@@ -31,10 +31,14 @@
     "prettier": "prettier --config .prettierrc --write .",
     "test": "jest --coverage",
     "test:watch": "jest --watch",
-    "tsc": "tsc"
+    "tsc": "tsc",
+    "cli": "node dist/cli.js",
+    "cli-dev": "ts-node -r tsconfig-paths/register ./src/cli.ts"
   },
   "dependencies": {
+    "@jii/core": "^0.0.1",
     "@jii/server": "^0.0.1",
+    "@jii/cli": "^0.0.1",
     "@jii/cors": "^0.0.1"
   }
 }
