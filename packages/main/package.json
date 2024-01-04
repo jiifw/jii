@@ -1,0 +1,40 @@
+{
+  "name": "@jii/main",
+  "version": "0.0.1",
+  "description": "> TODO: description",
+  "author": {
+    "name": "Junaid Atari",
+    "email": "mj.atari@gmail.com",
+    "url": "https://github.com/blacksmoke26"
+  },
+  "homepage": "",
+  "license": "ISC",
+  "directories": {
+    "dist": "dist"
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "start": "node dist/index.js",
+    "dev": "nodemon --exec babel-node ./src/index.ts --extensions .ts,.tsx,.js,.jsx",
+    "debug": "nodemon --inspect --exec babel-node ./src/index.ts --extensions .ts,.tsx,.js,.jsx",
+    "clean": "rimraf coverage dist tmp && mkdir coverage dist",
+    "prebuild": "npm run lint",
+    "build": "yarn run clean && yarn run build-code && yarn run build-types",
+    "build-code": "babel src --out-dir ./dist --extensions .ts,.tsx,.js,.jsx",
+    "build-types": "tsc --emitDeclarationOnly",
+    "lint": "eslint . --ext .ts",
+    "prettier": "prettier --config .prettierrc --write .",
+    "test": "jest --coverage",
+    "test:watch": "jest --watch",
+    "tsc": "tsc"
+  },
+  "dependencies": {
+    "@jii/server": "^0.0.1",
+    "@jii/cors": "^0.0.1"
+  }
+}

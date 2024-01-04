@@ -1,0 +1,45 @@
+{
+  "name": "@jii/cors",
+  "private": true,
+  "version": "0.0.1",
+  "description": "Jii CORS Plugin",
+  "author": {
+    "name": "Junaid Atari",
+    "email": "mj.atari@gmail.com",
+    "url": "https://github.com/blacksmoke26"
+  },
+  "homepage": "",
+  "license": "ISC",
+  "directories": {
+    "dist": "dist"
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "clean": "rimraf coverage dist tmp && mkdir dist",
+    "prebuild": "npm run lint",
+    "build": "yarn run clean && yarn run build-code && yarn run build-types",
+    "build-code": "babel src --out-dir ./dist --extensions .ts,.tsx,.js,.jsx",
+    "build-types": "tsc --emitDeclarationOnly",
+    "lint": "eslint . --ext .ts",
+    "prettier": "prettier --config .prettierrc --write .",
+    "test": "jest --coverage",
+    "test:watch": "jest --watch",
+    "tsc": "tsc"
+  },
+  "dependencies": {
+    "@jii/core": "^0.0.1",
+    "@jii/server": "^0.0.1",
+    "cors": "^2.8.5"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17"
+  },
+  "engines": {
+    "node": ">=18.18"
+  }
+}

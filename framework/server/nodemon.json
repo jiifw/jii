@@ -1,0 +1,6 @@
+{
+  "watch": ["src/**/*"],
+  "ext": "js,jsx,mjs,ts,tsx,flow,json,graphql",
+  "verbose": false,
+  "quiet": true
+}
