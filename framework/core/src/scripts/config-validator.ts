@@ -9,17 +9,17 @@
 import {normalize} from 'node:path';
 
 // classes
-import Configuration from '@jii/core/dist/classes/Configuration';
+import Configuration from '../classes/Configuration';
 
 // utils
-import {isPath, resolve} from '@jii/core/dist/helpers/path';
+import {isPath, resolve} from '../helpers/path';
 
 // types
-import {ApplicationConfig} from '../typings/app';
+import {ApplicationConfig} from '../typings/app-config';
 
 // schemas
 import schemaConfig from '../schemas/configuration.schema';
-import Jii from '@jii/core/dist/Jii';
+import Jii from '../Jii';
 
 /**
  * Validates and verify the application configuration
