@@ -6,60 +6,19 @@
  * @since 0.0.1
  */
 
+// types
 import {FastifyHttpOptions} from 'fastify';
 import {DeepPartial} from 'utility-types';
+import {ApplicationConfig as IApplicationConfig} from '@jii/core/dist/typings/app-config';
 
-export interface ApplicationConfig {
+export interface ApplicationConfig extends IApplicationConfig {
   /**
-   * Application ID (e.g., 'ecommerce-platform' or 'superficial-project')
+   * Server configuration.
    */
-  id: string;
-  /**
-   * Absolute path to the root directory of the application
-   */
-  basePath: string;
-  /**
-   * The absolute or alias path to the bootstrap file(s)<br>
-   * <span color="red">Warning</span>: Do not include extensions like '.ts' or '.js' in the path.<br>
-   * @example As a single file
-   * 'app/bootstrap/main'
-   * @example Multiple files
-   * ['@app/bootstrap/pre','app/bootstrap/post']
-   */
-  bootstrap?: string | Array<string>;
-  /**
-   * Aliases for the application to register
-   * @example
-   * {
-   *   'somePath': '@app/bootstrap/pre',
-   *   '@path': path.dirname(__dirname),
-   *   ...
-   * }
-   */
-  aliases?: Record<string, string>;
-  /**
-   * Additional parameters to store with the application to access later<br>
-   * To access in later application, use: `Jii.instance().params['secret'];`
-   * @example
-   * {
-   *   'db': {server: 'localhost', ...},
-   *   'secret': '<random-hash-here>',
-   * }
-   */
-  params?: Record<string, any>;
   server?: DeepPartial<{
+    /**
+     * Fastify server options.
+     */
     httpOptions: FastifyHttpOptions<undefined>;
   }>;
-  /*modules?: {
-    [name: string]: {
-      [property: string]: any;
-    };
-  };*/
-  /*
-  components?: {
-    [name: string]: any;
-  };
-  middleware?: {
-    [name: string]: any;
-  };*/
 }
