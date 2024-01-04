@@ -1,0 +1,4 @@
+src/cli.ts
+src/**/*.local.ts
+*.zip
+*.rar

@@ -1,0 +1,42 @@
+{
+  "name": "@jii/cli",
+  "version": "0.0.1",
+  "description": "Cli tools for Jii framework",
+  "author": {
+    "name": "Junaid Atari",
+    "email": "mj.atari@gmail.com",
+    "url": "https://github.com/blacksmoke26"
+  },
+  "homepage": "",
+  "license": "ISC",
+  "directories": {
+    "dist": "dist"
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "directory": "dist"
+  },
+  "dependencies": {
+    "@jii/core": "^0.0.1",
+    "commander": "^11.1.0",
+    "figlet": "^1.7.0",
+    "inquirer": "^9.2.12"
+  },
+  "scripts": {
+    "start": "node dist/cli.js",
+    "dev": "ts-node --script-mode -r tsconfig-paths/register ./src/cli.ts",
+    "clean": "rimraf coverage dist tmp && mkdir dist",
+    "prebuild": "yarn run clean && npm run lint",
+    "build": "yarn run build-code && yarn run build-types",
+    "build-code": "babel src --out-dir ./dist --extensions .ts,.tsx,.js,.jsx",
+    "build-types": "tsc --emitDeclarationOnly",
+    "lint": "eslint . --ext .ts",
+    "prettier": "prettier --config .prettierrc --write .",
+    "test": "jest --coverage",
+    "test:watch": "jest --watch",
+    "tsc": "tsc"
+  }
+}
