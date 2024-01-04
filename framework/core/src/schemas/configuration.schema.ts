@@ -33,6 +33,25 @@ export default <JSONSchema7>{
         },
       ],
     },
+    cli: {
+      type: 'object',
+      additionalProperties: false,
+      properties: {
+        dirs: {
+          oneOf: [
+            {
+              type: 'string',
+            },
+            {
+              type: 'array',
+              items: {
+                type: 'string',
+              },
+            },
+          ],
+        },
+      },
+    },
     aliases: {
       type: 'object',
       additionalProperties: {

@@ -28,13 +28,30 @@ export interface ApplicationConfig {
    */
   bootstrap?: string | Array<string>;
   /**
-   * The absolute or alias directory path to the cli command files<br>
-   * @example As a single directory
-   * '@app/commands'
-   * @example Multiple directories
-   * ['@app/commands','app/some-dir/commands']
+   * Command line (cli) related configuration
    */
-  commands?: string | Array<string>;
+  cli?: {
+    /**
+     * The absolute or alias directory path to the cli command files<br>
+     * **Note**: It will _only read_ files with the extension of
+     * *<span color="green">`<name>.cmd.ts`</span>* or *<span color="green">`<name>.cmd.js`</span> (after build)*.
+     * @example Single directory
+     * - 'drive:/path/to/commands' // Absolute path
+     * - '@app/commands' // Alias path
+     * - '@app∕**∕commands' // wildcard entries
+     * - '@app/directory∕**∕commands' // wildcard directory specific
+     * - '@jii/plugin∕commands' // Jii package specific directory
+     * @example Multiple directories
+     * [
+     *  'drive:/path/to/commands', // Absolute path
+     *  '@app/commands', // Alias path
+     *  '@app∕**∕commands', // wildcard entries
+     *  '@app/directory∕**∕commands', // wildcard directory specific
+     *  '@jii/plugin∕commands' // Jii package specific directory
+     * ]
+     */
+    dirs: string | Array<string>
+  };
   /**
    * Aliases for the application to register
    * @example
