@@ -11,10 +11,7 @@ import BaseApplication from '../base/Application';
 import createInstance from '../server/create-instance';
 
 // utils
-import Jii from '@jii/core/dist/Jii';
-import {CONTAINER_APP_KEY} from '@jii/core/dist/BaseJii';
 import {getNumberValue, getValue, isProdEnvironment} from '@jii/core/dist/env';
-import {bindClass} from '@jii/core/dist/helpers/auto-bind';
 
 // types
 import {ServerInstance, ServerRequest, ServerReply} from '../typings/server';
@@ -25,29 +22,19 @@ import {ApplicationConfig} from '../typings/app';
  * @since 0.1
  */
 export default class Application<
-  S extends ServerInstance = ServerInstance,
+  Server extends ServerInstance = ServerInstance,
   Request extends ServerRequest = ServerRequest,
   Reply extends ServerReply = ServerReply
-> extends BaseApplication<S, Request, Reply> {
-  /**
-   * Application constructor
-   * @param config - Configuration
-   */
-  constructor(config: Partial<ApplicationConfig>) {
-    super(config);
-    bindClass(this);
-    Jii.container.memoSync(CONTAINER_APP_KEY, this, {freeze: true});
-  }
-
+> extends BaseApplication<Server, Request, Reply> {
   /**
    * Run the application, start the server
    * @param [callback] - Callback function to execute after server is started
    */
 
-  public async run(callback?: (server?: S) => Promise<void>): Promise<void> {
+  public async run(callback?: (server?: Server) => Promise<void>): Promise<void> {
     // Create, initialize and memorize server instance
     await createInstance(
-      <ApplicationConfig><unknown>this.config, _server => this._server = <S>_server,
+      <ApplicationConfig><unknown>this.config, _server => this._server = <Server>_server,
     );
 
     const config = {
