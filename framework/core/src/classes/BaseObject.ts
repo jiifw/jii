@@ -7,8 +7,8 @@
  */
 
 // utils
-import {isObject} from '@jii/core/dist/helpers/object';
-import {bindClass} from '@jii/core/dist/helpers/auto-bind';
+import {isObject} from '../helpers/object';
+import {bindClass} from '../helpers/auto-bind';
 
 const PROPERTY_SCOPES = <const>['read', 'write', 'read-write'];
 
@@ -36,6 +36,7 @@ export default class BaseObject {
     }
 
     bindClass(this);
+    this.init();
   }
 
   /**
@@ -43,7 +44,7 @@ export default class BaseObject {
    * This method is invoked at the end of the constructor after the object is initialized with the
    * given configuration.
    */
-  async init(): Promise<void> {
+  init(): void {
   }
 
   /**
