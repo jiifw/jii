@@ -138,3 +138,12 @@ export const createDir = (aliasOrPath: string, throwException: boolean = false):
   mkdirSync(dirPath, {recursive: true});
   return isPath(dirPath, 'dir');
 };
+
+/**
+ * Trim slashes from the end of the given path
+ * @param path - Path to trim slashes from
+ * @returns The trimmed path
+ */
+export const trimSlashes = (path: string): string => {
+  return String(path || '').trim().replace(/[\/\\]+$/, '');
+};
