@@ -8,29 +8,41 @@
 
 // utils
 import {resolve} from './helpers/path';
+import {bindClass} from './helpers/auto-bind';
 import {isClass} from './helpers/reflection';
-import {getAlias, setAlias} from './base/aliases';
+import {getAlias, setAlias, aliases, hasAlias} from './base/aliases';
+
+// script
+import initCoreAliases from './scripts/init-core-aliases';
 
 // classes
 import Logger from './logger/Logger';
 import Container from './classes/Container';
 import MiddlewareContainer from './classes/MiddlewareContainer';
-import Application from '@jii/server/dist/base/Application';
 
 // types
 import {Class} from 'utility-types';
-import {ServerInstance} from '@jii/server/dist/typings/server';
+import BaseApplication from './classes/BaseApplication';
 import {ComponentConfig} from './classes/Container';
 
 export const CONTAINER_MIDDLEWARE_KEY = Symbol.for('__middleware');
 export const CONTAINER_APP_KEY = Symbol.for('__app');
 
 // public types
-export type AppInstance = InstanceType<typeof Application<ServerInstance>>;
+export type AppInstance = InstanceType<typeof BaseApplication>;
 export type MiddlewareRegistry = InstanceType<typeof MiddlewareContainer>;
 
 export default abstract class BaseJii {
+  /**
+   * DI Container instance
+   * @protected
+   */
   protected _container: Container;
+
+  /**
+   * Logger instance
+   * @protected
+   */
   protected logger: Logger;
 
   /**
@@ -42,6 +54,17 @@ export default abstract class BaseJii {
     this._container.memoSync(CONTAINER_MIDDLEWARE_KEY, new MiddlewareContainer(), {
       freeze: true,
     });
+    bindClass(this);
+
+    // initialize core aliases
+    initCoreAliases(this);
+  }
+
+  /**
+   * Get the list of registered aliases
+   */
+  get aliases () {
+    return <Record<string, string>><unknown>aliases;
   }
 
   /**
@@ -134,7 +157,6 @@ export default abstract class BaseJii {
     setAlias(alias, path);
   }
 
-
   /**
    * Translates a path alias into an actual path.
    *
@@ -155,6 +177,14 @@ export default abstract class BaseJii {
    */
   getAlias(alias: string, throwException: boolean = true): string {
     return getAlias(alias, throwException);
+  }
+
+  /**
+   * Check that given string contains a valid alias or not
+   * @param alias - Alias or alias included path
+   */
+  hasAlias(alias: string): boolean {
+    return hasAlias(alias)
   }
 
   /**
