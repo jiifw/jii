@@ -11,7 +11,11 @@ import {normalize} from 'node:path';
 // classes
 import Configuration from '../classes/Configuration';
 
+// scripts
+import middlewareDefsValidator from './middleware-defs-validator';
+
 // utils
+import Jii from '../Jii';
 import {isPath, resolve} from '../helpers/path';
 
 // types
@@ -19,7 +23,36 @@ import {ApplicationConfig} from '../typings/app-config';
 
 // schemas
 import schemaConfig from '../schemas/configuration.schema';
-import Jii from '../Jii';
+
+/**
+ * Validates and verify the application configuration
+ * @param [bootstrap] - bootstrap file(s)
+ */
+const bootstrapPropValidator = (bootstrap: string | string[]): void => {
+  if (!bootstrap) {
+    return;
+  }
+
+  const list = Array.isArray(bootstrap) ? bootstrap : [bootstrap];
+  for (const file of list) {
+    try {
+      if (!isPath(resolve(file), 'file')) {
+        // noinspection ExceptionCaughtLocallyJS
+        throw new Error('Trap error');
+      }
+    } catch (e) {
+      throw new Error(`File '${file}' is not found in a 'bootstrap', File must be a valid file`);
+    }
+  }
+};
+
+/**
+ * Initializes application aliases
+ * @param basePath - application base path
+ */
+const initAliases = ({basePath}): void => {
+  Jii.setAlias('@app', normalize(basePath), true);
+};
 
 /**
  * Validates and verify the application configuration
@@ -34,19 +67,12 @@ export default function (config: ApplicationConfig): void {
     throw new Error(`Application's 'basePath' must be a valid directory`);
   }
 
-  Jii.setAlias('@app', normalize(basePath), true);
+  // init aliases
+  initAliases({basePath});
 
-  if (bootstrap) {
-    const list = Array.isArray(bootstrap) ? bootstrap : [bootstrap];
-    for (const file of list) {
-      try {
-        if (!isPath(resolve(file), 'file')) {
-          // noinspection ExceptionCaughtLocallyJS
-          throw new Error ('Trap error');
-        }
-      } catch (e) {
-        throw new Error(`File '${file}' is not found in a 'bootstrap', File must be a valid file`);
-      }
-    }
-  }
+  // 'bootstrap' prop validator
+  bootstrapPropValidator(bootstrap);
+
+  // 'middleware' definitions validator
+  middlewareDefsValidator(config?.middleware);
 }
