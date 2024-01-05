@@ -19,9 +19,6 @@
     "access": "public",
     "directory": "dist"
   },
-  "dependencies": {
-    "@jii/server": "^0.0.1"
-  },
   "scripts": {
     "clean": "rimraf coverage dist tmp && mkdir dist",
     "prebuild": "yarn run clean && npm run lint",
