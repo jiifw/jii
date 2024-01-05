@@ -1,0 +1,39 @@
+# Environment files
+.env
+.env.local
+.env.staging
+.env.development
+.env.production
+
+# Logs
+logs
+*.log
+npm-debug.log*
+# Backup files
+*.*bak
+
+# Dependencies
+node_modules/
+
+# VS Code
+!.vscode/tasks.js
+
+# Coverage
+**/coverage
+
+# JetBrains IDEs
+.idea/
+
+# Optional npm cache directory
+.npm
+.yarn
+
+# Misc
+.DS_Store
+
+# Archive/Backup specific
+*.rar
+*.zip
+# Packager specific
+package-lock.json
+yarn.lock
