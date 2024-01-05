@@ -64,7 +64,7 @@ export default abstract class BaseJii {
    * Get the list of registered aliases
    */
   get aliases () {
-    return <Record<string, string>><unknown>aliases;
+    return <Record<string, string>><unknown>aliases();
   }
 
   /**
