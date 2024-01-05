@@ -18,6 +18,7 @@ import {getOrigin} from './utils';
 
 // types
 import {CorsOptions as NativeCorsOptions} from 'cors';
+import {WebApplication} from '@jii/server/dist/web/Application';
 
 export interface CorsOptions {
   cors?: Partial<NativeCorsOptions>;
@@ -58,6 +59,6 @@ export default class extends Plugin {
       },
     });
 
-    Jii.app().server.use(require('cors')(corsOptions));
+    Jii.app<WebApplication>().server.use(require('cors')(corsOptions));
   }
 }
