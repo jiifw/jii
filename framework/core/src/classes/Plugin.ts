@@ -6,11 +6,6 @@
  * @since 0.0.1
  */
 
-import merge from 'deepmerge';
-
-// utils
-import Jii from '../Jii';
-
 // classes
 import Component from './Component';
 
@@ -60,24 +55,8 @@ export default abstract class Plugin extends Component {
    * @returns The plugin config
    */
   async getConfig<T = Record<string, any>>(options: T | { [key: string]: any } = {}): Promise<T> {
-    return importPluginConfig<T>(this.id, Jii.app().server, merge(<T>this.config, <T>options));
+    return importPluginConfig<T>(this.id, <T>options);
   };
-
-  /**
-   * The plugin constructor
-   * @param [config] - Plugin configuration
-   */
-  constructor(private readonly config: { [name: string]: any } = {}) {
-    super({});
-
-    /*if (!toString(this.id, true)) {
-      throw new Error('Plugin id is required');
-    }
-
-    if (!toString(this.name, true)) {
-      throw new Error('Plugin name is required');
-    }*/
-  }
 
   /**
    * Returns the metadata for the plugin
