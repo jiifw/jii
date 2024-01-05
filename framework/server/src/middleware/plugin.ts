@@ -16,7 +16,8 @@ import Jii from '@jii/core/dist/Jii';
 import {isObject} from '@jii/core/dist/helpers/object';
 
 // types
-import {MiddlewarePlugin} from './types';
+import {MiddlewarePlugin} from '@jii/core/dist/typings/middleware';
+import {WebApplication} from '../web/Application';
 
 /**
  * Register a custom plugin
@@ -45,8 +46,8 @@ export const registerCustomPlugin = async <T>(plugin: MiddlewarePlugin<T>) => {
 
   await instance.beforeRegister.bind(instance);
 
-  await Jii.app().server.register(fp(instance.handler.bind(instance), instance.metadata()));
-  await Jii.app().server.after(async err => {
+  await Jii.app<WebApplication>().server.register(fp(instance.handler.bind(instance), instance.metadata()));
+  await Jii.app<WebApplication>().server.after(async err => {
     if (err) throw err;
     await instance.afterRegister.bind(instance);
   });
