@@ -12,52 +12,34 @@ interface Config {
   [k: string]: unknown;
 }
 
-interface Middleware {
+interface Middleware<T> {
   description?: string;
-  [k: string]: unknown;
+  config?: T;
 }
 
-export interface MiddlewareMiddleware<T = Config> extends Middleware {
+export interface MiddlewareMiddleware<T = Config> extends Middleware<T> {
   type: 'middleware';
   path: string;
-  config?: T;
 }
 
-export interface MiddlewarePlugin<T = Config>  extends Middleware{
+export interface MiddlewarePlugin<T = Config> extends Middleware<T> {
   type: 'plugin';
   path: string;
-  description?: string;
-  config?: T;
-
-  [k: string]: unknown;
 }
 
-export interface MiddlewareCallback<T = Config> extends Middleware {
-  type: 'after';
-  description?: string;
-
-  handler(): Promise<void>;
-
-  handler(config: T): Promise<void>;
-
-  [k: string]: unknown;
-}
-
-export interface MiddlewareAfter extends Middleware {
-  type: 'after';
-  description?: string;
-  handler: {};
-
-  [k: string]: unknown;
-}
-
-export interface MiddlewareRegister<T = Config> extends Middleware {
+export interface MiddlewareRegister<T = Config> extends Middleware<T> {
   type: 'register';
-  description?: string;
   path: string;
-  config?: T;
+}
 
-  [k: string]: unknown;
+export interface MiddlewareCallback<T = Config> extends Middleware<T> {
+  type: 'callback';
+  handler(config?: T): Promise<void> | void;
+}
+
+export interface MiddlewareAfter extends Middleware<undefined> {
+  type: 'after';
+  handler(error?: Error | null): Promise<void> | void;
 }
 
 export type MiddlewareDefinition<T = Config> = (
