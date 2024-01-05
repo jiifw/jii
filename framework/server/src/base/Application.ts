@@ -13,7 +13,7 @@ import BaseApplication from '@jii/core/dist/classes/BaseApplication';
 import Jii from '@jii/core/dist/Jii';
 
 // types
-import {ApplicationConfig} from '../typings/app';
+import {ApplicationConfig} from '../typings/app-config';
 
 /**
  * Application class
