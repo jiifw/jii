@@ -7,7 +7,7 @@
  */
 
 // classes
-import BaseApplication from '@jii/core/dist/classes/BaseApplication';
+import BaseApplicationCore from '@jii/core/dist/classes/BaseApplication';
 
 // utils
 import Jii from '@jii/core/dist/Jii';
@@ -15,10 +15,14 @@ import Jii from '@jii/core/dist/Jii';
 // types
 import {ApplicationConfig} from '../typings/app-config';
 
+// public types
+export type Application = InstanceType<typeof BaseApplication>;
+
 /**
  * Application class
  */
-export default abstract class Application<Server, Request, Reply> extends BaseApplication<ApplicationConfig> {
+export default abstract class BaseApplication<Server, Request, Reply>
+  extends BaseApplicationCore<ApplicationConfig> {
   /**
    * Server instance
    * @protected
