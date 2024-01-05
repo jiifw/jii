@@ -15,7 +15,7 @@ const rootAliases: string[] = [];
 /** Name aliases to ignore */
 const ignoredList: string[] = [];
 
-export const aliases = (): any/*Record<string, string>*/ => {
+export const aliases = (): Record<string, string> => {
   return Object.fromEntries(aliasesMap.entries());
 };
 
