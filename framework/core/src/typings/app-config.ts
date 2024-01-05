@@ -6,6 +6,8 @@
  * @since 0.0.1
  */
 
+import {MiddlewareDefinition} from './middleware';
+
 /**
  * Application configuration typing interface
  */
@@ -72,6 +74,29 @@ export interface ApplicationConfig {
    * }
    */
   params?: Record<string, any>;
+  /**
+   * Middlewares to register with the application<br>
+   * **Note**: The path argument supports alias, you can use `@app/plugins/some-plugin` to register the plugin
+   * @example
+   * [
+   *  { type: 'plugin', path: '@jii/cors/dist' }, // 'plugin': Jii based plugin
+   *  { type: 'register', path: 'fastify-favicon' }, // 'register': A server based plugin
+   *  { type: 'middleware', path: 'x-xss-protection' }, // 'middleware': A server based middleware
+   *  {
+   *    type: 'after', // A server based event
+   *    async handler(error: any) {
+   *      if (error) throw error;
+   *    },
+   *  },
+   *  {
+   *    type: 'callback', // A server based event
+   *    async handler(config?: {[key: string]: unknown}) {
+   *      // logic here
+   *    },
+   *  },
+   * ]
+   */
+  middleware?: Array<MiddlewareDefinition>;
   /*modules?: {
     [name: string]: {
       [property: string]: any;
@@ -81,7 +106,5 @@ export interface ApplicationConfig {
   components?: {
     [name: string]: any;
   };
-  middleware?: {
-    [name: string]: any;
-  };*/
+  */
 }
