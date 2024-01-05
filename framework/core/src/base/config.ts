@@ -12,8 +12,6 @@ import obp, { Path } from 'object-path';
 // utils
 import { exists, importFile } from '../helpers/file';
 
-type ServerInstance = {}
-
 /** Memorize configuration registry */
 const pluginConfig = new Map<string | symbol, any>();
 
@@ -21,26 +19,24 @@ const pluginConfig = new Map<string | symbol, any>();
  * Import a configuration file (.ts | .js)
  * @param alias - Alias including filename (ext: .js | .ts)
  * @param defaultConfig - Default configuration file
- * @param server - Server instance
  */
-export async function importConfigFile<T>(alias: string, defaultConfig: T, server?: ServerInstance): Promise<T> {
+export async function importConfigFile<T>(alias: string, defaultConfig: T): Promise<T> {
   if (!exists(alias)) {
     return defaultConfig;
   }
 
   const { default: configFetch } = await importFile(alias);
-  return merge(defaultConfig, await configFetch(server));
+  return merge(defaultConfig, await configFetch());
 }
 
 /**
  * Import an app based plugin configuration file (.ts)
  * @param id - Plugin id
- * @param server - Server instance
  * @param [defaultConfig] - Default configuration file
  */
-export async function importPluginConfig<T>(id: string, server?: ServerInstance, defaultConfig?: T): Promise<T> {
+export async function importPluginConfig<T>(id: string, defaultConfig?: T): Promise<T> {
   return importConfigFile<T>(
-    `@app/config/${id}.plugin.ts`, defaultConfig, server,
+    `@app/config/${id}.plugin.ts`, defaultConfig,
   );
 }
 
