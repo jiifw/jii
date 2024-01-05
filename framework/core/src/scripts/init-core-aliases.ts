@@ -17,6 +17,5 @@ import BaseJii from '../BaseJii';
  * @param jii - Jii instance
  */
 export default (jii: InstanceType<typeof BaseJii>) => {
-  jii.setAlias('@jiiRoot', dirname(__filename, 5));
-  jii.setAlias('@jii', dirname(__filename, 2));
+  jii.setAlias('@jiiRoot', dirname(__filename, 2));
 }
