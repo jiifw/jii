@@ -70,7 +70,7 @@ export default abstract class BaseJii {
   /**
    * Get application instance
    */
-  app<T extends AppInstance = AppInstance>(): T {
+  app<T = AppInstance>(): T {
     return this._container.retrieve<T>(CONTAINER_APP_KEY);
   }
 
