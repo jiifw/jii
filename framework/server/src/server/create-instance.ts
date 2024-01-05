@@ -18,7 +18,7 @@ import {applyMiddleware} from '../middleware';
 
 // types
 import {ServerHTTPOptions, ServerInstance} from '../typings/server';
-import {ApplicationConfig} from '../typings/app';
+import {ApplicationConfig} from '../typings/app-config';
 
 /**
  * Invoke bootstrapper files and register them to the server instance
