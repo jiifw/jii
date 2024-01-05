@@ -7,7 +7,7 @@
  */
 
 // classes
-import BaseApplication from '@jii/core/dist/classes/BaseApplication';
+import BaseApplicationCore from '@jii/core/dist/classes/BaseApplication';
 
 // types
 import {ApplicationConfig} from '../typings/app-config';
@@ -15,7 +15,7 @@ import {ApplicationConfig} from '../typings/app-config';
 /**
  * Application class
  */
-export default abstract class Application extends BaseApplication<ApplicationConfig> {
+export default abstract class BaseApplication extends BaseApplicationCore<ApplicationConfig> {
   /**
    * Run the application, start the cli server
    * @param [callback] - Callback function to execute when the application is ready

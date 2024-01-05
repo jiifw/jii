@@ -10,12 +10,16 @@ import figlet from 'figlet';
 import {Command} from 'commander';
 
 // classes
-import BaseApplication from '../classes/Application';
+import BaseApplication from '../classes/BaseApplication';
 
 /**
  * Console application
  */
 export default class Application extends BaseApplication {
+  /**
+   * Run the application, start the cli server
+   * @param [callback] - Callback function to execute when the application is ready
+   */
   async run(callback?: () => Promise<void>): Promise<void> {
     const program = new Command('jii');
 
