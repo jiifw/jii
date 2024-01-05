@@ -2,13 +2,35 @@
   "name": "@jii/cors",
   "private": true,
   "version": "0.0.1",
-  "description": "Jii CORS Plugin",
+  "description": "A plugin to enable CORS support for the Jii server",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "precommit": [
+    "lint",
+    "test"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jiifw/jii.git"
+  },
+  "licenses": [
+    {
+      "type": "Apache License 2.0",
+      "url": "https://github.com/jiifw/jii/blob/master/LICENSE.md"
+    }
+  ],
+  "keywords": [
+    "cors",
+    "request",
+    "jii",
+    "plugin"
+  ],
   "author": {
     "name": "Junaid Atari",
     "email": "mj.atari@gmail.com",
     "url": "https://github.com/blacksmoke26"
   },
-  "homepage": "",
+  "homepage": "https://github.com/jiifw/jii/tree/master/plugins/jii-cors",
   "license": "ISC",
   "directories": {
     "dist": "dist"
