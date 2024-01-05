@@ -12,17 +12,11 @@ import {dirname} from '@jii/core/dist/helpers/path';
 import {registerCustomPlugin} from './plugin';
 
 // types
-import {plugin} from '../typings/plugin';
+import {WebApplication} from '../web/Application';
 import {
   MiddlewareAfter, MiddlewareCallback, MiddlewareMiddleware,
-  MiddlewarePlugin, MiddlewareRegister, MiddlewareType, Registry,
-} from './types';
-
-// public types
-export type {
-  Registry, MiddlewarePlugin, MiddlewareMiddleware,
-  MiddlewareCallback, MiddlewareType, MiddlewareRegister,
-};
+  MiddlewarePlugin, MiddlewareRegister, MiddlewareType, MiddlewareDefinition,
+} from '@jii/core/dist/typings/middleware';
 
 /**
  * Middleware supported types
@@ -55,7 +49,7 @@ const middlewareTypes: MiddlewareType[] = [
  *  },
  *], server);
  */
-export async function applyMiddleware<T>(middleware: Registry<T>): Promise<void> {
+export async function applyMiddleware<T>(middleware: MiddlewareDefinition<T>[]): Promise<void> {
   if (!middleware.length) {
     return;
   }
@@ -74,17 +68,17 @@ export async function applyMiddleware<T>(middleware: Registry<T>): Promise<void>
 
     if (type === 'register') {
       const params = <MiddlewareRegister<T>>data;
-      await Jii.app().server.register(require(params.path), params.config || {});
+      await Jii.app<WebApplication>().server.register(require(params.path), params.config || {});
     } else if (type === 'middleware') {
       const params = <MiddlewareMiddleware<T>>data;
-      Jii.app().server.use(require(params.path)(params.config || {}));
+      Jii.app<WebApplication>().server.use(require(params.path)(params.config || {}));
     } else if (type === 'plugin') {
       await registerCustomPlugin<T>(<MiddlewarePlugin<T>>data);
     } else if (type === 'after') {
-      await Jii.app().server.after((<MiddlewareAfter>data).handler);
+      await Jii.app<WebApplication>().server.after((<MiddlewareAfter>data).handler);
     } else if (type === 'callback') {
       const params = <MiddlewareCallback<T>>data;
-      await params.handler(Jii.app().server, params?.config || {});
+      await params.handler(params?.config);
     }
   }
 }
