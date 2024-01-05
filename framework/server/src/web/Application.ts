@@ -7,7 +7,7 @@
  */
 
 // scripts
-import BaseApplication from '../base/Application';
+import BaseApplication from '../classes/BaseApplication';
 import createInstance from '../server/create-instance';
 
 // utils
@@ -15,7 +15,9 @@ import {getNumberValue, getValue, isProdEnvironment} from '@jii/core/dist/env';
 
 // types
 import {ServerInstance, ServerRequest, ServerReply} from '../typings/server';
-import {ApplicationConfig} from '../typings/app';
+import {ApplicationConfig} from '../typings/app-config';
+
+export type WebApplication = InstanceType<typeof Application>;
 
 /**
  * Application is the base class for all web application classes.
