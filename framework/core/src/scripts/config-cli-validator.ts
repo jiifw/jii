@@ -12,15 +12,17 @@ import {sync} from 'glob';
 // utils
 import Jii from '../Jii';
 import {isPath, trimSlashes} from '../helpers/path';
-import {ApplicationConfig, CliDirectory} from '../typings/app-config';
 import {INTERNAL_METADATA, INTERNAL_CLI_DIRS} from '../utils/symbols';
+
+// types
+import {ApplicationConfig, CliDirectory} from '../typings/app-config';
 
 /**
  * Validates cli 'dirs' existence
  * @param [dir] - Directory path to validate
  * @param [recursive] - Recursively find
  */
-const resolvePath = (dir: string, recursive: boolean = false): Array<string> => {
+export const resolvePath = (dir: string, recursive: boolean = false): Array<string> => {
   const path = trimSlashes(normalize(Jii.getAlias(dir, false)));
 
   if (!isPath(path, 'dir')) {
