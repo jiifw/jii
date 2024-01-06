@@ -31,14 +31,14 @@ const LINK_PREFIX: string = '$$_';
  */
 export default class MiddlewareContainer {
   protected registry: Map<string, MiddlewareConfig>;
-  protected links: Map<string, string>;
+  protected _links: Map<string, string>;
 
   /**
    * MiddlewareContainer constructor
    */
   constructor() {
     this.registry = new Map();
-    this.links = new Map();
+    this._links = new Map();
   }
 
   /**
@@ -53,6 +53,23 @@ export default class MiddlewareContainer {
       config,
       attributes: {},
     };
+  }
+
+  /**
+   * Get linked middleware list
+   */
+  get links(): { [name: string]: string } {
+    const collection = [...this._links.entries()].map(([k, v]) => {
+      return [this.omitLinkId(k), v];
+    });
+    return Object.fromEntries(collection);
+  }
+
+  /**
+   * Get middleware list
+   */
+  get list(): string[] {
+    return [...this.registry.keys()];
   }
 
   /**
@@ -101,7 +118,7 @@ export default class MiddlewareContainer {
    */
   protected omitLinkId(id: string): string {
     const regStr = LINK_PREFIX.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const regex = new RegExp(`^${regStr}`)
+    const regex = new RegExp(`^${regStr}`);
     return id.replace(regex, '');
   }
 
@@ -112,7 +129,7 @@ export default class MiddlewareContainer {
    */
   public link(name: string, id: string) {
     if (this.isLinked(id)) {
-      throw new Error(`The ID '${id}' is already associated with a middleware '${this.links.get(name)}'`);
+      throw new Error(`The ID '${id}' is already associated with a middleware '${this._links.get(name)}'`);
     }
 
     if (!this.registry.has(name)) {
@@ -123,7 +140,7 @@ export default class MiddlewareContainer {
       throw new Error(`Invalid ID '${id}' for middleware '${name}', Format should be a camelize`);
     }
 
-    this.links.set(this.formatLinkId(id), name);
+    this._links.set(this.formatLinkId(id), name);
   }
 
   /**
@@ -139,7 +156,7 @@ export default class MiddlewareContainer {
    * @param name - Middleware name or path
    */
   public isLinked(name: string): boolean {
-    return this.links.has(this.formatLinkId(name));
+    return this._links.has(this.formatLinkId(name));
   }
 
   /**
@@ -155,8 +172,8 @@ export default class MiddlewareContainer {
    * @param id - Unique ID
    */
   public toName(id: string): string | undefined {
-    return this.links.has(this.formatLinkId(id))
-      ? this.links.get(this.formatLinkId(id))
+    return this._links.has(this.formatLinkId(id))
+      ? this._links.get(this.formatLinkId(id))
       : undefined;
   }
 
@@ -165,7 +182,7 @@ export default class MiddlewareContainer {
    * @param name - Middleware name or path
    */
   public toId(name: string): string | undefined {
-    for (const [key, value] of this.links) {
+    for (const [key, value] of this._links) {
       if (value === name) {
         return this.omitLinkId(key);
       }
@@ -183,8 +200,8 @@ export default class MiddlewareContainer {
       return this.registry.get(nameOrId);
     }
 
-    if (this.links.has(this.formatLinkId(nameOrId))) {
-      const name = this.links.get(this.formatLinkId(nameOrId));
+    if (this._links.has(this.formatLinkId(nameOrId))) {
+      const name = this._links.get(this.formatLinkId(nameOrId));
       return this.registry.get(name);
     }
 
