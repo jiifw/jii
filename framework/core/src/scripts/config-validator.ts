@@ -78,5 +78,5 @@ export default function (config: ApplicationConfig): void {
   middlewareDefsValidator(config?.middleware);
 
   // 'cli' prop validator
-  configCliValidator();
+  configCliValidator(config?.cli);
 }
