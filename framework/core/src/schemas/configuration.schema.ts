@@ -43,9 +43,39 @@ export default <JSONSchema7>{
               type: 'string',
             },
             {
+              type: 'object',
+              properties: {
+                path: {
+                  type: 'string',
+                },
+                recursive: {
+                  type: 'boolean',
+                },
+              },
+              required: ['path', 'recursive'],
+              additionalProperties: false,
+            },
+            {
               type: 'array',
               items: {
-                type: 'string',
+                anyOf: [
+                  {
+                    type: 'string',
+                  },
+                  {
+                    type: 'object',
+                    properties: {
+                      path: {
+                        type: 'string',
+                      },
+                      recursive: {
+                        type: 'boolean',
+                      },
+                    },
+                    required: ['path', 'recursive'],
+                    additionalProperties: false,
+                  },
+                ],
               },
             },
           ],

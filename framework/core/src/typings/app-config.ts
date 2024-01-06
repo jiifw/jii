@@ -8,6 +8,8 @@
 
 import {MiddlewareDefinition} from './middleware';
 
+export type CliDirectory = string | { path: string; recursive?: boolean } | (string | { path: string; recursive?: boolean })[];
+
 /**
  * Application configuration typing interface
  */
@@ -27,6 +29,7 @@ export interface ApplicationConfig {
    * 'app/bootstrap/main'
    * @example Multiple files
    * ['@app/bootstrap/pre','app/bootstrap/post']
+   * @default []
    */
   bootstrap?: string | Array<string>;
   /**
@@ -38,21 +41,18 @@ export interface ApplicationConfig {
      * **Note**: It will _only read_ files with the extension of
      * *<span color="green">`<name>.cmd.ts`</span>* or *<span color="green">`<name>.cmd.js`</span> (after build)*.
      * @example Single directory
-     * - 'drive:/path/to/commands' // Absolute path
-     * - '@app/commands' // Alias path
-     * - '@app∕**∕commands' // wildcard entries
-     * - '@app/directory∕**∕commands' // wildcard directory specific
-     * - '@jii/plugin∕commands' // Jii package specific directory
+     * - 'drive:/path/to' // Absolute path (assuming 'drive:/path/to/commands' directory)
+     * - '@app' // Alias path (assuming '@app/commands' directory)
+     * - {dir: '@app', recursive: true} // Recursive mode (assuming '@app∕**∕commands' in all subdirectories)
      * @example Multiple directories
      * [
-     *  'drive:/path/to/commands', // Absolute path
-     *  '@app/commands', // Alias path
-     *  '@app∕**∕commands', // wildcard entries
-     *  '@app/directory∕**∕commands', // wildcard directory specific
-     *  '@jii/plugin∕commands' // Jii package specific directory
+     *  'drive:/path/to', // Absolute path (assuming 'drive:/path/to/commands' directory)
+     *  '@app', // Alias path (assuming '@app/commands' directory)
+     *  {dir: '@app', recursive: true}, // Recursive mode (assuming '@app∕**∕commands' in all subdirectories)
      * ]
+     * @default '@app'
      */
-    dirs: string | Array<string>
+    dirs?: CliDirectory;
   };
   /**
    * Aliases for the application to register
@@ -62,6 +62,7 @@ export interface ApplicationConfig {
    *   '@path': path.dirname(__dirname),
    *   ...
    * }
+   * @default undefined
    */
   aliases?: Record<string, string>;
   /**
@@ -72,6 +73,7 @@ export interface ApplicationConfig {
    *   'db': {server: 'localhost', ...},
    *   'secret': '<random-hash-here>',
    * }
+   * @default undefined
    */
   params?: Record<string, any>;
   /**
@@ -95,6 +97,7 @@ export interface ApplicationConfig {
    *    },
    *  },
    * ]
+   * @default []
    */
   middleware?: Array<MiddlewareDefinition>;
   /*modules?: {
