@@ -27,7 +27,7 @@
   },
   "scripts": {
     "start": "node dist/cli.js",
-    "dev": "ts-node --script-mode -r tsconfig-paths/register ./src/cli.ts",
+    "dev": "nodemon --exec babel-node --extensions .ts,.tsx,.js,.jsx ./src/cli.ts",
     "clean": "rimraf coverage dist tmp && mkdir dist",
     "prebuild": "yarn run clean && npm run lint",
     "build": "yarn run build-code && yarn run build-types",
