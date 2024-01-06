@@ -11,7 +11,7 @@ import Component from './Component';
 
 // utils
 import Jii from '../Jii';
-import {CONTAINER_APP_KEY} from '../BaseJii';
+import {CONTAINER_APP_KEY} from '../utils/symbols';
 
 // scripts
 import configValidator from '../scripts/config-validator';
