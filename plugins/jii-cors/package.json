@@ -3,8 +3,8 @@
   "private": true,
   "version": "0.0.1",
   "description": "A plugin to enable CORS support for the Jii server",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "index.js",
+  "types": "index.d.ts",
   "precommit": [
     "lint",
     "test"
