@@ -145,5 +145,5 @@ export const createDir = (aliasOrPath: string, throwException: boolean = false):
  * @returns The trimmed path
  */
 export const trimSlashes = (path: string): string => {
-  return String(path || '').trim().replace(/[\/\\]+$/, '');
+  return String(path || '').trim().replace(/[/\\]+$/, '');
 };
