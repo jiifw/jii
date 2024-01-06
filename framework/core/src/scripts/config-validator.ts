@@ -17,6 +17,7 @@ import middlewareDefsValidator from './middleware-defs-validator';
 // utils
 import Jii from '../Jii';
 import {isPath, resolve} from '../helpers/path';
+import configCliValidator from '../scripts/config-cli-validator';
 
 // types
 import {ApplicationConfig} from '../typings/app-config';
@@ -75,4 +76,7 @@ export default function (config: ApplicationConfig): void {
 
   // 'middleware' definitions validator
   middlewareDefsValidator(config?.middleware);
+
+  // 'cli' prop validator
+  configCliValidator();
 }
