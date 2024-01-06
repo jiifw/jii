@@ -10,10 +10,10 @@ import {normalize} from 'path';
 import {sync} from 'glob';
 
 // utils
-import Jii from '@jii/core/dist/Jii';
-import {isPath, trimSlashes} from '@jii/core/dist/helpers/path';
-import {CliDirectory} from '@jii/core/dist/typings/app-config';
-import {INTERNAL_METADATA, INTERNAL_CLI_DIRS} from '@jii/core/dist/utils/symbols';
+import Jii from '../Jii';
+import {isPath, trimSlashes} from '../helpers/path';
+import {ApplicationConfig, CliDirectory} from '../typings/app-config';
+import {INTERNAL_METADATA, INTERNAL_CLI_DIRS} from '../utils/symbols';
 
 /**
  * Validates cli 'dirs' existence
@@ -34,15 +34,14 @@ const resolvePath = (dir: string, recursive: boolean = false): Array<string> => 
 };
 
 /**
- * Validates cli 'dirs' existence
- * @param [dirDef] - List of directories path to validate
+ * Normalizes cli 'dirs' to array of paths
+ * @param [definition] - Dirs definition to validate
  */
-const normalizeDirs = (dirDef: CliDirectory): Array<string> => {
-  const list = !Array.isArray(dirDef) ? [dirDef] : dirDef;
+export const normalizeDirs = (definition: CliDirectory): Array<string> => {
+  const list = !Array.isArray(definition) ? [definition] : definition;
+  list.unshift('@app'); // predefined current app directory
 
-  const directories: Array<string> = [
-    '@app', // predefined current app directory
-  ];
+  const directories: Array<string> = [];
 
   for (const element of list) {
     if (typeof element === 'string') {
@@ -60,10 +59,7 @@ const normalizeDirs = (dirDef: CliDirectory): Array<string> => {
 /**
  * Validates cli configuration
  */
-export default (): void => {
-  const {cli} = Jii.app().config;
-
-  Jii.container.setConfig(INTERNAL_METADATA, {[INTERNAL_CLI_DIRS]: normalizeDirs(cli?.dirs ?? [])});
-
-  console.log(Jii.container);
+export default (config?: ApplicationConfig['cli']): void => {
+  // validates 'dirs' prop
+  Jii.container.setConfig(INTERNAL_METADATA, {[INTERNAL_CLI_DIRS]: normalizeDirs(config?.dirs ?? [])});
 }
