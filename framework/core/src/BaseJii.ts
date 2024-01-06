@@ -24,9 +24,7 @@ import MiddlewareContainer from './classes/MiddlewareContainer';
 import {Class} from 'utility-types';
 import BaseApplication from './classes/BaseApplication';
 import {ComponentConfig} from './classes/Container';
-
-export const CONTAINER_MIDDLEWARE_KEY = Symbol.for('__middleware');
-export const CONTAINER_APP_KEY = Symbol.for('__app');
+import {INTERNAL_METADATA, CONTAINER_APP_KEY, CONTAINER_MIDDLEWARE_KEY} from './utils/symbols';
 
 // public types
 export type AppInstance = InstanceType<typeof BaseApplication>;
@@ -51,6 +49,7 @@ export default abstract class BaseJii {
   constructor() {
     this._container = new Container();
     this.logger = new Logger();
+    this._container.memo(INTERNAL_METADATA, () => () => new Error('Inaccessible internal'), {freeze: true});
     this._container.memoSync(CONTAINER_MIDDLEWARE_KEY, new MiddlewareContainer(), {
       freeze: true,
     });
@@ -63,7 +62,7 @@ export default abstract class BaseJii {
   /**
    * Get the list of registered aliases
    */
-  get aliases () {
+  get aliases() {
     return <Record<string, string>><unknown>aliases();
   }
 
@@ -184,7 +183,7 @@ export default abstract class BaseJii {
    * @param alias - Alias or alias included path
    */
   hasAlias(alias: string): boolean {
-    return hasAlias(alias)
+    return hasAlias(alias);
   }
 
   /**
