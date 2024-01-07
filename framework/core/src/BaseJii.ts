@@ -246,23 +246,43 @@ export default abstract class BaseJii {
   }
 
   /**
-   * Creates a new object using the given configuration.
-   *
-   * @param classname The class name to create. Must start with @alias. e.g., @alias/path/to/class
+   * Creates a new object using the given configuration.<br>
+   * This methods support input in a few different forms:
+   *  - As a string: It should start with @alias. e.g., `@app/classes/MyClass`
+   *  - As an object: Should be class object. e.g., `class Test {}`
+   * <br>
+   * @param classname The class name to create.
    * @param [params] A configuration array of constructor parameters.
    *
-   * @example
+   * @example As an alias path
+   * // create an object by loading a file and initiate with the two constructor parameters
+   * const instance = Jii.createObject('@app/classes/MyClass', [param1, param2]);
    *
-   * // create an object with two constructor parameters
-   * const object = Jii.createObject('@app/classes/MyClass', [param1, param2]);
+   * @example As a class object
+   * class Test {
+   *   constructor (params) {
+   *     // some logic here
+   *   }
+   * }
+   * const instance = Jii.createObject<Test>(Test, [
+   *  {type: 'component'}, // value passes to Test constructor as a 'params' argument.
+   * ]);
    */
 
   createObject<T extends object>(classname: string, params: any[] = []): InstanceType<Class<T>> {
-    if (!classname.startsWith('@')) {
-      throw new Error('Classname must start with @alias. e.g., @alias/path/to/class');
+    let Class = null;
+
+    if ('string' === typeof classname ) {
+      if ( !classname.startsWith('@') ) {
+        throw new Error('Classname must start with @alias. e.g., @alias/path/to/class');
+      }
+
+      Class = require(resolve(classname))?.default || null;
     }
 
-    const Class = require(resolve(classname))?.default || null;
+    if ( 'object' === typeof classname && isClass(classname) ) {
+      Class = classname;
+    }
 
     if (!Class || !isClass(Class)) {
       throw new Error('File must have an actual class and should be exported as default');
