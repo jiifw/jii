@@ -280,11 +280,11 @@ export default abstract class BaseJii {
       Class = require(resolve(classname))?.default || null;
     }
 
-    if ( 'object' === typeof classname && isClass(classname) ) {
+    if ( isClass(Class) ) {
       Class = classname;
     }
 
-    if (!Class || !isClass(Class)) {
+    if (!Class) {
       throw new Error('File must have an actual class and should be exported as default');
     }
 
