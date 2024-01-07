@@ -11,6 +11,5 @@
  * @param val - The value
  */
 export const isClass = (val: any): boolean => {
-  return (typeof val === 'function' || typeof val === 'object')
-    && /^\s*class\s+/.test(val.toString());
+  return val && (typeof val === 'function') && /^\s*class\s+/.test(val.toString());
 };

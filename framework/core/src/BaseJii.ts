@@ -280,7 +280,7 @@ export default abstract class BaseJii {
       Class = require(resolve(classname))?.default || null;
     }
 
-    if ( isClass(Class) ) {
+    if ( isClass(classname) ) {
       Class = classname;
     }
 
