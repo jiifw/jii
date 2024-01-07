@@ -6,12 +6,13 @@
  * @since 0.0.1
  */
 
-import {normalize} from 'path';
+import {normalize, sep} from 'path';
 import {sync} from 'glob';
 
 // utils
 import Jii from '../Jii';
 import {isPath, trimSlashes} from '../helpers/path';
+import {wrap} from '../helpers/array';
 import {INTERNAL_METADATA, INTERNAL_CLI_DIRS} from '../utils/symbols';
 
 // types
@@ -29,19 +30,23 @@ export const resolvePath = (dir: string, recursive: boolean = false): Array<stri
     throw new Error(`${path} must be a valid directory`);
   }
 
-  const pattern: string = recursive ? '**/commands' : 'commands';
+  if (!recursive) {
+    return [path + sep + 'commands'];
+  }
 
-  return [...sync(pattern, {cwd: path, absolute: true})]
+  return [...sync('**/commands', {cwd: path, absolute: true})]
     .map(p => trimSlashes(normalize(p)));
 };
+
+type CliObj = { path: string; recursive: boolean };
 
 /**
  * Normalizes cli 'dirs' to array of paths
  * @param [definition] - Dirs definition to validate
  */
 export const normalizeDirs = (definition: CliDirectory): Array<string> => {
-  const list = !Array.isArray(definition) ? [definition] : definition;
-  list.unshift('@app'); // predefined current app directory
+  const list: CliDirectory[] = ['@app']; // predefined directories
+  list.push(...wrap(definition));
 
   const directories: Array<string> = [];
 
@@ -51,9 +56,12 @@ export const normalizeDirs = (definition: CliDirectory): Array<string> => {
     }
 
     if (typeof element === 'object') {
-      directories.push(...resolvePath(element.path, element.recursive));
+      const {path, recursive} = <CliObj>element;
+      directories.push(...resolvePath(path, recursive));
     }
   }
+
+  console.log('directories:', directories);
 
   return [...new Set(directories)]; // unique filter, clean up duplicates
 };
