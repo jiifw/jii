@@ -9,6 +9,9 @@
 import figlet from 'figlet';
 import {Command} from 'commander';
 
+// utils
+import {listCommands} from '../utils/commands';
+
 // classes
 import BaseApplication from '../classes/BaseApplication';
 
@@ -29,9 +32,8 @@ export default class Application extends BaseApplication {
       .version('1.0.0')
       .description('A Jii framework CLI tools for an easy development');
 
-    const commands = [];
-
-    commands.map(command => program.addCommand(command));
+    const commands = await listCommands(program);
+    commands.forEach(command => program.addCommand(command));
     program.showHelpAfterError('(add --help for additional information)');
 
     program.configureHelp({
@@ -41,8 +43,9 @@ export default class Application extends BaseApplication {
 
     if (!process.argv.length || !process.argv.slice(2).length) {
       program.outputHelp();
-    } else {
-      program.parseAsync(process.argv);
+      return;
     }
+
+    await program.parseAsync();
   }
 }
