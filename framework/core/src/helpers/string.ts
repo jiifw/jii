@@ -37,3 +37,15 @@ export const toString = (val: any, trim: boolean = false): string => {
 
   return str;
 };
+
+/**
+ * Replace a given string at a given index
+ * @see https://stackoverflow.com/a/1431113
+ * @param str - The input string
+ * @param index - The index to start the replacement
+ * @param replacement - The replacement string
+ * @returns The modified string
+ */
+export function replaceAt(str: string, index: number, replacement: string) {
+  return str.substring(0, index) + replacement + str.substring(index + replacement.length);
+}
