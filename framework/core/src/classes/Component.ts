@@ -9,4 +9,10 @@
 // classes
 import BaseObject from './BaseObject';
 
-export default class Component extends BaseObject {}
+// public types
+export type {
+  PropertyMeta, PropertyName, Props, PropertyScope,
+} from './BaseObject';
+
+export default class Component extends BaseObject {
+}
