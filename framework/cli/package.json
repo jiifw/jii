@@ -7,6 +7,9 @@
     "email": "mj.atari@gmail.com",
     "url": "https://github.com/blacksmoke26"
   },
+  "bin": {
+    "jii": "dist/cli.js"
+  },
   "homepage": "",
   "license": "ISC",
   "directories": {
@@ -27,7 +30,8 @@
   },
   "scripts": {
     "start": "node dist/cli.js",
-    "dev": "nodemon --exec babel-node --extensions .ts,.tsx,.js,.jsx ./src/cli.ts",
+    "dev": "babel-node --extensions .ts,.tsx,.js,.jsx ./src/cli.ts",
+    "dev:watch": "nodemon --exec babel-node --extensions .ts,.tsx,.js,.jsx ./src/cli.ts",
     "clean": "rimraf coverage dist tmp && mkdir dist",
     "prebuild": "yarn run clean && npm run lint",
     "build": "yarn run build-code && yarn run build-types",
