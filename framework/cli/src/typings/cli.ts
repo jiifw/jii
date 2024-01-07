@@ -29,5 +29,5 @@ export interface CommandOption {
 export interface Argument {
   name: string;
   description?: string;
-  defaultValue?: unknown;
+  defaultValue?: string;
 }
