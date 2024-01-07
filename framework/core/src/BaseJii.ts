@@ -269,7 +269,7 @@ export default abstract class BaseJii {
    * ]);
    */
 
-  createObject<T extends object>(classname: string, params: any[] = []): InstanceType<Class<T>> {
+  createObject<T extends object>(classname: string | object | any, params: any[] = []): InstanceType<Class<T>> {
     let Class = null;
 
     if ('string' === typeof classname ) {
