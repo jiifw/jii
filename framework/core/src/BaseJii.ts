@@ -10,7 +10,9 @@
 import {resolve} from './helpers/path';
 import {bindClass} from './helpers/auto-bind';
 import {isClass} from './helpers/reflection';
+import {isObject} from './helpers/object';
 import {getAlias, setAlias, aliases, hasAlias} from './base/aliases';
+import {INTERNAL_METADATA, CONTAINER_APP_KEY, CONTAINER_MIDDLEWARE_KEY} from './utils/symbols';
 
 // script
 import initCoreAliases from './scripts/init-core-aliases';
@@ -24,11 +26,15 @@ import MiddlewareContainer from './classes/MiddlewareContainer';
 import {Class} from 'utility-types';
 import BaseApplication from './classes/BaseApplication';
 import {ComponentConfig} from './classes/Container';
-import {INTERNAL_METADATA, CONTAINER_APP_KEY, CONTAINER_MIDDLEWARE_KEY} from './utils/symbols';
 
 // public types
 export type AppInstance = InstanceType<typeof BaseApplication>;
 export type MiddlewareRegistry = InstanceType<typeof MiddlewareContainer>;
+export type ObjectType = (
+  | string // alias path to class (e.g., '@app/components/User')
+  | Function // as a class object
+  | { class: string | object; [prop: string]: any; } // as an object configuration
+  );
 
 export default abstract class BaseJii {
   /**
@@ -248,10 +254,13 @@ export default abstract class BaseJii {
   /**
    * Creates a new object using the given configuration.<br>
    * This methods support input in a few different forms:
-   *  - As a string: It should start with @alias. e.g., `@app/classes/MyClass`
-   *  - As an object: Should be class object. e.g., `class Test {}`
+   *  1. As a string: It should start with @alias. e.g., `@app/classes/MyClass`
+   *  2. As an object: Should be class object. e.g., `class Test {}`
+   *  3. As configuration: Should be a plain object with alias or Class, for example:<br>
+   * `{class: '@alias/path/Class', ...} // ... means class properties`<br>
+   * `{class: ActionEvent, ...}`
    * <br>
-   * @param classname The class name to create.
+   * @param type The class path | Class | configuration to create.
    * @param [params] A configuration array of constructor parameters.
    *
    * @example As an alias path
@@ -267,21 +276,52 @@ export default abstract class BaseJii {
    * const instance = Jii.createObject<Test>(Test, [
    *  {type: 'component'}, // value passes to Test constructor as a 'params' argument.
    * ]);
+   *
+   * @example Configuration a class file path
+   * const instance = Jii.createObject({
+   *   class: '@jiiRoot/classes/Component',
+   * });
+   *
+   * @example Configuration a Class object with properties
+   * const instance = Jii.createObject({
+   *   class: ActionEvent,
+   *   action: 'create', // object properties (e.g. 'instance.action' returns 'create')
+   * });
    */
+  public createObject<T extends object>(type: ObjectType, params: any[] = []): InstanceType<Class<T>> {
+    let Class;
+    let props: Record<string, any> = {};
 
-  createObject<T extends object>(classname: string | object | any, params: any[] = []): InstanceType<Class<T>> {
-    let Class = null;
-
-    if ('string' === typeof classname ) {
-      if ( !classname.startsWith('@') ) {
-        throw new Error('Classname must start with @alias. e.g., @alias/path/to/class');
+    if (typeof type === 'string' && type.startsWith('@')) {
+      Class = require(resolve(type))?.default || null;
+    } else if ('function' === typeof type) {
+      if (isClass(type)) {
+        Class = type;
+      } else {
+        throw new Error('Type must be a class');
+      }
+    } else if (isObject(type)) {
+      const _obj: { class?: string; [prop: string]: any; } = {...type as Object};
+      if (!('class' in (_obj as Object))) {
+        throw new Error(`Object configuration should have a 'class' property`);
       }
 
-      Class = require(resolve(classname))?.default || null;
-    }
+      if (isClass(_obj.class)) {
+        Class = _obj.class;
+      } else {
+        if ('string' !== typeof _obj.class) {
+          throw new Error(`Object configuration 'class' should be a string property`);
+        }
 
-    if ( isClass(classname) ) {
-      Class = classname;
+        if (!_obj.class.startsWith('@')) {
+          throw new Error(`Object configuration 'class' should start with a @alias.`);
+        }
+
+        Class = require(resolve(_obj.class))?.default || null;
+      }
+
+      delete _obj.class;
+      props = _obj;
     }
 
     if (!Class) {
@@ -290,10 +330,20 @@ export default abstract class BaseJii {
 
     const instance = new Class(...params);
 
-    if ('init' in instance && 'function' === typeof instance.init) {
+    if (Object.keys(props).length) {
+      for (const [prop, value] of Object.entries(props)) {
+        if (instance[prop] === undefined) {
+          throw new Error(`Class has no such property: '${prop}'`);
+        }
+
+        instance[prop] = value;
+      }
+    }
+
+    if (instance['init'] !== undefined && 'function' === typeof instance['init']) {
       instance.init.call(null);
     }
 
-    return instance;
+    return instance as T;
   }
 }
