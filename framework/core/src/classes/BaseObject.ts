@@ -21,7 +21,7 @@ export type PropertyScope = typeof PROPERTY_SCOPES[number];
  * BaseObject is the base class that implements the *property* feature.
  */
 export default class BaseObject {
-  private _props: Map<PropertyName, PropertyMeta>;
+  private _props: Map<PropertyName, PropertyMeta> = new Map();
 
   /**
    * Configures an object with the initial property values.
