@@ -79,7 +79,7 @@ export default class Event extends BaseObject {
    * For example, the following code attaches an event handler to `MyClass`'s
    * `afterInsert` event:
    *
-   * ```php
+   * ```ts
    * Event.on(MyClass.EVENT_AFTER_INSERT, async (event: Event) => {
    *     console.log(event.sender, 'is inserted.');
    * });
