@@ -81,6 +81,7 @@ export default class BaseObject {
 
     if (!this.hasProperty(name)) {
       this._props.set(name, {scope, value});
+      return;
     }
 
     if (!['write', 'read-write'].includes(<PropertyScope><unknown>this._props.get(name).scope)) {
