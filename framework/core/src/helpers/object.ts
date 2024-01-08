@@ -39,3 +39,22 @@ export const onlyKeys = (obj: Record<string, any>, keys: Array<string> = [], exc
 
   return Object.fromEntries(normalized);
 };
+
+/**
+ * Prepend one or more elements to the beginning of an array
+ * @param obj - The input object.
+ * @param values - The values to be added to the beginning of the object.
+ * @returns Returns the new number of elements in the object.
+ *
+ * @example
+ * const grocery = {
+ *  fruit: 'orange',
+ * };
+ *
+ * unshift(queue, {vegetable: 'potato'});
+ * // expected: {vegetable: 'potato', fruit: 'orange'}
+ * console.log(grocery);
+ */
+export const unshift = <K extends string = string, V = any>(obj: Record<K, V>, ...values: Record<K, V>[]): Record<K, V> => {
+  return {...values, ...obj};
+};
