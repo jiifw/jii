@@ -95,11 +95,11 @@ export default class Component extends BaseObject {
   /**
    * Attaches an event handler to an event.
    *
-   * The event handler must be a valid PHP callback. The following are
+   * The event handler must be a valid callback. The following are
    * some examples:
    *
-   * 1. <code style="color:#B87333">async (event: Event, data: any): Promise<void> => { ... }</code> // Anonymous async function
-   * 2. <code style="color:#B87333">(event: Event, data: any): void => { ... }</code> // Anonymous sync function
+   * 1. <code style="color:#B87333">async (event: Event): Promise<void> => { ... }</code> // Anonymous async function
+   * 2. <code style="color:#B87333">(event: Event): void => { ... }</code> // Anonymous sync function
    * 3. <code style="color:#B87333">[instance, 'handleAdd']</code> // object method
    * 4. <code style="color:#B87333">[Page, 'handleAdd']</code> // static class method
    * 4. <code style="color:#B87333">['@app/classes/Page', 'handleAdd']</code> // alias based class path
@@ -108,7 +108,7 @@ export default class Component extends BaseObject {
    * The event handler must be defined with the following signature,
    *
    * ```
-   * async (event: Event, data: any)
+   * (event: Event)
    * ```
    *
    * Where `event` is an {@link Event Event} object which includes parameters associated with the event.
