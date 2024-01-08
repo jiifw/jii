@@ -181,9 +181,10 @@ export default class Component extends BaseObject {
       return;
     }
 
-    if (!event) {
+    if (!event || !(event instanceof Event)) {
       event = new Event();
     }
+
     if (!event.sender) {
       event.sender = this;
     }
