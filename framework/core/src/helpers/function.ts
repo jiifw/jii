@@ -151,3 +151,12 @@ export const invokeMethod = async (target: object, funcName: string, args: any[]
     ? objFunc.apply(target, args)
     : promisify(objFunc, args, target);
 };
+
+/**
+ * Validates function or variable is defined or not
+ * @param varOrFunc - The variable or function to check
+ * @returns true if the variable or function is defined
+ */
+export const isDefined = (varOrFunc: any): boolean => {
+  return typeof varOrFunc !== 'undefined' && varOrFunc !== null;
+}
