@@ -12,6 +12,7 @@ npm-debug.log*
 lerna-debug*.log
 # Backup files
 *.*bak
+*.local.*
 
 # Dependencies
 node_modules/
