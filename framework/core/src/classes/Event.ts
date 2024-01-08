@@ -186,12 +186,12 @@ export default class Event extends BaseObject {
 
       if (typeof handler === 'string' && typeof handler !== undefined) {
         // global function
-        await invoke(handler, [event, data]);
+        await invoke(handler, [event]);
       }
 
       if (typeof handler === 'function') {
         // anonymous function
-        await invoke(handler, [event, data]);
+        await invoke(handler, [event]);
       }
 
       if (Array.isArray(handler)) {
@@ -199,10 +199,10 @@ export default class Event extends BaseObject {
 
         if ('string' === typeof target && target.startsWith('@')) {
           // module method
-          await invokeModuleMethod(target, funcName, [event, data]);
+          await invokeModuleMethod(target, funcName, [event]);
         } else if ( ['object', 'function'].includes(typeof target)) {
           // object method or a static class method
-          await invokeMethod(<object | Function>target, funcName, [event, data]);
+          await invokeMethod(<object | Function>target, funcName, [event]);
         }
 
         throw new Error ('Handler must be be a valid function or a method');
