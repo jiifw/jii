@@ -161,6 +161,11 @@ export default class Component extends BaseObject {
     // plain event names
     if (this._events?.get(name)?.has(handler)) {
       this._events.get(name).delete(handler);
+
+      if (!this._events.get(name).size) {
+        this._events.delete(name)
+      }
+
       return true;
     }
 
