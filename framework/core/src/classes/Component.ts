@@ -84,7 +84,7 @@ export default class Component extends BaseObject {
    * @param name - The event name
    * @returns Whether there is any handler attached to the event.
    */
-  public hasEventHandlers = (name: string): boolean => {
+  public hasEventHandlers (name: string): boolean{
     if (this._events.has(name)) {
       return true;
     }
@@ -120,7 +120,7 @@ export default class Component extends BaseObject {
    * @see {@link off off()}
    * @throws Error if the handler is not a valid callback
    */
-  on(name: string, handler: EventHandler, data: EventData = null): void {
+  public on(name: string, handler: EventHandler, data: EventData = null): void {
     if (!['string', 'function'].includes(typeof handler) && (
       !Array.isArray(handler) && handler.length !== 2 && ['function', 'object'].includes(typeof handler[0])
     )) {
@@ -148,7 +148,7 @@ export default class Component extends BaseObject {
    * @returns If a handler is found and detached
    * @see {@link on on()}
    */
-  off(name: string, handler: EventHandler | null): boolean {
+  public off(name: string, handler: EventHandler | null): boolean {
     if (!this._events.has(name)) {
       return false;
     }
@@ -176,7 +176,7 @@ export default class Component extends BaseObject {
    * @param name - The event name
    * @param event - The event instance. If not set, a default {@link Event} object will be created.
    */
-  async trigger(name: string, event: Event | null = null): Promise<void> {
+  public async trigger(name: string, event: Event | null = null): Promise<void> {
     if (!this._events.has(name) || !this._events.get(name).size) {
       return;
     }
