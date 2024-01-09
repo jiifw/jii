@@ -44,12 +44,12 @@ export const registerCustomPlugin = async <T>(plugin: MiddlewarePlugin<T>) => {
     throw new Error(`Plugin 'metadata' must be a valid object`);
   }
 
-  await instance.beforeRegister.bind(instance);
+  await instance.beforeRegister();
 
   await Jii.app<WebApplication>().server.register(fp(instance.handler.bind(instance), instance.metadata()));
   await Jii.app<WebApplication>().server.after(async err => {
     if (err) throw err;
-    await instance.afterRegister.bind(instance);
+    await instance.afterRegister();
   });
 
   Jii.middleware.link(path, instance.id);
