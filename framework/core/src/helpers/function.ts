@@ -23,7 +23,7 @@ export const isAsyncFunction = (func: any): boolean => {
  */
 export const isSyncFunction = (func: any): boolean => {
   return 'function' === typeof func
-    && (<Function>func).constructor.name === 'Function';
+    && (func as Function).constructor.name === 'Function';
 };
 
 /**
@@ -51,14 +51,22 @@ export const isPromise = (value: any): boolean => {
  * @param [thisArg] - The object to be used as a (this) context object.
  * @returns The output produced by a function
  */
-export const promisify = <T = any>(func: Function | (() => T), args: any[] = [], thisArg = null): Promise<T> => {
-  return new Promise((resolve, reject): void => {
-    try {
-      resolve((<Function>func).apply(thisArg, args));
-    } catch (e) {
-      reject(e);
-    }
-  });
+export const promisify = <T = any>(func: Function | (() => T) | (() => Promise<T>), args: any[] = [], thisArg = null): Promise<T> => {
+  if (isAsyncFunction(func)) {
+    return (func as Function).apply(thisArg, args) as Promise<T>;
+  }
+
+  if ( isSyncFunction(func) ) {
+    return new Promise((resolve, reject): void => {
+      try {
+        resolve((func as Function).apply(thisArg, args));
+      } catch (e) {
+        reject(e);
+      }
+    });
+  }
+
+  throw new Error (`The arg 'func' should be a function but ${typeof func} given`);
 };
 
 /**
