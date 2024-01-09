@@ -16,5 +16,6 @@
     ["@babel/plugin-proposal-function-bind"]
   ],
   "comments": false,
-  "compact": "auto"
+  "compact": "auto",
+  "ignore": ["**/*.local.ts"]
 }
