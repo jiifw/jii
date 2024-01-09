@@ -61,8 +61,6 @@ export const normalizeDirs = (definition: CliDirectory): Array<string> => {
     }
   }
 
-  console.log('directories:', directories);
-
   return [...new Set(directories)]; // unique filter, clean up duplicates
 };
 
