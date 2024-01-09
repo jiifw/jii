@@ -15,7 +15,7 @@
     // "Go to Definition" in VSCode
     "declarationMap": true,
   },
-  "exclude": ["dist"],
+  "exclude": ["dist", "**/*local.ts"],
   "include": [
     "src"
   ]
