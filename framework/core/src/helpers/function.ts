@@ -100,11 +100,7 @@ export const promisify = <T = any>(func: Function | (() => T) | (() => Promise<T
  * await invoke(trackUser, ['junaid']);
  */
 export const invoke = async (func: any, args: any[] = [], thisArg = null): Promise<any> => {
-  if (isAsyncFunction(func)) {
-    return (<Function>func).apply(thisArg, args);
-  }
-
-  if (isSyncFunction(func)) {
+  if (isFunction(func)) {
     return promisify(func, args, thisArg);
   }
 
