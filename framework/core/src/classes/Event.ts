@@ -184,7 +184,7 @@ export default class Event extends BaseObject {
     for await (const [handler, data] of Event._events.get(name).entries()) {
       event.data = data;
 
-      if (typeof handler === 'string' && typeof handler !== undefined) {
+      if (typeof handler === 'string') {
         // global function
         await invoke(handler, [event]);
       }
