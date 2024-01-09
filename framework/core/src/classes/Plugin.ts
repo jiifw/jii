@@ -65,6 +65,11 @@ export default abstract class Plugin extends Component {
   public description: string = null;
 
   /**
+   * Target platform to register plugin with
+   */
+  public target: 'web' | 'cli' = 'web';
+
+  /**
    * Reads the plugin config file (app), also merge supplied options with the plugin config
    * @param [options] - The plugin options
    * @returns The plugin config
