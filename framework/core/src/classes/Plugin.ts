@@ -8,6 +8,7 @@
 
 // classes
 import Component from './Component';
+import PluginEvent from './PluginEvent';
 
 // types
 import {importPluginConfig} from '../base/config';
@@ -33,6 +34,20 @@ export interface PluginMetadata {
  * A plugin class to create server plugins
  */
 export default abstract class Plugin extends Component {
+  /**
+   * @event PluginEvent
+   * An event raised right before executing a plugin register.
+   *
+   * You may set {@link PluginEvent#isValid PluginEvent.isValid} to be false to cancel the plugin execution.
+   */
+  public static EVENT_BEFORE_REGISTER: string = 'beforeRegister';
+
+  /**
+   * @event PluginEvent
+   * An event raised right after executing a plugin registered.
+   */
+  public static EVENT_AFTER_REGISTER: string = 'afterRegister';
+
   /**
    * The unique plugin id, e.g., cors, body-parser, etc.
    */
@@ -75,12 +90,18 @@ export default abstract class Plugin extends Component {
   /**
    * Trigger event before the plugin register
    */
-  async beforeRegister(): Promise<void> {
+  async beforeRegister(): Promise<boolean> {
+    const event = new PluginEvent();
+    await this.trigger(Plugin.EVENT_BEFORE_REGISTER, event);
+    return event.isValid;
   }
 
   /**
    * Trigger event after the plugin register
    */
-  async afterRegister(): Promise<void> {
+  async afterRegister(): Promise<any> {
+    const event = new PluginEvent();
+    await this.trigger(Plugin.EVENT_AFTER_REGISTER, event);
+    return event.result;
   }
 }
