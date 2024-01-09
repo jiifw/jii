@@ -8,6 +8,7 @@
 
 // utils
 import {isObject} from '../helpers/object';
+import {invoke} from '../helpers/function';
 import {bindClass} from '../helpers/auto-bind';
 
 const PROPERTY_SCOPES = <const>['read', 'write', 'read-write'];
@@ -20,13 +21,15 @@ export type PropertyScope = typeof PROPERTY_SCOPES[number];
 /**
  * BaseObject is the base class that implements the *property* feature.
  */
-export default class BaseObject {
+export default class BaseObject extends Object {
   private _props: Map<PropertyName, PropertyMeta> = new Map();
 
   /**
    * Configures an object with the initial property values.
    */
   constructor(props: Props = {}) {
+    super();
+
     if (props && !isObject(props)) {
       throw new Error('config must be an object');
     }
@@ -72,9 +75,14 @@ export default class BaseObject {
    * Sets the value of the property.
    * @param name - The property name
    * @param value - The value
-   * @param scope - The scope of the property
+   * Passing values will change the property to a method, for instance:
+   *
+   * - `baseObj.setProperty('checkAccess', async (user) => { ... });` // Consider as a method, use {@link invoke invoke()} to call)
+   * - `baseObj.setProperty('userType', 'admin');` // *no-function*, Consider as a property:, use {@link getProperty getProperty()} to retrieve)
+   *
+   * @param [scope] - The scope of the property
    */
-  setProperty(name: PropertyName, value: any, scope: PropertyScope = 'read-write'): void {
+  setProperty(name: PropertyName, value: (() => any) | (() => Promise<any>) | string | null | object | Array<any> | boolean, scope: PropertyScope = 'read-write'): void {
     if (!PROPERTY_SCOPES.includes(scope)) {
       throw new Error(`Invalid scope: '${scope}', should be one of '${PROPERTY_SCOPES.join(', ')}'`);
     }
@@ -127,5 +135,27 @@ export default class BaseObject {
     return this.hasProperty(name)
       && 'function' === typeof this._props.get(name).value
       && ['AsyncFunction', 'Function'].includes((<Function>this._props.get(name).value).constructor.name);
+  }
+
+  /**
+   * Invokes a component or a behaviour method.
+   * @param name - Function name
+   * @param args - Arguments passed to the function
+   * @returns The result of the function
+   * @see {@link hasMethod hasMethod()}
+   *
+   * @example
+   * baseObj.setProperty('checkAccess', async (user) => {
+   *   return user === 'admin';
+   * });
+   * // expected: 'Has access?' true
+   * console.log('Has access?', await baseObj.invoke<boolean>('checkAccess', 'admin'));
+   */
+  public async invoke<T>(name: string, ...args: any[]): Promise<T>{
+    if ( !this.hasMethod(name) ) {
+      throw new Error(`Method '${name}' not found`);
+    }
+
+    return invoke(this._props.get(name).value as Function, args, this);
   }
 }
