@@ -171,3 +171,144 @@ export const inspectClass = (theClass: Function, type: 'property' | 'method', om
       : !nativeList.includes(name) && isItA;
   });
 };
+
+/**
+ * Checks if the object has the specified property or a method
+ * @param obj - The object
+ * @param name - The property or method name
+ * @param type - The type of the method to check. Can be 'property' or 'method'
+ * @returns true if the object has the specified property or a method, false otherwise
+ *
+ * @example
+ * class User {
+ *   getName () {}
+ *   get id() {}
+ * }
+ *
+ * console.log('Method?', hasOwn(new User, 'getName', 'method')); // expected: true
+ * console.log('Property?', hasOwn(new User, 'id', 'property')); // expected: true
+ * @see {@link hasOwnProperty hasOwnProperty()} _property_ specific
+ * @see {@link hasOwnMethod hasOwnMethod()} _method_ specific
+ */
+const hasOwn = (obj: object, name: string, type: 'property' | 'method'): boolean => {
+  if (!obj || 'object' !== typeof obj) {
+    throw new Error('The provided object is not an instance of object');
+  }
+
+  let currentObj = obj;
+
+  do {
+    const props = Object.getOwnPropertyNames(currentObj);
+    if (props.includes(name)) {
+      const isFunc = 'function' === typeof currentObj[name];
+      return (type === 'method' && isFunc)
+        || (type === 'property' && !isFunc);
+    }
+  } while ((currentObj = Object.getPrototypeOf(currentObj)));
+
+  return false;
+};
+
+/**
+ * Checks if the object has the specified property
+ * @param obj - The object
+ * @param property - The property name
+ * @returns true if the object has the specified property, false otherwise
+ * @see {@link hasOwn hasOwn()}
+ *
+ * @example
+ * class User {
+ *   get id () {}
+ * }
+ *
+ * console.log('Property?', hasOwnProperty(new User, 'id')); // expected: true
+ */
+const hasOwnProperty = (obj: object, property: string): boolean => {
+  return hasOwn(obj, property, 'property');
+}
+
+/**
+ * Checks if the object has the specified method
+ * @param obj - The object
+ * @param method - The method name
+ * @returns true if the object has the specified method, false otherwise
+ * @see {@link hasOwn hasOwn()}
+ *
+ * @example
+ * class User {
+ *   getName () {}
+ * }
+ *
+ * console.log('Method?', hasOwnMethod(new User, 'getName')); // expected: true
+ */
+const hasOwnMethod = (obj: object, method: string): boolean => {
+  return hasOwn(obj, method, 'method');
+}
+
+/**
+ * Checks if the class has the specified static property or a method
+ * @param theClass - The class
+ * @param name - The property or method name
+ * @param type - The type of the method to check. Can be 'property' or 'method'
+ *
+ * @example
+ * class User {
+ *   static getUid() {}
+ *   static get uid() {}
+ * }
+ *
+ * console.log('Method?', hasOwnStatic(User, 'getUid', 'method')); // expected: true
+ * console.log('Property?', hasOwnStatic(User, 'uid', 'property')); // expected: true
+ * @see {@link hasOwnStaticProperty hasOwnStaticProperty()} _property_ specific
+ * @see {@link hasOwnStaticMethod hasOwnStaticMethod()} _method_ specific
+ */
+const hasOwnStatic = (theClass: Function, name: string, type: 'property' | 'method'): boolean => {
+  if (!theClass || !isClass(theClass)) {
+    throw new Error('The provided object is not a class');
+  }
+
+  for ( const prop of Object.getOwnPropertyNames(theClass) ) {
+    if ( prop === name ) {
+      const isMethod = 'function' === typeof theClass[name];
+      return type === 'method' ? isMethod : !isMethod;
+    }
+  }
+
+  return false;
+};
+
+/**
+ * Checks if the class has the specified property
+ * @param theClass - The class
+ * @param property - The property name
+ * @returns true if the object has the specified property, false otherwise
+ * @see {@link hasOwnStatic hasOwnStatic()}
+ *
+ * @example
+ * class User {
+ *   static get uuid () {}
+ * }
+ *
+ * console.log('Property?', hasOwnStaticProperty(User, 'uuid')); // expected: true
+ */
+const hasOwnStaticProperty = (theClass: Function, property: string): boolean => {
+  return hasOwn(theClass, property, 'property');
+}
+
+/**
+ * Checks if the class has the specified method
+ * @param theClass - The class
+ * @param method - The method name
+ * @returns true if the object has the specified method, false otherwise
+ * @see {@link hasOwnStatic hasOwnStatic()}
+ *
+ * @example
+ * class User {
+ *   static getUid () {}
+ * }
+ *
+ * console.log('Method?', hasOwnStaticMethod(User, 'getUid')); // expected: true
+ */
+const hasOwnStaticMethod = (theClass: Function, method: string): boolean => {
+  return hasOwn(theClass, method, 'method');
+}
