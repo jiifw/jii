@@ -14,6 +14,9 @@ lerna-debug*.log
 *.*bak
 *.local.*
 
+# generate tests
+*.generated.test.ts
+
 # Dependencies
 node_modules/
 
