@@ -88,7 +88,7 @@ export default class Behavior extends BaseObject {
 
     for (const [event, handler] of _events) {
       this._attachedEvents[event] = handler;
-      owner.on(event, handler);
+      owner.on(event, 'string' === typeof handler ? [this, handler] : handler);
     }
   }
 
@@ -99,12 +99,12 @@ export default class Behavior extends BaseObject {
    * Make sure you call the parent implementation if you override this method.
    */
   public detach(): void {
-    if (!(this.owner instanceof Component)) {
+    if (!this.owner || !(this.owner instanceof Component)) {
       return;
     }
 
     for (const [event, handler] of Object.entries(this._attachedEvents)) {
-      this.owner.off(event, handler);
+      this.owner.off(event, 'string' === typeof handler ? [this, handler] : handler);
     }
 
     this._attachedEvents = {};
