@@ -175,7 +175,7 @@ export const inspectClass = (theClass: Function, type: 'property' | 'method', om
 /**
  * Checks if the object has the specified property or a method
  * @param obj - The object
- * @param name - The property or method name
+ * @param name - The property or method name (string | symbol)
  * @param type - The type of the method to check. Can be 'property' or 'method'
  * @returns true if the object has the specified property or a method, false otherwise
  *
@@ -190,7 +190,7 @@ export const inspectClass = (theClass: Function, type: 'property' | 'method', om
  * @see {@link hasOwnProperty hasOwnProperty()} _property_ specific
  * @see {@link hasOwnMethod hasOwnMethod()} _method_ specific
  */
-export const hasOwn = (obj: object, name: string, type: 'property' | 'method'): boolean => {
+export const hasOwn = (obj: object, name: string | symbol, type: 'property' | 'method'): boolean => {
   if (!obj || 'object' !== typeof obj) {
     throw new Error('The provided object is not an instance of object');
   }
@@ -198,11 +198,16 @@ export const hasOwn = (obj: object, name: string, type: 'property' | 'method'): 
   let currentObj = obj;
 
   do {
-    const props = Object.getOwnPropertyNames(currentObj);
-    if (props.includes(name)) {
-      const isFunc = 'function' === typeof currentObj[name];
-      return (type === 'method' && isFunc)
-        || (type === 'property' && !isFunc);
+    const props = 'symbol' === typeof name
+      ? Object.getOwnPropertySymbols(currentObj)
+      : Object.getOwnPropertyNames(currentObj);
+
+    for ( const prop of props) {
+      if ( name === prop ) {
+        const isFunc = 'function' === typeof currentObj[name];
+        return (type === 'method' && isFunc)
+          || (type === 'property' && !isFunc);
+      }
     }
   } while ((currentObj = Object.getPrototypeOf(currentObj)));
 
@@ -212,7 +217,7 @@ export const hasOwn = (obj: object, name: string, type: 'property' | 'method'): 
 /**
  * Checks if the object has the specified property
  * @param obj - The object
- * @param property - The property name
+ * @param property - The property name (string | symbol)
  * @returns true if the object has the specified property, false otherwise
  * @see {@link hasOwn hasOwn()}
  *
@@ -223,14 +228,14 @@ export const hasOwn = (obj: object, name: string, type: 'property' | 'method'): 
  *
  * console.log('Property?', hasOwnProperty(new User, 'id')); // expected: true
  */
-export const hasOwnProperty = (obj: object, property: string): boolean => {
+export const hasOwnProperty = (obj: object, property: string | symbol): boolean => {
   return hasOwn(obj, property, 'property');
 }
 
 /**
  * Checks if the object has the specified method
  * @param obj - The object
- * @param method - The method name
+ * @param method - The method name (string | symbol)
  * @returns true if the object has the specified method, false otherwise
  * @see {@link hasOwn hasOwn()}
  *
@@ -241,14 +246,14 @@ export const hasOwnProperty = (obj: object, property: string): boolean => {
  *
  * console.log('Method?', hasOwnMethod(new User, 'getName')); // expected: true
  */
-export const hasOwnMethod = (obj: object, method: string): boolean => {
+export const hasOwnMethod = (obj: object, method: string | symbol): boolean => {
   return hasOwn(obj, method, 'method');
 }
 
 /**
  * Checks if the class has the specified static property or a method
  * @param theClass - The class
- * @param name - The property or method name
+ * @param name - The property or method name (string | symbol)
  * @param type - The type of the method to check. Can be 'property' or 'method'
  *
  * @example
@@ -262,12 +267,16 @@ export const hasOwnMethod = (obj: object, method: string): boolean => {
  * @see {@link hasOwnStaticProperty hasOwnStaticProperty()} _property_ specific
  * @see {@link hasOwnStaticMethod hasOwnStaticMethod()} _method_ specific
  */
-export const hasOwnStatic = (theClass: Function, name: string, type: 'property' | 'method'): boolean => {
+export const hasOwnStatic = (theClass: Function, name: string | symbol, type: 'property' | 'method'): boolean => {
   if (!theClass || !isClass(theClass)) {
     throw new Error('The provided object is not a class');
   }
 
-  for ( const prop of Object.getOwnPropertyNames(theClass) ) {
+  const props = 'symbol' === typeof name
+    ? Object.getOwnPropertySymbols(theClass)
+    : Object.getOwnPropertyNames(theClass);
+
+  for ( const prop of props ) {
     if ( prop === name ) {
       const isMethod = 'function' === typeof theClass[name];
       return type === 'method' ? isMethod : !isMethod;
@@ -278,7 +287,7 @@ export const hasOwnStatic = (theClass: Function, name: string, type: 'property' 
 };
 
 /**
- * Checks if the class has the specified property
+ * Checks if the class has the specified property (string | symbol)
  * @param theClass - The class
  * @param property - The property name
  * @returns true if the object has the specified property, false otherwise
@@ -291,12 +300,12 @@ export const hasOwnStatic = (theClass: Function, name: string, type: 'property' 
  *
  * console.log('Property?', hasOwnStaticProperty(User, 'uuid')); // expected: true
  */
-export const hasOwnStaticProperty = (theClass: Function, property: string): boolean => {
-  return hasOwn(theClass, property, 'property');
+export const hasOwnStaticProperty = (theClass: Function, property: string | symbol): boolean => {
+  return hasOwnStatic(theClass, property, 'property');
 }
 
 /**
- * Checks if the class has the specified method
+ * Checks if the class has the specified method (string | symbol)
  * @param theClass - The class
  * @param method - The method name
  * @returns true if the object has the specified method, false otherwise
@@ -309,6 +318,6 @@ export const hasOwnStaticProperty = (theClass: Function, property: string): bool
  *
  * console.log('Method?', hasOwnStaticMethod(User, 'getUid')); // expected: true
  */
-export const hasOwnStaticMethod = (theClass: Function, method: string): boolean => {
-  return hasOwn(theClass, method, 'method');
+export const hasOwnStaticMethod = (theClass: Function, method: string | symbol): boolean => {
+  return hasOwnStatic(theClass, method, 'method');
 }
