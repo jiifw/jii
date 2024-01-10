@@ -8,7 +8,8 @@
 
 // utils
 import {isObject} from '../helpers/object';
-import {invoke} from '../helpers/function';
+import {invoke, isFunction} from '../helpers/function';
+import {hasOwn} from '../helpers/reflection';
 import {bindClass} from '../helpers/auto-bind';
 
 const PROPERTY_SCOPES = <const>['read', 'write', 'read-write'];
@@ -17,11 +18,16 @@ export type PropertyMeta = { scope: PropertyScope, value: any }
 export type PropertyName = string | symbol;
 export type Props = { [name: string | symbol]: any }
 export type PropertyScope = typeof PROPERTY_SCOPES[number];
+export type PropertyValue = (() => any) | (() => Promise<any>) | string | null | object | Array<any> | boolean;
 
 /**
  * BaseObject is the base class that implements the *property* feature.
  */
 export default class BaseObject extends Object {
+  /**
+   * Stores the object specific property meta.
+   * @private
+   */
   private _props: Map<PropertyName, PropertyMeta> = new Map();
 
   /**
@@ -47,7 +53,7 @@ export default class BaseObject extends Object {
    * This method is invoked at the end of the constructor after the object is initialized with the
    * given configuration.
    */
-  init(): void {
+  public init(): void {
   }
 
   /**
@@ -56,16 +62,20 @@ export default class BaseObject extends Object {
    * @param throwException - If true, an exception will be thrown if the property is not found or invalid scope.
    * @returns The value of the property
    */
-  getProperty<T>(name: PropertyName, throwException: boolean = true): T | undefined {
+  public getProperty<T = PropertyValue>(name: PropertyName, throwException: boolean = true): T | undefined {
     if (!this.hasProperty(name)) {
-      if (throwException) throw new Error(`Property '${name.toString()}' not found`);
+      if (throwException) throw new Error(`Trying to get unknown property: ${this.constructor.name}.${name.toString()}`);
       return undefined;
+    }
+
+    if ( hasOwn(this, name, 'property') ) {
+      return this[name] as T;
     }
 
     const {scope, value} = this._props.get(name);
 
     if (!['read', 'read-write'].includes(scope)) {
-      throw new Error(`Cannot read property '${name.toString()}'`);
+      throw new Error(`Trying to read write-only property: ${this.constructor.name}.${name.toString()}`);
     }
 
     return value as T;
@@ -75,70 +85,97 @@ export default class BaseObject extends Object {
    * Sets the value of the property.
    * @param name - The property name
    * @param value - The value
-   * Passing values will change the property to a method, for instance:
+   * Passing values will change from property to a method, for instance:
    *
    * - `baseObj.setProperty('checkAccess', async (user) => { ... });` // Consider as a method, use {@link invoke invoke()} to call)
    * - `baseObj.setProperty('userType', 'admin');` // *no-function*, Consider as a property:, use {@link getProperty getProperty()} to retrieve)
    *
    * @param [scope] - The scope of the property
    */
-  setProperty(name: PropertyName, value: (() => any) | (() => Promise<any>) | string | null | object | Array<any> | boolean, scope: PropertyScope = 'read-write'): void {
+  public setProperty<T = PropertyValue>(name: PropertyName, value: T, scope: PropertyScope = 'read-write'): void {
     if (!PROPERTY_SCOPES.includes(scope)) {
-      throw new Error(`Invalid scope: '${scope}', should be one of '${PROPERTY_SCOPES.join(', ')}'`);
+      throw new Error(`Trying to set property with invalid scope: '${scope}'`);
     }
 
-    if (!this.hasProperty(name)) {
+    if (hasOwn(this, name, 'property')
+      && Object.getOwnPropertyDescriptor(this, name).writable) {
+      this[name] = value;
+      return;
+    }
+
+    const hasProp: boolean = this.hasProperty(name, false);
+
+    if (!hasProp) {
       this._props.set(name, {scope, value});
       return;
     }
 
-    if (!['write', 'read-write'].includes(<PropertyScope><unknown>this._props.get(name).scope)) {
-      throw new Error(`Cannot set property '${name.toString()}' with scope '${scope}'`);
+    if (hasProp && ['write', 'read-write'].includes(<PropertyScope><unknown>this._props.get(name).scope)) {
+      this._props.set(name, {scope, value});
+      return;
     }
 
-    this._props.set(name, {scope, value});
+    throw new Error(`Trying to set read-only property: ${this.constructor.name}.${name.toString()}`);
   }
 
   /**
    * Checks if the object has the given property.
    * @param name - The property name
+   * @param [checkVars] - Checks for the object properties
    * @returns True if the object has the given property
    */
-  hasProperty(name: PropertyName): boolean {
-    return this._props.has(name);
+  public hasProperty(name: PropertyName, checkVars: boolean = true): boolean {
+    return (checkVars && hasOwn(this, name, 'property')) || this._props.has(name);
   }
 
   /**
-   * Checks if the object can be accessed by the given key.
+   * Checks that property is writeable / settable or not
    * @param name - The property name
-   * @returns True if the object can be accessed by the given key
+   * @param [checkVars] - Checks for the internal methods
+   * @returns True if the property is settable.
    */
-  canSetProperty(name: PropertyName): boolean {
-    return this.hasProperty(name) && ['read-write', 'write'].includes(this._props.get(name).scope);
+  public canSetProperty(name: PropertyName, checkVars: boolean = true): boolean {
+    if (!this.hasProperty(name, checkVars)) {
+      return true;
+    }
+
+    return checkVars && hasOwn(this, name, 'property')
+      ? Object.getOwnPropertyDescriptor(this, name).writable
+      : ['read-write', 'write'].includes(this._props.get(name).scope);
   }
 
   /**
-   * Checks if the object can be accessed by the given key.
+   * Checks that property is assessable or readable
    * @param name - The property name
-   * @returns True if the object can be accessed by the given key
+   * @param [checkVars] - Checks for the internal methods
+   * @returns True if property is readable and false otherwise
    */
-  canGetProperty(name: PropertyName): boolean {
-    return this.hasProperty(name) && ['read-write', 'read'].includes(this._props.get(name).scope);
+  public canGetProperty(name: PropertyName, checkVars: boolean = true): boolean {
+    if (!this.hasProperty(name, checkVars)) {
+      return false;
+    }
+
+    return checkVars && hasOwn(this, name, 'property')
+      ? Object.getOwnPropertyDescriptor(this, name).enumerable
+      : ['read-write', 'read'].includes(this._props.get(name).scope);
   }
 
   /**
    * Checks if the object has the given method.
    * @param name - The property name
+   * @param [checkVars] - Checks for the internal methods
    * @returns True if the object has the given method
    */
-  hasMethod(name: PropertyName): boolean {
-    return this.hasProperty(name)
-      && 'function' === typeof this._props.get(name).value
-      && ['AsyncFunction', 'Function'].includes((<Function>this._props.get(name).value).constructor.name);
+  public hasMethod(name: PropertyName, checkVars: boolean = true): boolean {
+    if (checkVars && hasOwn(this, name, 'method')) {
+      return true;
+    } else {
+      return this._props.has(name) && isFunction(this._props.get(name).value);
+    }
   }
 
   /**
-   * Invokes a component or a behaviour method.
+   * Invokes a component method.
    * @param name - Function name
    * @param args - Arguments passed to the function
    * @returns The result of the function
@@ -151,11 +188,15 @@ export default class BaseObject extends Object {
    * // expected: 'Has access?' true
    * console.log('Has access?', await baseObj.invoke<boolean>('checkAccess', 'admin'));
    */
-  public async invoke<T>(name: string, ...args: any[]): Promise<T>{
-    if ( !this.hasMethod(name) ) {
-      throw new Error(`Method '${name}' not found`);
+  public async invoke<T>(name: string, ...args: any[]): Promise<T> {
+    if (!this.hasMethod(name)) {
+      throw new Error(`Trying to call an unknown method ${this.constructor.name}.${name}()`);
     }
 
-    return invoke(this._props.get(name).value as Function, args, this);
+    const func = hasOwn(this, name, 'method')
+      ? this[name]
+      : this._props.get(name).value;
+
+    return invoke(func as Function, args, this);
   }
 }
