@@ -7,8 +7,13 @@
  */
 
 // classes
-import BaseObject from './BaseObject';
+import BaseObject, {PropertyValue} from './BaseObject';
 import Event from './Event';
+
+// error classes
+import InvalidCallError from './InvalidCallError';
+import UnknownPropertyError from './UnknownPropertyError';
+import UnknownMethodError from './UnknownMethodError';
 
 // utils
 import Jii from '../Jii';
@@ -16,13 +21,15 @@ import {invoke, invokeMethod} from '../helpers/function';
 import {invokeModuleMethod} from '../helpers/file';
 
 // types
+import {ObjectType} from '../BaseJii';
 import {EventHandler, EventData, Events} from './Event';
+import {PropertyName, PropertyScope} from './BaseObject';
 import Behavior, {Instance as BehaviorInstance, BehaviorArgs} from './Behavior';
 
 // public types
 export type Instance = InstanceType<typeof Component>;
-export type {PropertyMeta, PropertyName, Props, PropertyScope} from './BaseObject';
 export type {EventHandler, EventData, Events} from './Event';
+export type {PropertyMeta, PropertyName, Props, PropertyScope, PropertyValue} from './BaseObject';
 
 /**
  * Component is the base class that implements the *property*, *event* and *behavior* features.
@@ -88,6 +95,195 @@ export default class Component extends BaseObject {
   private _behaviors: Map<string, BehaviorInstance> = new Map;
 
   /**
+   * Returns the value of a component property.
+   *
+   * This method will check in the following order and act accordingly:
+   *
+   *  - a property defined by a getter: return the getter result
+   *  - a property of a behavior: return the behavior property value
+   *
+   * @param name - The property name
+   * @param throwException - If true, an exception will be thrown if the property is not found or invalid scope.
+   * @returns The value of the property
+   */
+  getProperty<T>(name: PropertyName, throwException: boolean = true): T | undefined {
+    if (super.hasProperty(name) ) {
+      return super.getProperty<T>(name, throwException);
+    }
+
+    this.ensureBehaviors();
+    for (const behavior of Object.values(this._behaviors) as BehaviorInstance[]) {
+      if (behavior.hasProperty(name)) {
+        return behavior.getProperty<T>(name);
+      }
+    }
+
+    throw new UnknownPropertyError(`Getting unknown property: ${this.constructor.name}.${name.toString()}`);
+  }
+
+  /**
+   * Sets the value of the property.
+   * @param name - The property name
+   * @param value - The value
+   *
+   * This method will check in the following order and act accordingly:
+   *
+   *  - a property defined by a setter: set the property value<br>
+   *  - an event in the format of "on xyz": attach the handler to the event "xyz"<br>
+   *  - a behavior in the format of "as xyz": attach the behavior named as "xyz"<br>
+   *  - a property of a behavior: set the behavior property value
+   *
+   * Passing values will change from property to a method, for instance:
+   *
+   * - `baseObj.setProperty('checkAccess', async (user) => { ... });` // Consider as a method, use {@link invoke invoke()} to call)
+   * - `baseObj.setProperty('userType', 'admin');` // *no-function*, Consider as a property:, use {@link getProperty getProperty()} to retrieve)
+   *
+   * @param [scope] - The scope of the property
+   */
+  public setProperty<T = PropertyValue>(name: PropertyName, value: T, scope: PropertyScope = 'read-write'): void {
+    if (super.canSetProperty(name)) {
+      super.setProperty(name, value, scope);
+      return;
+    }
+
+    if (typeof name === 'string') {
+      if (name.startsWith('on ')) {
+        this.on(name.replace(/^on /, ''), value as EventHandler);
+        return;
+      } else if (name.startsWith('as ')) {
+        const behavior: BehaviorInstance = value instanceof Behavior ? value : Jii.createObject(<ObjectType>value);
+        this.attachBehavior(name.replace(/^as /, ''), behavior);
+        return;
+      }
+    }
+
+    this.ensureBehaviors();
+    for (const behavior of Object.values(this._behaviors) as BehaviorInstance[]) {
+      if (behavior.canSetProperty(name)) {
+        behavior.setProperty(name, value);
+        return;
+      }
+    }
+
+    throw new UnknownPropertyError(`Setting unknown property: ${this.constructor.name}.${name.toString()}`);
+  }
+
+  /**
+   * Checks if the object has the given property.
+   * @param name - The property name
+   * @param checkBehaviors - Whether to treat behaviors' properties as properties of this component
+   * @returns True if the object has the given property
+   */
+  hasProperty(name: PropertyName, checkBehaviors: boolean = true): boolean {
+    if (super.hasProperty(name)) {
+      return true;
+    } else if (checkBehaviors) {
+      this.ensureBehaviors();
+      for (const behavior of Object.values(this._behaviors) as BehaviorInstance[]) {
+        if (behavior.hasProperty(name)) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * Checks that property is writeable / settable or not
+   * @param name - The property name
+   * @param checkBehaviors - Whether to treat behaviors' properties as properties of this component
+   * @returns True if the property is settable.
+   */
+  canSetProperty(name: PropertyName, checkBehaviors: boolean = true): boolean {
+    if (super.canSetProperty(name)) {
+      return true;
+    } else if (checkBehaviors) {
+      this.ensureBehaviors();
+      for (const behavior of Object.values(this._behaviors) as BehaviorInstance[]) {
+        if (behavior.canSetProperty(name)) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * Checks that property is assessable or readable
+   * @param name - The property name
+   * @param checkBehaviors - Whether to treat behaviors' properties as properties of this component
+   * @returns True if property is readable and false otherwise
+   */
+  canGetProperty(name: PropertyName, checkBehaviors: boolean = true): boolean {
+    if (super.canGetProperty(name)) {
+      return true;
+    } else if (checkBehaviors) {
+      this.ensureBehaviors();
+      for (const behavior of Object.values(this._behaviors) as BehaviorInstance[]) {
+        if (behavior.canGetProperty(name)) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * Checks if the object has the given method.
+   * @param name - The property name
+   * @param checkBehaviors - Whether to treat behaviors' properties as properties of this component
+   * @returns True if method exists, false otherwise
+   */
+  hasMethod(name: PropertyName, checkBehaviors: boolean = true): boolean {
+    if (super.hasMethod(name)) {
+      return true;
+    } else if (checkBehaviors) {
+      this.ensureBehaviors();
+      for (const behavior of Object.values(this._behaviors) as BehaviorInstance[]) {
+        if (behavior.hasMethod(name)) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * Invokes a component or a behaviour method.
+   * @param name - Function name
+   * @param args - Arguments passed to the function
+   * @returns The result of the function
+   * @see {@link hasMethod hasMethod()}
+   * @see {@link ensureBehaviors ensureBehaviors()}
+   *
+   * @example
+   * component.setProperty('checkAccess', async (user) => {
+   *   return user === 'admin';
+   * });
+   * // expected: 'Has access?' true
+   * console.log('Has access?', await component.invoke<boolean>('checkAccess', 'admin'));
+   */
+  public async invoke<T>(name: string, ...args: any[]): Promise<T> {
+    if (super.hasMethod(name)) {
+      return super.invoke<T>(name, ...args);
+    }
+
+    this.ensureBehaviors();
+
+    for (const behavior of this._behaviors.values()) {
+      if (behavior.hasMethod(name)) {
+        return behavior.invoke<T>(name, ...args);
+      }
+    }
+
+    throw new UnknownMethodError(`Trying to call an unknown method: ${this.constructor.name}.${name}()`);
+  }
+
+  /**
    * Returns a value indicating whether there is any handler attached to the named event.
    * @param name - The event name
    * @returns Whether there is any handler attached to the event.
@@ -132,7 +328,7 @@ export default class Component extends BaseObject {
     if (!['string', 'function'].includes(typeof handler) && (
       !Array.isArray(handler) && handler.length !== 2 && ['function', 'object'].includes(typeof handler[0])
     )) {
-      throw new Error('Invalid handler passed, it should be an array [object|class, data] or a function of function name');
+      throw new InvalidCallError('Invalid handler passed, it should be an array [object|class, data] or a function of function name');
     }
 
     if (!this._events.has(name)) {
@@ -227,9 +423,9 @@ export default class Component extends BaseObject {
         } else if (['object', 'function'].includes(typeof target)) {
           // object method or a static class method
           await invokeMethod(<object | Function>target, funcName, [event]);
+        } else {
+          throw new InvalidCallError('Handler must be be a valid function or a method');
         }
-
-        throw new Error('Handler must be be a valid function or a method');
       }
 
       // stop further handling if the event is handled
@@ -377,7 +573,7 @@ export default class Component extends BaseObject {
    * @returns The attached behavior.
    */
   public attachBehaviorInternal(name: string, behavior: BehaviorArgs): BehaviorInstance {
-    if (!(behavior instanceof Behavior)) {
+    if (!(behavior instanceof Behavior) || 'string' === typeof behavior) {
       behavior = Jii.createObject<BehaviorInstance>(behavior);
     }
 
