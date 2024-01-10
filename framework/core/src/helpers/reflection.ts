@@ -55,7 +55,7 @@ export const getClassHierarchy = (className: string): string[] => {
  *
  * @see https://flaviocopes.com/how-to-list-object-methods-javascript/
  */
-const getObjectInfo = (obj: object): Record<string, string> => {
+export const getObjectInfo = (obj: object): Record<string, string> => {
   if (!obj || 'object' !== typeof obj) {
     throw new Error('The provided object is not an instance of object');
   }
@@ -81,7 +81,7 @@ const getObjectInfo = (obj: object): Record<string, string> => {
  * @see {@link methodsOf methodsOf()} for retrieving methods
  * @see {@link propertiesOf propertiesOf()} for retrieving properties
  */
-const inspectObject = (obj: object, type: 'property' | 'method', omitPrototype: boolean = true): string[] => {
+export const inspectObject = (obj: object, type: 'property' | 'method', omitPrototype: boolean = true): string[] => {
   const nativeList: string[] = omitPrototype ? Object.keys(getObjectInfo({})) : [];
 
   return Object
@@ -190,7 +190,7 @@ export const inspectClass = (theClass: Function, type: 'property' | 'method', om
  * @see {@link hasOwnProperty hasOwnProperty()} _property_ specific
  * @see {@link hasOwnMethod hasOwnMethod()} _method_ specific
  */
-const hasOwn = (obj: object, name: string, type: 'property' | 'method'): boolean => {
+export const hasOwn = (obj: object, name: string, type: 'property' | 'method'): boolean => {
   if (!obj || 'object' !== typeof obj) {
     throw new Error('The provided object is not an instance of object');
   }
@@ -223,7 +223,7 @@ const hasOwn = (obj: object, name: string, type: 'property' | 'method'): boolean
  *
  * console.log('Property?', hasOwnProperty(new User, 'id')); // expected: true
  */
-const hasOwnProperty = (obj: object, property: string): boolean => {
+export const hasOwnProperty = (obj: object, property: string): boolean => {
   return hasOwn(obj, property, 'property');
 }
 
@@ -241,7 +241,7 @@ const hasOwnProperty = (obj: object, property: string): boolean => {
  *
  * console.log('Method?', hasOwnMethod(new User, 'getName')); // expected: true
  */
-const hasOwnMethod = (obj: object, method: string): boolean => {
+export const hasOwnMethod = (obj: object, method: string): boolean => {
   return hasOwn(obj, method, 'method');
 }
 
@@ -262,7 +262,7 @@ const hasOwnMethod = (obj: object, method: string): boolean => {
  * @see {@link hasOwnStaticProperty hasOwnStaticProperty()} _property_ specific
  * @see {@link hasOwnStaticMethod hasOwnStaticMethod()} _method_ specific
  */
-const hasOwnStatic = (theClass: Function, name: string, type: 'property' | 'method'): boolean => {
+export const hasOwnStatic = (theClass: Function, name: string, type: 'property' | 'method'): boolean => {
   if (!theClass || !isClass(theClass)) {
     throw new Error('The provided object is not a class');
   }
@@ -291,7 +291,7 @@ const hasOwnStatic = (theClass: Function, name: string, type: 'property' | 'meth
  *
  * console.log('Property?', hasOwnStaticProperty(User, 'uuid')); // expected: true
  */
-const hasOwnStaticProperty = (theClass: Function, property: string): boolean => {
+export const hasOwnStaticProperty = (theClass: Function, property: string): boolean => {
   return hasOwn(theClass, property, 'property');
 }
 
@@ -309,6 +309,6 @@ const hasOwnStaticProperty = (theClass: Function, property: string): boolean => 
  *
  * console.log('Method?', hasOwnStaticMethod(User, 'getUid')); // expected: true
  */
-const hasOwnStaticMethod = (theClass: Function, method: string): boolean => {
+export const hasOwnStaticMethod = (theClass: Function, method: string): boolean => {
   return hasOwn(theClass, method, 'method');
 }
