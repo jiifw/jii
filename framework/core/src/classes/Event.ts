@@ -37,7 +37,7 @@ export type Events = Map<string, EventMap>;
  *
  * @see https://github.com/yiisoft/yii2/blob/master/framework/base/Event.php
  */
-export default class Event extends BaseObject {
+export default class Event<T = object> extends BaseObject {
   /**
    * The event name. This property is set by {@link Component#trigger Component.trigger()} and {@link trigger trigger()}.
    * Event handlers may use this property to check what event it is handling.
@@ -50,7 +50,7 @@ export default class Event extends BaseObject {
    * This property may also be a `null` when this event is a
    * class-level event which is triggered in a static context.
    */
-  public sender: object | null;
+  public sender: T | null;
 
   /**
    * Whether the event is handled. Defaults to `false`.
@@ -200,12 +200,12 @@ export default class Event extends BaseObject {
         if ('string' === typeof target && target.startsWith('@')) {
           // module method
           await invokeModuleMethod(target, funcName, [event]);
-        } else if ( ['object', 'function'].includes(typeof target)) {
+        } else if (['object', 'function'].includes(typeof target)) {
           // object method or a static class method
           await invokeMethod(<object | Function>target, funcName, [event]);
+        } else {
+          throw new Error('Handler must be be a valid function or a method');
         }
-
-        throw new Error ('Handler must be be a valid function or a method');
       }
 
       // stop further handling if the event is handled
