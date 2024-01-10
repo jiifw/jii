@@ -6,7 +6,12 @@
  * @since 0.0.1
  */
 
+// classes
 import BaseObject from './BaseObject';
+
+// error classes
+import InvalidArgumentError from './InvalidArgumentError';
+import InvalidCallError from './InvalidCallError';
 
 // utils
 import {invoke, invokeMethod} from '../helpers/function';
@@ -99,7 +104,7 @@ export default class Event<T = object> extends BaseObject {
     if ( !['string', 'function'].includes(typeof handler) && (
       !Array.isArray(handler) && handler.length !== 2 && ['function', 'object'].includes(typeof handler[0])
     )) {
-      throw new Error('Invalid handler passed, it should be an array [object|class, data] or a function of function name');
+      throw new InvalidArgumentError('Invalid handler passed, it should be an array [object|class, data] or a function of function name');
     }
 
     if (!Event._events.has(name)) {
@@ -204,7 +209,7 @@ export default class Event<T = object> extends BaseObject {
           // object method or a static class method
           await invokeMethod(<object | Function>target, funcName, [event]);
         } else {
-          throw new Error('Handler must be be a valid function or a method');
+          throw new InvalidCallError('Handler must be be a valid function or a method');
         }
       }
 

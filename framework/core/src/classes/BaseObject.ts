@@ -11,6 +11,11 @@ import {isObject} from '../helpers/object';
 import {invoke, isFunction} from '../helpers/function';
 import {hasOwn} from '../helpers/reflection';
 import {bindClass} from '../helpers/auto-bind';
+import UnknownMethodError from './UnknownMethodError';
+import InvalidScopeError from './InvalidScopeError';
+import InvalidCallError from './InvalidCallError';
+import UnknownPropertyError from './UnknownPropertyError';
+import InvalidArgumentError from './InvalidArgumentError';
 
 const PROPERTY_SCOPES = <const>['read', 'write', 'read-write'];
 
@@ -37,7 +42,7 @@ export default class BaseObject extends Object {
     super();
 
     if (props && !isObject(props)) {
-      throw new Error('config must be an object');
+      throw new InvalidArgumentError('config must be an object');
     }
 
     for (const key in props) {
@@ -64,7 +69,7 @@ export default class BaseObject extends Object {
    */
   public getProperty<T = PropertyValue>(name: PropertyName, throwException: boolean = true): T | undefined {
     if (!this.hasProperty(name)) {
-      if (throwException) throw new Error(`Trying to get unknown property: ${this.constructor.name}.${name.toString()}`);
+      if (throwException) throw new UnknownPropertyError(`Trying to get unknown property: ${this.constructor.name}.${name.toString()}`);
       return undefined;
     }
 
@@ -75,7 +80,7 @@ export default class BaseObject extends Object {
     const {scope, value} = this._props.get(name);
 
     if (!['read', 'read-write'].includes(scope)) {
-      throw new Error(`Trying to read write-only property: ${this.constructor.name}.${name.toString()}`);
+      throw new InvalidCallError(`Trying to read write-only property: ${this.constructor.name}.${name.toString()}`);
     }
 
     return value as T;
@@ -94,7 +99,7 @@ export default class BaseObject extends Object {
    */
   public setProperty<T = PropertyValue>(name: PropertyName, value: T, scope: PropertyScope = 'read-write'): void {
     if (!PROPERTY_SCOPES.includes(scope)) {
-      throw new Error(`Trying to set property with invalid scope: '${scope}'`);
+      throw new InvalidScopeError(`Trying to set property with invalid scope: '${scope}'`);
     }
 
     if (hasOwn(this, name, 'property')
@@ -115,7 +120,7 @@ export default class BaseObject extends Object {
       return;
     }
 
-    throw new Error(`Trying to set read-only property: ${this.constructor.name}.${name.toString()}`);
+    throw new InvalidCallError(`Trying to set read-only property: ${this.constructor.name}.${name.toString()}`);
   }
 
   /**
@@ -190,7 +195,7 @@ export default class BaseObject extends Object {
    */
   public async invoke<T>(name: string, ...args: any[]): Promise<T> {
     if (!this.hasMethod(name)) {
-      throw new Error(`Trying to call an unknown method ${this.constructor.name}.${name}()`);
+      throw new UnknownMethodError(`Trying to call an unknown method ${this.constructor.name}.${name}()`);
     }
 
     const func = hasOwn(this, name, 'method')
