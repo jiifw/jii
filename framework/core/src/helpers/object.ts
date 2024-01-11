@@ -9,9 +9,25 @@
 /**
  * Check that the given object is an actual object or not
  */
-export const isObject = (obj: any): boolean => {
-  const type = typeof obj;
-  return type === 'function' || type === 'object' && !!obj;
+/**
+ * Check that the given object is an object
+ * @param val - The input value to testify
+ * @returns Returns true if the object otherwise false
+ */
+export const isObject = (val: any): boolean => {
+  const type = typeof val;
+  return type === 'function' || type === 'object' && !!val;
+};
+
+
+/**
+ * Check that the given object is a plain {key: value} pairs object
+ * @param val - The input value to testify
+ * @returns Returns true if the object is a plain object
+ * @see https://stackoverflow.com/a/68989785
+ */
+export const isPlainObject = (val: any): boolean => {
+  return val && typeof val === 'object' && val?.constructor === Object;
 };
 
 /**
