@@ -9,29 +9,32 @@
 import Component from '../../src/classes/Component';
 import Event from '../../src/classes/Event';
 
-describe('class Component', () => {
+class User extends Component {
+}
+
+describe('Initializing component', () => {
   let instance;
 
   beforeEach(() => {
-    instance = new Component();
+    instance = new User;
   });
 
   it('Initializing component without properties', async () => {
-    const instance = new Component();
-    expect(instance).toBeInstanceOf(Component);
+    const instance = new User();
+    expect(instance).toBeInstanceOf(User);
   });
 
   it('Initializing component with property', async () => {
-    const instance = new Component({event: 'click'});
-    expect(instance).toBeInstanceOf(Component);
+    const instance = new User({event: 'click'});
+    expect(instance).toBeInstanceOf(User);
     expect(instance.hasProperty('event')).toBe(true);
   });
 });
 
 describe('Component events', () => {
   it('Register, verify, trigger and removing component event', async () => {
-    const instance = new Component();
-    const handleClick = () => 'output';
+    const instance = new User();
+    const handleClick = jest.fn(() => 'output');
 
     instance.on('handleClick', handleClick);
     expect(instance.hasEventHandlers('handleClick')).toBe(true);
@@ -44,7 +47,7 @@ describe('Component events', () => {
   });
 
   it('Testing event callback along with the event data', async () => {
-    const instance = new Component({event: 'click'});
+    const instance = new User({event: 'click'});
 
     const handleClick = jest.fn((event: Event) => {
       event.data.action ='submit';
