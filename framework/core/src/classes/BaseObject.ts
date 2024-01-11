@@ -69,7 +69,7 @@ export default class BaseObject extends Object {
    */
   public getProperty<T = PropertyValue>(name: PropertyName, throwException: boolean = true): T | undefined {
     if (!this.hasProperty(name)) {
-      if (throwException) throw new UnknownPropertyError(`Trying to get unknown property: ${this.constructor.name}.${name.toString()}`);
+      if (throwException) throw new UnknownPropertyError(`Trying to get unknown property: '${this.constructor.name}.${name.toString()}'`);
       return undefined;
     }
 
@@ -80,7 +80,7 @@ export default class BaseObject extends Object {
     const {scope, value} = this._props.get(name);
 
     if (!['read', 'read-write'].includes(scope)) {
-      throw new InvalidCallError(`Trying to read write-only property: ${this.constructor.name}.${name.toString()}`);
+      throw new InvalidCallError(`Trying to read write-only property: '${this.constructor.name}.${name.toString()}'`);
     }
 
     return value as T;
@@ -96,13 +96,13 @@ export default class BaseObject extends Object {
    * @param throwException - If true, an exception will be thrown if the property is not found or invalid scope.
    * @returns The value of the write property
    */
-  protected getPropertyInternal<T>(name: PropertyName, throwException: boolean = true) {
+  protected getPropertyInternal<T = any>(name: PropertyName, throwException: boolean = true): T {
     if (!this.hasProperty(name, false)) {
-      if (throwException) throw new UnknownPropertyError(`Trying to get unknown property: ${this.constructor.name}.${name.toString()}`);
+      if (throwException) throw new UnknownPropertyError(`Trying to get unknown property: '${this.constructor.name}.${name.toString()}'`);
       return undefined;
     }
 
-    return this._props.get(name).value;
+    return this._props.get(name).value as T;
   }
 
   /**
@@ -139,7 +139,7 @@ export default class BaseObject extends Object {
       return;
     }
 
-    throw new InvalidCallError(`Trying to set read-only property: ${this.constructor.name}.${name.toString()}`);
+    throw new InvalidCallError(`Trying to set read-only property: '${this.constructor.name}.${name.toString()}'`);
   }
 
   /**
@@ -214,7 +214,7 @@ export default class BaseObject extends Object {
    */
   public async invoke<T>(name: string, ...args: any[]): Promise<T> {
     if (!this.hasMethod(name)) {
-      throw new UnknownMethodError(`Trying to call an unknown method ${this.constructor.name}.${name}()`);
+      throw new UnknownMethodError(`Trying to call an unknown method: '${this.constructor.name}.${name}()'`);
     }
 
     const func = hasOwn(this, name, 'method')
