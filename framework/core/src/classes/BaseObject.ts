@@ -87,6 +87,25 @@ export default class BaseObject extends Object {
   }
 
   /**
+   * Gets the value of the property *(with any scope)*
+   *
+   * **Note**: Properties with the 'write' are inaccessible from outside, however this method can read values (internally),<br>
+   * although it does not read object's private or protected properties.
+   *
+   * @param name - The property name
+   * @param throwException - If true, an exception will be thrown if the property is not found or invalid scope.
+   * @returns The value of the write property
+   */
+  protected getPropertyInternal<T>(name: PropertyName, throwException: boolean = true) {
+    if (!this.hasProperty(name, false)) {
+      if (throwException) throw new UnknownPropertyError(`Trying to get unknown property: ${this.constructor.name}.${name.toString()}`);
+      return undefined;
+    }
+
+    return this._props.get(name).value;
+  }
+
+  /**
    * Sets the value of the property.
    * @param name - The property name
    * @param value - The value
