@@ -7,7 +7,7 @@
  */
 
 // utils
-import {isObject} from '../helpers/object';
+import {isPlainObject} from '../helpers/object';
 import {invoke, isFunction} from '../helpers/function';
 import {hasOwn} from '../helpers/reflection';
 import {bindClass} from '../helpers/auto-bind';
@@ -41,8 +41,8 @@ export default class BaseObject extends Object {
   constructor(props: Props = {}) {
     super();
 
-    if (props && !isObject(props)) {
-      throw new InvalidArgumentError('config must be an object');
+    if (!isPlainObject(props)) {
+      throw new InvalidArgumentError('Properties must be a plain object');
     }
 
     for (const key in props) {
