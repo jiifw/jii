@@ -249,9 +249,80 @@ export default <JSONSchema7>{
         ],
       },
     },
+    plugins: {
+      type: 'object',
+      additionalProperties: {
+        type: 'object',
+        properties: {
+          class: {
+            type: 'string',
+            description: 'Class path',
+            minLength: 3,
+          },
+        },
+        additionalProperties: false,
+        patternProperties: {
+          '^(on|as) [a-z]+([A-Z][a-z]+)*$': {
+            $ref: '#/definitions/ClassConfig',
+          },
+          '^[a-z]+([A-Z][a-z]+)*$': {
+            $ref: '#/definitions/PropertyValue',
+          },
+        },
+        required: [
+          'class',
+        ],
+      },
+      propertyNames: {
+        pattern: '^[a-z]+([A-Z][a-z]+)*$',
+      },
+    },
   },
   required: [
     'id',
     'basePath',
   ],
+  definitions: {
+    ClassConfig: {
+      type: 'object',
+      properties: {
+        class: {
+          type: 'string',
+          description: 'Class path',
+          minLength: 3,
+        },
+      },
+      additionalProperties: false,
+      patternProperties: {
+        '^[a-z]+([A-Z][a-z]+)*$': {
+          $ref: '#/definitions/PropertyValue',
+        },
+      },
+      required: [
+        'class',
+      ],
+    },
+    PropertyValue: {
+      oneOf: [
+        {
+          type: 'string',
+        },
+        {
+          type: 'null',
+        },
+        {
+          type: 'object',
+        },
+        {
+          type: 'number',
+        },
+        {
+          type: 'array',
+        },
+        {
+          type: 'boolean',
+        },
+      ],
+    },
+  },
 };
