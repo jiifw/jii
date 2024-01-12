@@ -20,6 +20,7 @@
     "directory": "dist"
   },
   "scripts": {
+    "dev": "nodemon --exec babel-node ./src/index.local.ts --extensions .ts,.tsx,.js,.jsx",
     "clean": "rimraf coverage dist tmp && mkdir dist",
     "prebuild": "yarn run clean && npm run lint",
     "build": "yarn run build-code && yarn run build-types",
