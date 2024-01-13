@@ -70,6 +70,7 @@ export const newInstance = (options: DeepPartial<InstanceOptions> = {}): Instanc
       verbose: true,
       allErrors: true,
       $data: true,
+      allowMatchingProperties: true,
     },
     formatsOptions: {},
     errorOptions: {singleError: true},
