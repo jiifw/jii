@@ -256,15 +256,13 @@ export default <JSONSchema7>{
         properties: {
           class: {
             type: 'string',
-            description: 'Class path',
+            description: 'Class object or a path',
             minLength: 3,
           },
         },
         additionalProperties: false,
         patternProperties: {
-          '^(on|as) [a-z]+([A-Z][a-z]+)*$': {
-            $ref: '#/definitions/ClassConfig',
-          },
+          '^(on|as) [a-z]+([A-Z][a-z]+)*$': {},
           '^[a-z]+([A-Z][a-z]+)*$': {
             $ref: '#/definitions/PropertyValue',
           },
@@ -283,25 +281,6 @@ export default <JSONSchema7>{
     'basePath',
   ],
   definitions: {
-    ClassConfig: {
-      type: 'object',
-      properties: {
-        class: {
-          type: 'string',
-          description: 'Class path',
-          minLength: 3,
-        },
-      },
-      additionalProperties: false,
-      patternProperties: {
-        '^[a-z]+([A-Z][a-z]+)*$': {
-          $ref: '#/definitions/PropertyValue',
-        },
-      },
-      required: [
-        'class',
-      ],
-    },
     PropertyValue: {
       oneOf: [
         {
