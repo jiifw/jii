@@ -7,34 +7,26 @@
  */
 
 // utils
-import {resolve} from './helpers/path';
 import {bindClass} from './helpers/auto-bind';
-import {isClass} from './helpers/reflection';
-import {isObject} from './helpers/object';
-import {getAlias, setAlias, aliases, hasAlias} from './base/aliases';
-import {INTERNAL_METADATA, CONTAINER_APP_KEY, CONTAINER_MIDDLEWARE_KEY} from './utils/symbols';
+import {aliases, getAlias, hasAlias, setAlias} from './base/aliases';
+import {CONTAINER_APP_KEY, CONTAINER_MIDDLEWARE_KEY, INTERNAL_METADATA} from './utils/symbols';
 
 // script
 import initCoreAliases from './scripts/init-core-aliases';
 
 // classes
 import Logger from './logger/Logger';
-import Container from './classes/Container';
+import Container, {ComponentConfig} from './classes/Container';
 import MiddlewareContainer from './classes/MiddlewareContainer';
+import InvalidCallError from './classes/InvalidCallError';
 
 // types
-import {Class} from 'utility-types';
 import BaseApplication from './classes/BaseApplication';
-import {ComponentConfig} from './classes/Container';
+import Instance, {ObjectType} from './classes/Instance';
 
 // public types
 export type AppInstance = InstanceType<typeof BaseApplication>;
-export type MiddlewareRegistry = InstanceType<typeof MiddlewareContainer>;
-export type ObjectType = (
-  | string // alias path to class (e.g., '@app/components/User')
-  | Function // as a class object
-  | { class: string | object; [prop: string]: any; } // as an object configuration
-  );
+export {ObjectType};
 
 export default abstract class BaseJii {
   /**
@@ -100,7 +92,7 @@ export default abstract class BaseJii {
    */
   get<T>(name: string): T {
     if (!this._container.exists(name)) {
-      throw new Error(`Component ${name} not found in container`);
+      throw new InvalidCallError(`Component ${name} not found in container`);
     }
 
     return this._container.retrieve<T>(name);
@@ -286,64 +278,11 @@ export default abstract class BaseJii {
    * const instance = Jii.createObject({
    *   class: ActionEvent,
    *   action: 'create', // object properties (e.g. 'instance.action' returns 'create')
+   *   'on eventName': ..., // events to bind with component
+   *   'as behavior': ..., // behaviors to attach with component
    * });
    */
-  public createObject<T extends object>(type: ObjectType, params: any[] = []): InstanceType<Class<T>> {
-    let Class;
-    let props: Record<string, any> = {};
-
-    if (typeof type === 'string' && type.startsWith('@')) {
-      Class = require(resolve(type))?.default || null;
-    } else if ('function' === typeof type) {
-      if (isClass(type)) {
-        Class = type;
-      } else {
-        throw new Error('Type must be a class');
-      }
-    } else if (isObject(type)) {
-      const _obj: { class?: string; [prop: string]: any; } = {...type as Object};
-      if (!('class' in (_obj as Object))) {
-        throw new Error(`Object configuration should have a 'class' property`);
-      }
-
-      if (isClass(_obj.class)) {
-        Class = _obj.class;
-      } else {
-        if ('string' !== typeof _obj.class) {
-          throw new Error(`Object configuration 'class' should be a string property`);
-        }
-
-        if (!_obj.class.startsWith('@')) {
-          throw new Error(`Object configuration 'class' should start with a @alias.`);
-        }
-
-        Class = require(resolve(_obj.class))?.default || null;
-      }
-
-      delete _obj.class;
-      props = _obj;
-    }
-
-    if (!Class) {
-      throw new Error('File must have an actual class and should be exported as default');
-    }
-
-    const instance = new Class(...params);
-
-    if (Object.keys(props).length) {
-      for (const [prop, value] of Object.entries(props)) {
-        if (instance[prop] === undefined) {
-          throw new Error(`Class has no such property: '${prop}'`);
-        }
-
-        instance[prop] = value;
-      }
-    }
-
-    if (instance['init'] !== undefined && 'function' === typeof instance['init']) {
-      instance.init.call(null);
-    }
-
-    return instance as T;
+  public createObject<T extends object>(type: ObjectType, params: any[] = []): T {
+    return Instance.createFrom<T>(type, params);
   }
 }
