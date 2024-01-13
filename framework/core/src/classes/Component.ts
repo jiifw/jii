@@ -6,25 +6,24 @@
  * @since 0.0.1
  */
 
+// utils
+import Jii from '../Jii';
+import {invokeModuleMethod} from '../helpers/file';
+import {checkEventHandler, invoke, invokeMethod} from '../helpers/function';
+
 // classes
-import BaseObject, {PropertyValue} from './BaseObject';
-import Event from './Event';
+import Event, {EventData, EventHandler, Events} from './Event';
+import BaseObject, {PropertyName, PropertyScope, PropertyValue} from './BaseObject';
 
 // error classes
 import InvalidCallError from './InvalidCallError';
-import UnknownPropertyError from './UnknownPropertyError';
 import UnknownMethodError from './UnknownMethodError';
-
-// utils
-import Jii from '../Jii';
-import {invoke, invokeMethod} from '../helpers/function';
-import {invokeModuleMethod} from '../helpers/file';
+import UnknownPropertyError from './UnknownPropertyError';
 
 // types
 import {ObjectType} from '../BaseJii';
-import {EventHandler, EventData, Events} from './Event';
-import {PropertyName, PropertyScope} from './BaseObject';
-import Behavior, {Instance as BehaviorInstance, BehaviorArgs} from './Behavior';
+import Behavior, {BehaviorArgs, Instance as BehaviorInstance} from './Behavior';
+import InvalidArgumentError from './InvalidArgumentError';
 
 // public types
 export type Instance = InstanceType<typeof Component>;
@@ -107,7 +106,7 @@ export default class Component extends BaseObject {
    * @returns The value of the property
    */
   getProperty<T>(name: PropertyName, throwException: boolean = true): T | undefined {
-    if (super.hasProperty(name) ) {
+    if (super.hasProperty(name)) {
       return super.getProperty<T>(name, throwException);
     }
 
@@ -325,11 +324,8 @@ export default class Component extends BaseObject {
    * @throws Error if the handler is not a valid callback
    */
   public on(name: string, handler: EventHandler, data: EventData = null): void {
-    if (!['string', 'function'].includes(typeof handler) && (
-      !Array.isArray(handler) && handler.length !== 2 && ['function', 'object'].includes(typeof handler[0])
-    )) {
-      throw new InvalidCallError('Invalid handler passed, it should be an array [object|class, data] or a function of function name');
-    }
+    // validates handler argument
+    checkEventHandler(handler);
 
     if (!this._events.has(name)) {
       this._events.set(name, new Map());
@@ -567,14 +563,18 @@ export default class Component extends BaseObject {
   }
 
   /**
-   * Attaches a behavior to this component.
-   * @param name - The name of the behavior.
+   * Attaches a behavior to this component
+   * @param name - The name of the behavior
    * @param behavior - The behavior to be attached
-   * @returns The attached behavior.
+   * @returns The attached behavior
    */
   public attachBehaviorInternal(name: string, behavior: BehaviorArgs): BehaviorInstance {
     if (!(behavior instanceof Behavior) || 'string' === typeof behavior) {
       behavior = Jii.createObject<BehaviorInstance>(behavior);
+    }
+
+    if (!(behavior instanceof Behavior)) {
+      throw new InvalidArgumentError(`The behavior must be a string specifying the behavior class or an instance of Behavior`);
     }
 
     if (this._behaviors.has(name)) {
