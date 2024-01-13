@@ -10,12 +10,11 @@
 import BaseObject from './BaseObject';
 
 // error classes
-import InvalidArgumentError from './InvalidArgumentError';
 import InvalidCallError from './InvalidCallError';
 
 // utils
-import {invoke, invokeMethod} from '../helpers/function';
 import {invokeModuleMethod} from '../helpers/file';
+import {checkEventHandler, invoke, invokeMethod} from '../helpers/function';
 
 // public types
 export type EventHandler = (
@@ -24,7 +23,7 @@ export type EventHandler = (
   | [string, string]
   | string
   );
-export type EventData = Record<string, any> | null;
+export type EventData = Record<string, any> | any;
 export type EventMap = Map<EventHandler, EventData>;
 export type Events = Map<string, EventMap>;
 
@@ -101,11 +100,7 @@ export default class Event<T = object> extends BaseObject {
    * @see {@link off off()}
    */
   on(name: string, handler: EventHandler, data: EventData = null): void {
-    if ( !['string', 'function'].includes(typeof handler) && (
-      !Array.isArray(handler) && handler.length !== 2 && ['function', 'object'].includes(typeof handler[0])
-    )) {
-      throw new InvalidArgumentError('Invalid handler passed, it should be an array [object|class, data] or a function of function name');
-    }
+    checkEventHandler(handler);
 
     if (!Event._events.has(name)) {
       Event._events.set(name, new Map());
