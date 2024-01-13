@@ -8,10 +8,11 @@
 
 import {EventHandler} from '../classes/Event';
 import {BehaviorArgs} from '../classes/Behavior';
+import {Class} from 'utility-types';
 
 export interface ComponentDefinition {
   /** Class path, Object */
-  class: string;
+  class: string | Class<any>;
   [event: `on ${string}`]: EventHandler;
   [behavior: `as ${string}`]: BehaviorArgs;
   [prop: string]: any;
