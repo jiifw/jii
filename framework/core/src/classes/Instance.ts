@@ -19,10 +19,13 @@ import {isClass, hasOwnMethod, isConstructor} from '../helpers/reflection';
 // types
 import {EventHandler} from './Event';
 import {Constructor} from '../typings/utility';
+import {ComponentDefinition} from '../typings/components';
+import BaseObject from './BaseObject';
 
 export type ObjectType = (
   | string // alias path to class (e.g., '@app/components/User')
   | Function // as a class object
+  | ((() => Function) | ((...args) => Function)) // as an anonymous function
   | { class: string | object; [prop: string]: any; } // as an object configuration
   );
 
@@ -40,48 +43,52 @@ interface InstanceMetadata {
 export default class Instance {
   /**
    * Get class object from component configuration
+   *
+   * @example
+   * // a class name
+   * classOf('@jiiRoot/caching/FileCache');
+   *
+   * // a configuration array
+   * classOf({
+   *   class: '@jiiRoot/db/Connection',
+   *   dsn: 'mysql:host=127.0.0.1;dbname=demo',
+   *   username: 'root',
+   *   password: '',
+   *   charset: 'utf8',
+   * });
+   *
+   * // an anonymous function
+   * classOf(params => {
+   *     return new FileCache;
+   * });
+   *
+   * // an instance
+   * classOf(new FileCache);
+   *
    * @param type - The configuration object
    * @returns The constructor class
    */
   public static classOf<T = Function>(type: ObjectType): T | null {
-    if (typeof type === 'string' && type.startsWith('@')) { // <-- from a string
-      return require(resolve(type))?.default ?? null;
+    if (typeof type === 'string') { // <-- from a string
+      return this.classFromPath(type as string);
     }
 
-    if ('function' === typeof type) { // <-- from a function
-      if (!isClass(type)) {
-        throw new Error('Type must be a class');
-      }
+    if (isClass(type)) { // <-- an instance
       return type as T;
     }
 
-    if (isObject(type)) { // <-- from an object
-      const conf: { class?: string; [prop: string]: any; } = {...type as Object};
-
-      if (!Object.hasOwn(conf, 'class')) {
-        throw new InvalidConfigError(`Object configuration should have a 'class' property`);
+    if ('function' === typeof type) { // <-- an anonymous function
+      const _constructor = type();
+      if (_constructor instanceof Component || isConstructor(_constructor) || isClass(_constructor)) {
+        return _constructor as T;
       }
-
-      if (isConstructor(conf.class)) {
-        return conf.class as T;
-      }
-
-      if (isClass(conf.class)) {
-        return <T><unknown>(type as any)?.class;
-      }
-
-      if ('string' !== typeof conf.class) {
-        throw new InvalidConfigError(`Object configuration 'class' should be a string property`);
-      }
-
-      if (!conf.class.startsWith('@')) {
-        throw new InvalidConfigError(`Object configuration 'class' should start with a @alias.`);
-      }
-
-      return require(resolve(conf.class))?.default ?? null;
     }
 
-    throw new InvalidConfigError('File must have an actual class and should be exported as default');
+    if (isObject(type)) { // <-- from an definition
+      return Instance.classFromDefinition<T>(type as ComponentDefinition);
+    }
+
+    throw new InvalidConfigError(`'type' must be an actual class, component definition, alias path or constructor function`);
   }
 
   /**
@@ -111,6 +118,49 @@ export default class Instance {
       acc[_name] = type[prop];
       return acc;
     }, {}) as T;
+  }
+
+  public static classFromDefinition<T>(definition: ComponentDefinition): T {
+    if (!isPlainObject(definition)) {
+      throw new InvalidConfigError('Component configuration must be an object');
+    }
+
+    const conf: { class?: string; [prop: string]: any; } = {...definition as Object};
+
+    if (!Object.hasOwn(conf, 'class')) {
+      throw new InvalidConfigError(`Object configuration should have a 'class' property`);
+    }
+
+    if (isConstructor(conf.class) || isClass(conf.class)) {
+      return conf.class as T;
+    }
+
+    return this.classFromPath<T>(conf.class as string);
+  }
+
+  public static classFromPath<T>(pathOrAlias: string): T {
+    if (!pathOrAlias || 'string' !== typeof pathOrAlias || !pathOrAlias.trim()) {
+      throw new InvalidConfigError(`Object configuration 'class' should be a string property`);
+    }
+
+    if (!pathOrAlias.startsWith('@')) {
+      throw new InvalidConfigError(`Object configuration 'class' should start with a @alias.`);
+    }
+
+    let Class;
+
+    try {
+      Class = require(resolve(pathOrAlias));
+    } catch (e) {
+      throw new InvalidConfigError(`Object configuration class '${pathOrAlias}' should exist`);
+    }
+
+    if (!Class?.default && !isConstructor(Class.default) && !isClass(Class.default)) {
+
+      throw new InvalidConfigError('File must have an actual class and should be exported as default');
+    }
+
+    return Class.default;
   }
 
   /**
@@ -158,13 +208,17 @@ export default class Instance {
     let props: Record<string, any> = {};
 
     const Class = Instance.classOf<Constructor>(type) as T;
-    const instance = new (Class as Constructor)(...params);
+    const instance = Class instanceof BaseObject ? Class : new (Class as Constructor)(...params);
+
+    if ( !(instance instanceof BaseObject) ) {
+      throw new InvalidConfigError(`Class '${Class.constructor.name}' must be an instance of component`);
+    }
 
     if (!Instance.isComponent(instance)) {
       if (Object.keys(props).length) {
         for (const [prop, value] of Object.entries(props)) {
           if (instance[prop] === undefined) {
-            throw new Error(`Class has no such property: '${prop}'`);
+            throw new InvalidConfigError(`Class has no such property: '${prop}'`);
           }
 
           instance[prop] = value;
@@ -175,7 +229,7 @@ export default class Instance {
         instance.init.call(instance);
       }
 
-      return instance;
+      return instance as T;
     }
 
     Object.entries(Instance.propsOf(type)).forEach(([name, value]) => {
@@ -192,7 +246,7 @@ export default class Instance {
 
     instance.init.call(instance);
 
-    return instance;
+    return instance as T;
   }
 
   /**
