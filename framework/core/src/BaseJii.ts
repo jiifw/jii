@@ -255,13 +255,23 @@ export default abstract class BaseJii {
    * @param type The class path | Class | configuration to create.
    * @param [params] A configuration array of constructor parameters.
    *
-   * @example As an alias path
-   * // create an object by loading a file and initiate with the two constructor parameters
-   * const instance = Jii.createObject('@app/classes/MyClass', [param1, param2]);
+   * @example As an anonymous function with returning instance
+   * const instance = Jii.createObject(params => {
+   *   return new FileCache;
+   * });
+   *
+   * @example As an anonymous function with returning class
+   * const instance = Jii.createObject(() => {
+   *   return FileCache;
+   * });
    *
    * @example As a class object
    * class Test {
    *   constructor (params) {
+   *     // some logic here
+   *   }
+   *
+   *   init () {
    *     // some logic here
    *   }
    * }
@@ -269,9 +279,14 @@ export default abstract class BaseJii {
    *  {type: 'component'}, // value passes to Test constructor as a 'params' argument.
    * ]);
    *
+   * @example As an alias file path
+   * // create an object by loading a file and initiate with the two constructor parameters
+   * const instance = Jii.createObject('@app/cache/FileCache', [param1, param2]);
+   *
    * @example Configuration a class file path
    * const instance = Jii.createObject({
    *   class: '@jiiRoot/classes/Component',
+   *   ...
    * });
    *
    * @example Configuration a Class object with properties
@@ -282,7 +297,7 @@ export default abstract class BaseJii {
    *   'as behavior': ..., // behaviors to attach with component
    * });
    */
-  public createObject<T extends object>(type: ObjectType, params: any[] = []): T {
+  public createObject<T = object>(type: ObjectType, params: any[] = []): T {
     return Instance.createFrom<T>(type, params);
   }
 }
