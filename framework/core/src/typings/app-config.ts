@@ -7,8 +7,10 @@
  */
 
 import {MiddlewareDefinition} from './middleware';
+import {ComponentsDefinition} from './components';
 
 export type CliDirectory = string | { path: string; recursive?: boolean } | (string | { path: string; recursive?: boolean })[];
+export {MiddlewareDefinition, ComponentsDefinition};
 
 /**
  * Application configuration typing interface
@@ -100,14 +102,27 @@ export interface ApplicationConfig {
    * @default []
    */
   middleware?: Array<MiddlewareDefinition>;
+  /**
+   * Components to register with the application<br>
+   *
+   * @example
+   * components: {
+   *   webDisk: {
+   *     class: MyComponent,
+   *     'as changeProp': new Behavior,
+   *     'on myEvent': () => { console.log('myEvent TRIGGERED'); },
+   *     action: 'changed',
+   *     working: 'YES'
+   *   },
+   *   ... // others
+   * }
+   *
+   * @default {}
+   */
+  components?: ComponentsDefinition;
   /*modules?: {
     [name: string]: {
       [property: string]: any;
     };
   };*/
-  /*
-  components?: {
-    [name: string]: any;
-  };
-  */
 }
