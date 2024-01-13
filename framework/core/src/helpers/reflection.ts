@@ -202,8 +202,8 @@ export const hasOwn = (obj: object, name: string | symbol, type: 'property' | 'm
       ? Object.getOwnPropertySymbols(currentObj)
       : Object.getOwnPropertyNames(currentObj);
 
-    for ( const prop of props) {
-      if ( name === prop ) {
+    for (const prop of props) {
+      if (name === prop) {
         const isFunc = 'function' === typeof currentObj[name];
         return (type === 'method' && isFunc)
           || (type === 'property' && !isFunc);
@@ -230,7 +230,7 @@ export const hasOwn = (obj: object, name: string | symbol, type: 'property' | 'm
  */
 export const hasOwnProperty = (obj: object, property: string | symbol): boolean => {
   return hasOwn(obj, property, 'property');
-}
+};
 
 /**
  * Checks if the object has the specified method
@@ -248,7 +248,7 @@ export const hasOwnProperty = (obj: object, property: string | symbol): boolean 
  */
 export const hasOwnMethod = (obj: object, method: string | symbol): boolean => {
   return hasOwn(obj, method, 'method');
-}
+};
 
 /**
  * Checks if the class has the specified static property or a method
@@ -276,8 +276,8 @@ export const hasOwnStatic = (theClass: Function, name: string | symbol, type: 'p
     ? Object.getOwnPropertySymbols(theClass)
     : Object.getOwnPropertyNames(theClass);
 
-  for ( const prop of props ) {
-    if ( prop === name ) {
+  for (const prop of props) {
+    if (prop === name) {
       const isMethod = 'function' === typeof theClass[name];
       return type === 'method' ? isMethod : !isMethod;
     }
@@ -302,7 +302,7 @@ export const hasOwnStatic = (theClass: Function, name: string | symbol, type: 'p
  */
 export const hasOwnStaticProperty = (theClass: Function, property: string | symbol): boolean => {
   return hasOwnStatic(theClass, property, 'property');
-}
+};
 
 /**
  * Checks if the class has the specified method (string | symbol)
@@ -320,4 +320,20 @@ export const hasOwnStaticProperty = (theClass: Function, property: string | symb
  */
 export const hasOwnStaticMethod = (theClass: Function, method: string | symbol): boolean => {
   return hasOwnStatic(theClass, method, 'method');
-}
+};
+
+/**
+ * Check the given constructor is an actual constructor
+ * @param cons - The constructor
+ * @returns true if the object is a constructor, false otherwise
+ * @see https://stackoverflow.com/a/48036194
+ */
+export const isConstructor = (cons: any): boolean => {
+  const handler={construct(){return handler}} //Must return ANY object, so reuse one
+
+  try {
+    return !!(new (new Proxy(cons, handler))());
+  } catch (e) {
+    return false;
+  }
+};
