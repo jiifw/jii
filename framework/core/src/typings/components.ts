@@ -9,13 +9,15 @@
 import {EventHandler} from '../classes/Event';
 import {BehaviorArgs} from '../classes/Behavior';
 
+export interface ComponentDefinition {
+  /** Class path, Object */
+  class: string;
+  [event: `on ${string}`]: EventHandler;
+  [behavior: `as ${string}`]: BehaviorArgs;
+  [prop: string]: any;
+}
+
 export interface ComponentsDefinition {
   /** Component alias to retrieve via Jii::get('<alias>') throughout the application */
-  [key: string]: {
-    /** Class path, Object */
-    class: string;
-    [event: `on ${string}`]: EventHandler;
-    [behavior: `as ${string}`]: BehaviorArgs;
-    [prop: string]: any;
-  };
+  [key: string]: ComponentDefinition;
 }
