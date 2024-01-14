@@ -6,9 +6,9 @@
  * @since 0.0.1
  */
 
+import {Class} from 'utility-types';
 import {EventHandler} from '../classes/Event';
 import {BehaviorArgs} from '../classes/Behavior';
-import {Class} from 'utility-types';
 
 export interface ComponentDefinition {
   /** Class path, Object */
@@ -16,6 +16,9 @@ export interface ComponentDefinition {
   [event: `on ${string}`]: EventHandler;
   [behavior: `as ${string}`]: BehaviorArgs;
   [prop: string]: any;
+}
+
+export interface ModuleDefinition extends ComponentDefinition {
 }
 
 export interface ComponentsDefinition {
