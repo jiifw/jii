@@ -7,11 +7,11 @@
  */
 
 // classes
-import Component from './Component';
+import {Module} from './Module';
 
 // utils
 import Jii from '../Jii';
-import {CONTAINER_APP_KEY} from '../utils/symbols';
+import {APP_CONFIG, CONTAINER_APP_KEY} from '../utils/symbols';
 
 // scripts
 import configValidator from '../scripts/config-validator';
@@ -20,76 +20,68 @@ import configValidator from '../scripts/config-validator';
 import {ApplicationConfig} from '../typings/app-config';
 import {Props} from './BaseObject';
 
-// public types
-export type Params = Record<string, any>;
-
 /**
- * Application class
+ * Application is the base class for all application classes.
  */
 export default abstract class BaseApplication<
   T extends ApplicationConfig = ApplicationConfig
-> extends Component {
-  /**
-   * Application unique identifier
-   * @private
-   */
-  private _id: string;
+> extends Module {
+
+  // allow props
+  [property: string | symbol]: any;
 
   /**
-   * Application base path
-   * @private
+   * Application state used by {@link state} application just started.
    */
-  private _basePath: string;
+  public static readonly STATE_BEGIN: number = 0;
 
   /**
-   * Application parameters
-   * @private
+   * Application state used by {@link state} application is initializing.
    */
-  private _params: Params;
+  public static readonly STATE_INIT: number = 1;
+
+  /**
+   * The current application state during a request handling life cycle.<br>
+   * This property is managed by the application. Do not modify this property.
+   */
+  public state: number;
 
   /**
    * Application constructor
    * @param config - Application configuration
    * @param [props] - Component properties
    */
-  constructor(public readonly config: T, props: Props = {}) {
-    super(props);
-    this._initConfig();
+  constructor(config: T, props: Props = {}) {
+    super(null, null, props);
     Jii.container.memoSync(CONTAINER_APP_KEY, this, {freeze: true});
+    this.state = BaseApplication.STATE_BEGIN;
+
+    this.preInit(config);
   }
 
   /**
-   * Initialize application configuration
-   * @private
+   * Pre-initializes the application.<br>
+   * This method is called at the beginning of the application constructor.<br>
+   * It initializes several important application properties.<br>
+   * If you override this method, please make sure you call the parent implementation.<br>
+   * @param config - The application configuration
+   * @throws InvalidConfigError if either {@link id} or {@link basePath} configuration is missing.
    */
-  private _initConfig() {
+  public preInit(config: T) {
     // validates/verify configuration
-    configValidator(<ApplicationConfig>this.config);
+    configValidator(<ApplicationConfig>config);
 
-    this._id = this.config.id;
-    this._basePath = this.config.basePath;
-
-    // set params
-    this._params = this.config.params;
+    this.id = config.id;
+    this.params = config.params;
+    this.setBasePath(config.basePath);
 
     // register aliases
-    for (const key of Object.keys(this.config.aliases)) {
-      this.config.params[key] = this.config.aliases[key];
-      Jii.setAlias(key, this.config.aliases[key]);
+    for (const key of Object.keys(config.aliases)) {
+      Jii.setAlias(key, config.aliases[key]);
     }
-  }
 
-  /**
-   * Get application parameters
-   */
-  get params(): Params {
-    return this._params;
-  }
+    this.setComponents(config?.components)
 
-  /**
-   * Get application base path
-   */
-  get basePath(): string {
-    return this._basePath;
+    Jii.container.memoSync(APP_CONFIG, config, {freeze: true});
   }
 }
