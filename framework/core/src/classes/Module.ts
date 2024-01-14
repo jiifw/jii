@@ -362,6 +362,6 @@ export default class Module extends ServiceLocator {
    * The parent module may be the application.
    */
   public has(id: string, checkInstance: boolean = false): boolean {
-    return super.has(id, checkInstance) || (this.module?.has(id, checkInstance));
+    return super.has(id, checkInstance) || (this.module?.has(id, checkInstance) ?? false);
   }
 }
