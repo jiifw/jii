@@ -28,7 +28,7 @@ import {ModuleDefinition} from '../typings/components';
  * {@link components} may be registered with the module so that they are globally
  * accessible within the module.
  */
-export class Module extends ServiceLocator {
+export default class Module extends ServiceLocator {
   /**
    * An event raised before executing a controller action.
    * You may set {@link ActionEvent.isValid} to be `false` to cancel the action execution.

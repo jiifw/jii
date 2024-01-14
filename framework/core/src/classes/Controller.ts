@@ -8,7 +8,7 @@
 
 // classes
 import Component from './Component';
-import {Module} from './Module';
+import Module from './Module';
 
 // utils
 import {ltrim} from '../helpers/string';

@@ -7,7 +7,7 @@
  */
 
 // classes
-import {Module} from './Module';
+import Module from './Module';
 
 // utils
 import Jii from '../Jii';
