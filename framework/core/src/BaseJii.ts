@@ -21,13 +21,19 @@ import MiddlewareContainer from './classes/MiddlewareContainer';
 import InvalidCallError from './classes/InvalidCallError';
 
 // types
-import BaseApplication from './classes/BaseApplication';
+import Application from './classes/Application';
 import Instance, {ObjectType} from './classes/Instance';
 
 // public types
-export type AppInstance = InstanceType<typeof BaseApplication>;
+export type AppInstance = InstanceType<typeof Application>;
 export {ObjectType};
 
+/**
+ * BaseJii is the core helper class for the Jii framework.
+ *
+ * Do not use BaseJii directly. Instead, use its child module Yii which you can replace to
+ * customize methods of BaseJii.
+ */
 export default abstract class BaseJii {
   /**
    * DI Container instance
