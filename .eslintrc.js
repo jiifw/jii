@@ -5,7 +5,7 @@ module.exports = {
     node: true,
   },
   root: false,
-  ignorePatterns: ['dist', '__tests__', 'coverage', '*.local.ts'],
+  ignorePatterns: ['dist', '__tests__', 'coverage', '*.local.ts', 'examples'],
   extends: ['eslint:recommended', 'plugin:@typescript-eslint/recommended', 'plugin:@typescript-eslint/eslint-recommended', 'plugin:jest/recommended', 'prettier'],
   parser: '@typescript-eslint/parser',
   parserOptions: {
