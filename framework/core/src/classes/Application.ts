@@ -23,7 +23,7 @@ import {Props} from './BaseObject';
 /**
  * Application is the base class for all application classes.
  */
-export default abstract class BaseApplication<
+export default abstract class Application<
   T extends ApplicationConfig = ApplicationConfig
 > extends Module {
 
@@ -54,7 +54,7 @@ export default abstract class BaseApplication<
   constructor(config: T, props: Props = {}) {
     super(null, null, props);
     Jii.container.memoSync(CONTAINER_APP_KEY, this, {freeze: true});
-    this.state = BaseApplication.STATE_BEGIN;
+    this.state = Application.STATE_BEGIN;
 
     this.preInit(config);
   }
@@ -76,12 +76,22 @@ export default abstract class BaseApplication<
     this.setBasePath(config.basePath);
 
     // register aliases
-    for (const key of Object.keys(config.aliases)) {
-      Jii.setAlias(key, config.aliases[key]);
-    }
+    this.setAliases(config.aliases);
 
-    this.setComponents(config?.components)
+    this.setComponents(config?.components);
 
     Jii.container.memoSync(APP_CONFIG, config, {freeze: true});
+  }
+
+  /**
+   * Initializes the application.
+   *
+   * This method is called after the module is created and initialized with property values
+   * given in configuration.
+   *
+   * If you override this method, please make sure you call the parent implementation.
+   */
+  init() {
+    this.state = Application.STATE_INIT;
   }
 }
