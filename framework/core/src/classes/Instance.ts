@@ -205,7 +205,7 @@ export default class Instance {
    * @returns The instance
    */
   public static createFrom<T = Constructor>(type: ObjectType, params: any[] = []): T {
-    let props: Record<string, any> = {};
+    const props: Record<string, any> = {};
 
     const Class = Instance.classOf<Constructor>(type) as T;
     const instance = Class instanceof BaseObject ? Class : new (Class as Constructor)(...params);

@@ -215,7 +215,7 @@ export class Module extends ServiceLocator {
    * are considered.
    */
   public hasModule(id): boolean {
-    let pos: number | false = strpos(id, '/');
+    const pos: number | false = strpos(id, '/');
 
     if (pos !== false) {
       // sub-module
@@ -237,7 +237,7 @@ export class Module extends ServiceLocator {
    * @see hasModule()
    */
   public getModule(id, load: boolean = true): Module | null {
-    let pos: number | false = strpos(id, '/');
+    const pos: number | false = strpos(id, '/');
 
     if (pos !== false) {
       // sub-module
