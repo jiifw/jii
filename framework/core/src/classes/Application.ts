@@ -25,6 +25,7 @@ import configValidator from '../scripts/config-validator';
 import {Props} from './BaseObject';
 import InvalidConfigError from './InvalidConfigError';
 import {ApplicationConfig, ComponentsDefinition} from '../typings/app-config';
+export type Platform = 'web' | 'cli' | string;
 
 /**
  * Application is the base class for all application classes.
@@ -81,12 +82,12 @@ export default abstract class Application<
    * Application type
    * @protected
    */
-  protected _appType: 'web' | 'cli';
+  protected _platform: 'web' | 'cli' | string = null;
 
   /**
    * Get application type (a web platform or command line interface)
    */
-  get appType(): 'web' | 'cli' {
+  get platform(): Platform {
     return this._appType;
   }
 
@@ -97,10 +98,6 @@ export default abstract class Application<
    */
   constructor(config: T, props: Props = {}) {
     super(null, null, props);
-
-    if ( !this._appType ) {
-      throw new InvalidConfigError('You must specify the application type');
-    }
 
     Jii.container.memoSync(CONTAINER_APP_KEY, this, {freeze: true});
     this.state = Application.STATE_BEGIN;
@@ -128,8 +125,22 @@ export default abstract class Application<
    * @param config - The application configuration
    */
   public preInitConfig(config: ApplicationConfig): void {
+    if ( !this._platform ) {
+      throw new InvalidConfigError('You must specify the application type');
+    }
+
     if (!objPath.has(config, 'components') || !isPlainObject(config.components)) {
       config.components = {};
+    }
+
+    if (config?.components) {
+      for (const key in config.components) {
+        const {platform = 'web'} = config.components[key];
+
+        if (!platform || platform !== this._platform) {
+          delete config.components[key];
+        }
+      }
     }
 
     // merge core components with custom components

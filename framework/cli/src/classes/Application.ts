@@ -10,7 +10,7 @@ import figlet from 'figlet';
 import {Command} from 'commander';
 
 // classes
-import BaseApplication from '@jii/core/dist/classes/Application';
+import BaseApplication, {Platform} from '@jii/core/dist/classes/Application';
 
 // utils
 import {listCommands} from '../utils/commands';
@@ -25,7 +25,10 @@ export default class Application extends BaseApplication<ApplicationConfig> {
   /**
    * @inheritDoc
    */
-  protected _appType: 'web' | 'cli' = 'cli';
+  preInitConfig(config: ApplicationConfig) {
+    this._platform = 'cli';
+    super.preInitConfig(config);
+  }
 
   /**
    * Run the application, start the cli server

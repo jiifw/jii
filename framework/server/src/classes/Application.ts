@@ -32,10 +32,10 @@ export default class Application extends BaseApplication {
    */
   //public static readonly EVENT_AFTER_REQUEST = 'afterRequest';
 
-  /**
-   * @inheritDoc
-   */
-  protected _appType: 'web' | 'cli' = 'cli';
+  preInitConfig(config: ApplicationConfig) {
+    this._platform = 'web';
+    super.preInitConfig(config);
+  }
 
   preInit(config: ApplicationConfig) {
     this.setAliases({'@jiiServer': dirname(__dirname)});
