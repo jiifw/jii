@@ -16,9 +16,28 @@ export default <JSONSchema7>{
       maxLength: 50,
       pattern: '^[a-z]+(-[a-z0-9]+)*$',
     },
+    name: {
+      type: 'string',
+      maxLength: 30,
+    },
     basePath: {
       type: 'string',
-      maxLength: 50,
+      maxLength: 200,
+    },
+    sourceLanguage: {
+      type: 'string',
+      minLength: 4,
+      maxLength: 6,
+    },
+    language: {
+      type: 'string',
+      minLength: 4,
+      maxLength: 6,
+    },
+    timeZone: {
+      type: 'string',
+      minLength: 3,
+      maxLength: 10,
     },
     bootstrap: {
       oneOf: [
