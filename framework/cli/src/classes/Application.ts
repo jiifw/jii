@@ -23,6 +23,11 @@ import {ApplicationConfig} from '../typings/app-config';
  */
 export default class Application extends BaseApplication<ApplicationConfig> {
   /**
+   * @inheritDoc
+   */
+  protected _appType = 'cli';
+
+  /**
    * Run the application, start the cli server
    * @param [callback] - Callback function to execute when the application is ready
    */

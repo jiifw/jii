@@ -78,12 +78,30 @@ export default abstract class Application<
   public sourceLanguage: string = 'en-US';
 
   /**
+   * Application type
+   * @protected
+   */
+  protected _appType: 'web' | 'cli';
+
+  /**
+   * Get application type (a web platform or command line interface)
+   */
+  get appType(): 'web' | 'cli' {
+    return this._appType;
+  }
+
+  /**
    * Application constructor
    * @param config - Application configuration
    * @param [props] - Component properties
    */
   constructor(config: T, props: Props = {}) {
     super(null, null, props);
+
+    if ( !this._appType ) {
+      throw new InvalidConfigError('You must specify the application type');
+    }
+
     Jii.container.memoSync(CONTAINER_APP_KEY, this, {freeze: true});
     this.state = Application.STATE_BEGIN;
 
