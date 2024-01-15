@@ -7,9 +7,6 @@
     "email": "mj.atari@gmail.com",
     "url": "https://github.com/blacksmoke26"
   },
-  "bin": {
-    "jii": "dist/cli.js"
-  },
   "homepage": "",
   "license": "ISC",
   "directories": {
