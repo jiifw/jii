@@ -7,6 +7,7 @@
  */
 
 import {normalize} from 'node:path';
+import obPath from 'object-path';
 
 // classes
 import Configuration from '../classes/Configuration';
@@ -24,6 +25,9 @@ import {ApplicationConfig} from '../typings/app-config';
 
 // schemas
 import schemaConfig from '../schemas/configuration.schema';
+import {isLanguage} from '../helpers/locale';
+import InvalidConfigError from '../classes/InvalidConfigError';
+import {isTimezone} from '../helpers/datetime';
 
 /**
  * Validates and verify the application configuration
@@ -56,6 +60,24 @@ const initAliases = ({basePath}): void => {
 };
 
 /**
+ * Basic properties validator
+ * @param config - application configuration
+ */
+const basicPropsValidator = (config: ApplicationConfig): void => {
+  if (config?.language && !isLanguage(config.language)) {
+    throw new InvalidConfigError(`Application's 'language' must be a part of ISO 639`);
+  }
+
+  if (config?.sourceLanguage && !isLanguage(config.sourceLanguage)) {
+    throw new InvalidConfigError(`Application's 'sourceLanguage' must be a part of ISO 639`);
+  }
+
+  if (config?.timeZone && !isTimezone(config.timeZone)) {
+    throw new InvalidConfigError(`Application's 'timeZone' must be a valid time zone`);
+  }
+};
+
+/**
  * Validates and verify the application configuration
  * @param config - application configuration
  */
@@ -65,8 +87,10 @@ export default function (config: ApplicationConfig): void {
   const {basePath, bootstrap} = config;
 
   if (!isPath(basePath, 'dir')) {
-    throw new Error(`Application's 'basePath' must be a valid directory`);
+    throw new InvalidConfigError(`Application's 'basePath' must be a valid directory`);
   }
+
+  basicPropsValidator(config);
 
   // init aliases
   initAliases({basePath});
