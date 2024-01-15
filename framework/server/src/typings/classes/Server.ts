@@ -126,16 +126,14 @@ export type MiddlewareDefinition = (
   | {
   type: 'after'
   description?: string
-  handler: {}
+  handler (error: any): Promise<void>;
   [k: string]: unknown
 }
   | {
-  type: 'callback'
-  description?: string
-  config?: {
-    [k: string]: unknown
-  }
-  [k: string]: unknown
+  type: 'callback';
+  description?: string;
+  handler(server?: ServerInstance, options?: Record<string, any>): Promise<void>;
+  [k: string]: unknown;
 }
   );
 
