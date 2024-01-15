@@ -271,9 +271,9 @@ export default class Server extends Component {
         const params = <MiddlewareMiddleware<T>>data;
         this._server.use(require(params.path)(params.config || {}));
       } else if (type === 'after') {
-        await this._server.after((<MiddlewareAfter>data).handler);
+        await this._server.after((<MiddlewareAfter><unknown>data).handler);
       } else if (type === 'callback') {
-        const params = <MiddlewareCallback<T>>data;
+        const params = <MiddlewareCallback<T>>data.handler;
         await params.handler(params?.config);
       }
     }
