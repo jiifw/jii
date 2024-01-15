@@ -19,7 +19,7 @@ import {isClass, hasOwnMethod, isConstructor} from '../helpers/reflection';
 // types
 import {EventHandler} from './Event';
 import {Constructor} from '../typings/utility';
-import {ComponentDefinition} from '../typings/components';
+import {ComponentDefinition, ModuleDefinition} from '../typings/components';
 import BaseObject from './BaseObject';
 
 export type ObjectType = (
@@ -27,6 +27,8 @@ export type ObjectType = (
   | Function // as a class object
   | ((() => Function) | ((...args) => Function)) // as an anonymous function
   | { class: string | object; [prop: string]: any; } // as an object configuration
+  | ModuleDefinition
+  | ComponentDefinition
   );
 
 interface InstanceMetadata {
