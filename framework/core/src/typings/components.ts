@@ -12,7 +12,7 @@ import {BehaviorArgs} from '../classes/Behavior';
 
 export interface ComponentDefinition {
   /** Class path, Object */
-  class: string | Class<any>;
+  class?: string | Class<any>;
   [event: `on ${string}`]: EventHandler;
   [behavior: `as ${string}`]: BehaviorArgs;
   [prop: string]: any;
