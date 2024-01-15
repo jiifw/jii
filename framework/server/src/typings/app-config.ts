@@ -7,18 +7,11 @@
  */
 
 // types
-import {FastifyHttpOptions} from 'fastify';
-import {DeepPartial} from 'utility-types';
-import {ApplicationConfig as IApplicationConfig} from '@jii/core/dist/typings/app-config';
+import {ServerComponentDefinition} from './classes/Server';
+import {ApplicationConfig as IAppConfig, ComponentsDefinition} from '@jii/core/dist/typings/app-config';
 
-export interface ApplicationConfig extends IApplicationConfig {
-  /**
-   * Server configuration.
-   */
-  server?: DeepPartial<{
-    /**
-     * Fastify server options.
-     */
-    httpOptions: FastifyHttpOptions<undefined>;
-  }>;
+export interface ApplicationConfig extends IAppConfig {
+  components?: ComponentsDefinition & {
+    server?: ServerComponentDefinition;
+  };
 }
