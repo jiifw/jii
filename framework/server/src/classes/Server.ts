@@ -15,6 +15,15 @@ import Component from '@jii/core/dist/classes/Component';
 
 // types
 import {ServerInstance, ServerHTTPOptions} from '../typings/server';
+import {MiddlewareAfter, MiddlewareCallback, MiddlewareDefinition, MiddlewareMiddleware, MiddlewareRegister, MiddlewareType} from '../typings/classes/Server';
+import InvalidConfigError from '@jii/core/dist/classes/InvalidConfigError';
+
+/**
+ * Middleware supported types
+ */
+export const MIDDLEWARE_TYPES: MiddlewareType[] = [
+  'middleware', 'after', 'callback', 'register',
+];
 
 /**
  * Server class to handle the server instance.
@@ -85,6 +94,12 @@ export default class Server extends Component {
    * The current server state during a request handling life cycle.
    * This property is managed by the application. Do not modify this property.
    */
+  public middleware: MiddlewareDefinition[];
+
+  /**
+   * The current server state during a request handling life cycle.
+   * This property is managed by the application. Do not modify this property.
+   */
   public state: number;
 
   /**
@@ -131,10 +146,17 @@ export default class Server extends Component {
    * Initialize and creates the server instance.
    */
   public async createServer(): Promise<void> {
+    this.state = Server.STATE_INIT;
     // register middleware engine
     await this._server.register(require('@fastify/middie'));
+
+    // register predefined middleware
+    await this.applyMiddleware(this.getPredefinedMiddleware());
+
+    // register user specific middleware
+    await this.applyMiddleware(this.middleware);
+
     await this.onInitialize();
-    this.state = Server.STATE_INIT;
   }
 
   /**
@@ -169,6 +191,8 @@ export default class Server extends Component {
    * Starts the server.
    */
   public async start(callback?: (server?: any) => Promise<void>): Promise<void> {
+    await this.createServer();
+
     try {
       await this._server.listen({host: this.host, port: this.port});
       console.log(`Server is listening on: http://${this.host}:${this.port}`);
@@ -182,6 +206,76 @@ export default class Server extends Component {
       await this.onError(err);
       this._server.log.error(err);
       process.exit(1);
+    }
+  }
+
+  /**
+   * Returns predefined server middleware
+   * @protected
+   */
+  protected getPredefinedMiddleware(): MiddlewareDefinition[] {
+    return [
+      {path: 'fastify-favicon', type: 'register'},
+      {path: 'fastify-graceful-shutdown', type: 'register'},
+      {path: 'x-xss-protection', type: 'middleware'},
+      {path: '@fastify/accepts', type: 'register'},
+      {path: '@fastify/url-data', type: 'register'},
+      {path: '@fastify/cookie', type: 'register'},
+      {path: '@fastify/formbody', type: 'register'},
+      {path: '@fastify/multipart', type: 'register', config: {attachFieldsToBody: 'keyValues'}},
+      {
+        async handler(error: any) {
+          if (error) throw error;
+        },
+        type: 'after',
+      },
+    ];
+  }
+
+  /**
+   * Apply a middlewares to server instance
+   * @param definitions - Middleware definitions
+   *
+   * @example
+   * await Jii.app().get<Server>('server').applyMiddleware([
+   *  { path: 'fastify-favicon', type: 'register' },
+   *  { path: 'x-xss-protection', type: 'middleware' },
+   *  {
+   *    async handler(error: any) {
+   *      if (error) throw error;
+   *    },
+   *    type: 'after',
+   *  },
+   *  {
+   *    async handler(server: ServerInstance, options?: Record<string, any>) {
+   *      // logic here
+   *    },
+   *    type: 'callback',
+   *  },
+   * ]);
+   */
+  public async applyMiddleware<T>(definitions: MiddlewareDefinition[]): Promise<void> {
+    if (! definitions || !Array.isArray(definitions) || !definitions.length) {
+      return;
+    }
+
+    for await (const {type, ...data} of definitions) {
+      if (!MIDDLEWARE_TYPES.includes(type)) {
+        throw new InvalidConfigError(`Unknown middleware type '${type}' given`);
+      }
+
+      if (type === 'register') {
+        const params = <MiddlewareRegister<T>>data;
+        await this._server.register(require(params.path), params.config || {});
+      } else if (type === 'middleware') {
+        const params = <MiddlewareMiddleware<T>>data;
+        this._server.use(require(params.path)(params.config || {}));
+      } else if (type === 'after') {
+        await this._server.after((<MiddlewareAfter>data).handler);
+      } else if (type === 'callback') {
+        const params = <MiddlewareCallback<T>>data;
+        await params.handler(params?.config);
+      }
     }
   }
 }
