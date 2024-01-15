@@ -20,10 +20,41 @@ export interface ApplicationConfig {
    * Application ID (e.g., 'ecommerce-platform' or 'superficial-project')
    */
   id: string;
+
   /**
    * Absolute path to the root directory of the application
    */
   basePath: string;
+
+  /**
+   * The application name.
+   * @default 'My Application'
+   */
+  name?: string;
+
+  /**
+   * The time zone used by this application.
+   * @default 'UTC'
+   */
+  timeZone?: string;
+
+  /**
+   * The language that is meant to be used for end users. It is recommended that you
+   * use [IETF language tags](http://en.wikipedia.org/wiki/IETF_language_tag). For example, `en` stands
+   * for English, while `en-US` stands for English (United States).
+   * @see sourceLanguage
+   * @default 'en-US'
+   */
+  language?: string;
+
+  /**
+   * The language that the application is written in. This mainly refers to
+   * the language that the messages and view files are written in.
+   * @see language
+   * @default 'en-US'
+   */
+  sourceLanguage?: string;
+
   /**
    * The absolute or alias path to the bootstrap file(s)<br>
    * <span color="red">Warning</span>: Do not include extensions like '.ts' or '.js' in the path.<br>
@@ -34,6 +65,7 @@ export interface ApplicationConfig {
    * @default []
    */
   bootstrap?: string | Array<string>;
+
   /**
    * Command line (cli) related configuration
    */
@@ -56,6 +88,7 @@ export interface ApplicationConfig {
      */
     dirs?: CliDirectory;
   };
+
   /**
    * Aliases for the application to register
    * @example
@@ -67,6 +100,7 @@ export interface ApplicationConfig {
    * @default undefined
    */
   aliases?: Record<string, string>;
+
   /**
    * Additional parameters to store with the application to access later<br>
    * To access in later application, use: `Jii.instance().params['secret'];`
@@ -78,6 +112,7 @@ export interface ApplicationConfig {
    * @default undefined
    */
   params?: Record<string, any>;
+
   /**
    * Middlewares to register with the application<br>
    * **Note**: The path argument supports alias, you can use `@app/plugins/some-plugin` to register the plugin
@@ -102,6 +137,7 @@ export interface ApplicationConfig {
    * @default []
    */
   middleware?: Array<MiddlewareDefinition>;
+
   /**
    * Components to register with the application<br>
    *
@@ -120,6 +156,7 @@ export interface ApplicationConfig {
    * @default {}
    */
   components?: ComponentsDefinition;
+
   /*modules?: {
     [name: string]: {
       [property: string]: any;
