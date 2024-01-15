@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 /**
  * @link https://www.github.com/jiifw
  * @copyright Copyright (c) 2023-2024 Jii framework
@@ -7,16 +9,16 @@
  */
 
 // classes
-import Application from '@jii/cli/dist/console/Application';
+import Application from '@jii/cli/dist/classes/Application';
 
 // utils
 import {loadFile} from '@jii/core/dist/env';
 
-// config
-import appConfig from './config/app';
-
 // load .env file into memory
 loadFile('../.env');
+
+// config
+import appConfig from './config/app';
 
 (async () => {
   const config = await appConfig();
