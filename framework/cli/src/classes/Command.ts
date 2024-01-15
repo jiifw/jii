@@ -16,9 +16,9 @@ import {Class} from 'utility-types';
 import {Argument, CommandOption} from '../typings/cli';
 
 // public types
-export type CommandInstance = InstanceType<typeof BaseCommand>;
-export type CommandStatic = Class<BaseCommand>;
-export type Command = InstanceType<typeof CommandClass>;
+export type CommandInstance = InstanceType<typeof Command>;
+export type CommandStatic = Class<Command>;
+export type TheCommand = InstanceType<typeof CommandClass>;
 export type {Argument, CommandOption} from '../typings/cli';
 
 /**
@@ -36,7 +36,7 @@ export type {Argument, CommandOption} from '../typings/cli';
  *  //...
  * }
  */
-export default class BaseCommand extends Component {
+export default class Command extends Component {
   /**
    * Name of the command to show/execute in cli.<br>
    * By default, it's the name of the file.
@@ -112,7 +112,7 @@ export default class BaseCommand extends Component {
    *   .description(`Make a copy of the current project. This may require additional disk space.`);
    * }
    */
-  init(command?: Command): void {
+  init(command?: TheCommand): void {
   }
 
   /**

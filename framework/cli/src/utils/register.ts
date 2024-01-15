@@ -13,10 +13,10 @@ import {Command} from 'commander';
 import {toString} from '@jii/core/dist/helpers/string';
 import {validateCommand} from './validators';
 import processCommandOptions from './command-options';
-import {CommandStatic, CommandInstance} from '../classes/BaseCommand';
 
 // types
 import Jii from '@jii/core/dist/Jii';
+import {CommandStatic, CommandInstance} from '../classes/Command';
 
 /**
  * @private
@@ -25,7 +25,6 @@ import Jii from '@jii/core/dist/Jii';
  * @param filePath - Absolute file path
  * @returns Formatted command name
  */
-
 export const formatName = (instance: CommandInstance, filePath: string): string => {
   let name = !toString(instance?.name, true)
     ? basename(filePath, '.ts')
@@ -40,6 +39,13 @@ export const formatName = (instance: CommandInstance, filePath: string): string 
     : name;
 };
 
+/**
+ * @private
+ * Creates a command from given file
+ * @param Class - Command class
+ * @param filePath - Aliased or absolute class file path
+ * @returns The created command
+ */
 export default async function registerCommand(Class: CommandStatic, filePath: string): Promise<Command> {
   const instance = Jii.createObject<CommandInstance>(Class, []);
   const name = formatName(instance, filePath);

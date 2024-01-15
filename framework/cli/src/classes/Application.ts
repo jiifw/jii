@@ -9,16 +9,19 @@
 import figlet from 'figlet';
 import {Command} from 'commander';
 
+// classes
+import BaseApplication from '@jii/core/dist/classes/Application';
+
 // utils
 import {listCommands} from '../utils/commands';
 
-// classes
-import BaseApplication from '../classes/BaseApplication';
+// types
+import {ApplicationConfig} from '../typings/app-config';
 
 /**
- * Console application
+ * Application class
  */
-export default class Application extends BaseApplication {
+export default class Application extends BaseApplication<ApplicationConfig> {
   /**
    * Run the application, start the cli server
    * @param [callback] - Callback function to execute when the application is ready
@@ -30,7 +33,7 @@ export default class Application extends BaseApplication {
 
     program
       .version('1.0.0')
-      .description('A Jii framework CLI tools for an easy development');
+      .description('A Jii framework CLI for terminal operations');
 
     const commands = await listCommands(program);
     commands.forEach(command => program.addCommand(command));

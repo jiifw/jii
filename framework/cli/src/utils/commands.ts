@@ -6,18 +6,13 @@
  * @since 0.0.1
  */
 
-import {dirname, join} from 'path';
 import {sync} from 'glob';
 import {Command} from 'commander';
 
 // utils
 import Jii from '@jii/core/dist/Jii';
-import {resolve} from '@jii/core/dist/helpers/path';
 import {INTERNAL_CLI_DIRS, INTERNAL_METADATA} from '@jii/core/dist/utils/symbols';
 import registerCommand from '../utils/register';
-
-// types
-import {MiddlewarePlugin} from '@jii/core/dist/typings/middleware';
 
 /**
  * Compile glob patterns for CLI commands.
@@ -27,12 +22,7 @@ export const compileGlobPatterns = (): { path: string; pattern: string }[] => {
   //const patterns: string[];
   const paths: Array<string> = Jii.container.getConfig(INTERNAL_METADATA)?.[INTERNAL_CLI_DIRS] ?? [];
 
-  Jii.app().config.middleware
-    .filter(mid => mid.type === 'plugin')
-    .forEach((mid) => {
-      const path = dirname(resolve((<MiddlewarePlugin>mid).path, false));
-      paths.push(join(path, 'commands'));
-    });
+  // @todo Implementation of plugins commands here
 
   return paths.map(dir => ({
     path: dir,

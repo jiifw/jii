@@ -12,7 +12,7 @@ import {toString} from '@jii/core/dist/helpers/string';
 
 // types
 import {CommandOption, Argument} from '../typings/cli';
-import {CommandInstance} from '../classes/BaseCommand';
+import {CommandInstance} from '../classes/Command';
 
 /**
  * Validate command option
