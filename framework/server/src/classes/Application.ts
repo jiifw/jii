@@ -9,21 +9,17 @@ import merge from 'deepmerge';
 
 // classes
 import BaseApplication from '@jii/core/dist/classes/Application';
+import Server from './Server';
 
 // utils
 import {dirname} from '@jii/core/dist/helpers/path';
 
-// scripts
-//import createInstance from '../server/create-instance';
-
 // types
 import {ApplicationConfig} from '../typings/app-config';
 import {ComponentsDefinition} from '@jii/core/dist/typings/components';
-import Server from './Server';
 
 /**
  * Application is the base class for all web application classes.
- * @since 0.1
  */
 export default class Application extends BaseApplication {
   /**
@@ -42,11 +38,11 @@ export default class Application extends BaseApplication {
   }
 
   /**
-   * Run the application, start the server
-   * @param [callback] - Callback function to execute after server is started
+   * Run the application
    */
-  public async run(callback?: (server?: any) => Promise<void>): Promise<void> {
-    await this.get<Server>('server')?.start(callback);
+  public async run(): Promise<void> {
+    await super.run();
+    await this.get<Server>('server')?.start();
   }
 
   /**
