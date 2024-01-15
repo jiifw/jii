@@ -14,11 +14,11 @@ import Plugin from '@jii/core/dist/classes/Plugin';
 
 // utils
 import Jii from '@jii/core/dist/Jii';
+import Server from '@jii/server/dist/classes/Server';
 import {getOrigin} from './utils';
 
 // types
 import {CorsOptions as NativeCorsOptions} from 'cors';
-import {WebApplication} from '@jii/server/dist/web/Application';
 
 export interface CorsOptions {
   cors?: Partial<NativeCorsOptions>;
@@ -59,6 +59,6 @@ export default class extends Plugin {
       },
     });
 
-    Jii.app<WebApplication>().server.use(require('cors')(corsOptions));
+    Jii.app().get<Server>('server')?.getServer()?.use(require('cors')(corsOptions));
   }
 }
