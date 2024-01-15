@@ -25,7 +25,7 @@ export default class Application extends BaseApplication<ApplicationConfig> {
   /**
    * @inheritDoc
    */
-  protected _appType = 'cli';
+  protected _appType: 'web' | 'cli' = 'cli';
 
   /**
    * Run the application, start the cli server

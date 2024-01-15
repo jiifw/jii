@@ -35,7 +35,7 @@ export default class Application extends BaseApplication {
   /**
    * @inheritDoc
    */
-  protected _appType = 'web';
+  protected _appType: 'web' | 'cli' = 'cli';
 
   preInit(config: ApplicationConfig) {
     this.setAliases({'@jiiServer': dirname(__dirname)});
