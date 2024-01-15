@@ -15,6 +15,7 @@ import Module from './Module';
 import Jii from '../Jii';
 import {toString} from '../helpers/string';
 import {isPlainObject} from '../helpers/object';
+import {invokeModuleMethod} from '../helpers/file';
 import {APP_CONFIG, CONTAINER_APP_KEY} from '../utils/symbols';
 
 // scripts
@@ -87,6 +88,18 @@ export default abstract class Application<
     this.state = Application.STATE_BEGIN;
 
     this.preInit(config);
+  }
+
+  /**
+   * Initializes the application.
+   *
+   * This method is called after the module is created and initialized with property values
+   * given in configuration.
+   *
+   * If you override this method, please make sure you call the parent implementation.
+   */
+  init() {
+    this.state = Application.STATE_INIT;
   }
 
   /**
@@ -170,22 +183,35 @@ export default abstract class Application<
   }
 
   /**
-   * Initializes the application.
-   *
-   * This method is called after the module is created and initialized with property values
-   * given in configuration.
-   *
-   * If you override this method, please make sure you call the parent implementation.
-   */
-  init() {
-    this.state = Application.STATE_INIT;
-  }
-
-  /**
    * Returns the configuration of core application components.
    * @see set()
    */
   public coreComponents(): ComponentsDefinition {
     return {};
+  }
+
+  /**
+   * Invoke bootstrapper files<br>
+   * If you override this method, please make sure you call the parent implementation.
+   */
+  protected async invokeBootstraps (): Promise<void>  {
+    // memorize the configuration for future reference and usage
+    const {bootstrap = []} = Jii.container.retrieve<ApplicationConfig>(APP_CONFIG);
+    const list = Array.isArray(bootstrap) ? bootstrap : [bootstrap];
+
+    if (!list.length) return;
+
+    await Promise.all(
+      list.map(path => invokeModuleMethod(path, 'default'))
+    );
+  };
+
+  /**
+   * Run the application<br>
+   * If you override this method, please make sure you call the parent implementation.
+   */
+  public async run(): Promise<void> {
+    // invoke bootstrapper files
+    await this.invokeBootstraps();
   }
 }
