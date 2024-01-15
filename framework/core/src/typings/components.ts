@@ -16,6 +16,11 @@ export interface ComponentDefinition {
   [event: `on ${string}`]: EventHandler;
   [behavior: `as ${string}`]: BehaviorArgs;
   [prop: string]: any;
+
+  /**
+   * Platform to target components for.
+   */
+  platform?: 'web' | 'cli';
 }
 
 export interface ModuleDefinition extends ComponentDefinition {
