@@ -24,7 +24,9 @@ export default async (): Promise<ApplicationConfig> => ({
     classed: 'x',
   },
   bootstrap: ['@app/bootstrap/bootstrap'],
-  /*server: {
-    httpOptions: {},
-  },*/
+  components: {
+    server: {
+      enableLogging: false,
+    },
+  },
 });
