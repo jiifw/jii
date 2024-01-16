@@ -9,7 +9,7 @@
 // utils
 import {bindClass} from './helpers/auto-bind';
 import {aliases, getAlias, hasAlias, setAlias} from './base/aliases';
-import {CONTAINER_APP_KEY, CONTAINER_MIDDLEWARE_KEY, INTERNAL_METADATA} from './utils/symbols';
+import {CONTAINER_APP_KEY, CONTAINER_PLUGINS_KEY, INTERNAL_METADATA} from './utils/symbols';
 
 // script
 import initCoreAliases from './scripts/init-core-aliases';
@@ -17,7 +17,7 @@ import initCoreAliases from './scripts/init-core-aliases';
 // classes
 import Logger from './logger/Logger';
 import Container, {ComponentConfig} from './classes/Container';
-import MiddlewareContainer from './classes/MiddlewareContainer';
+import PluginsContainer from './classes/PluginsContainer';
 import InvalidCallError from './classes/InvalidCallError';
 
 // types
@@ -54,7 +54,7 @@ export default abstract class BaseJii {
     this._container = new Container();
     this.logger = new Logger();
     this._container.memo(INTERNAL_METADATA, () => () => new Error('Inaccessible internal'), {freeze: true});
-    this._container.memoSync(CONTAINER_MIDDLEWARE_KEY, new MiddlewareContainer(), {
+    this._container.memoSync(CONTAINER_PLUGINS_KEY, new PluginsContainer(), {
       freeze: true,
     });
     bindClass(this);
@@ -87,8 +87,8 @@ export default abstract class BaseJii {
   /**
    * Returns middleware from container object
    */
-  get middleware(): InstanceType<typeof MiddlewareContainer> {
-    return this._container.retrieve(CONTAINER_MIDDLEWARE_KEY);
+  get plugins(): InstanceType<typeof PluginsContainer> {
+    return this._container.retrieve(CONTAINER_PLUGINS_KEY);
   }
 
   /**

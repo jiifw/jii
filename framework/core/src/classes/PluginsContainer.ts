@@ -5,36 +5,37 @@
  * @author Junaid Atari <mj.atari@gmail.com>
  * @since 0.0.1
  */
+import {PluginType} from '../typings/plugin';
 
 export type MetaData = {
   [name: string | symbol]: any;
   directory: string;
-  type: string;
+  type: PluginType;
 }
 
-export type MiddlewareAttributes = {
+export type PluginAttributes = {
   [name: string | symbol]: any;
 }
 
-export interface MiddlewareConfig {
+export interface PluginConfig {
   metadata: MetaData;
   config: {
     [name: string]: any;
   };
-  attributes: MiddlewareAttributes;
+  attributes: PluginAttributes;
 }
 
 const LINK_PREFIX: string = '$$_';
 
 /**
- * Middleware registrar container
+ * Plugins registrar container
  */
-export default class MiddlewareContainer {
-  protected registry: Map<string, MiddlewareConfig>;
+export default class PluginsContainer {
+  protected registry: Map<string, PluginConfig>;
   protected _links: Map<string, string>;
 
   /**
-   * MiddlewareContainer constructor
+   * PluginsContainer constructor
    */
   constructor() {
     this.registry = new Map();
@@ -43,11 +44,11 @@ export default class MiddlewareContainer {
 
   /**
    * Normalize configuration
-   * @param name - Middleware name or path
+   * @param name - Plugin name or path
    * @param [config] - Configuration object
    * @param [metadata] - Additional metadata
    */
-  protected processConfig<T = Record<string, any>>(name: string, config: T, metadata: MetaData): MiddlewareConfig {
+  protected processConfig<T = Record<string, any>>(name: string, config: T, metadata: MetaData): PluginConfig {
     return {
       metadata,
       config,
@@ -56,7 +57,7 @@ export default class MiddlewareContainer {
   }
 
   /**
-   * Get linked middleware list
+   * Get linked plugins list
    */
   get links(): { [name: string]: string } {
     const collection = [...this._links.entries()].map(([k, v]) => {
@@ -66,21 +67,21 @@ export default class MiddlewareContainer {
   }
 
   /**
-   * Get middleware list
+   * Get plugins list
    */
   get list(): string[] {
     return [...this.registry.keys()];
   }
 
   /**
-   * Register a middleware along with the configuration
+   * Register a plugins along with the configuration
    * @param name - Middleware name or path
    * @param config - Configuration object
    * @param [metadata] - Additional metadata
    */
   public register<T = Record<string, any>>(name: string, config: T, metadata: MetaData) {
     if (this.registry.has(name)) {
-      throw new Error(`Middleware '${name}' is already registered`);
+      throw new Error(`Plugin '${name}' is already registered`);
     }
 
     this.registry.set(
@@ -90,13 +91,13 @@ export default class MiddlewareContainer {
   }
 
   /**
-   * Get middleware configuration
-   * @param name - Middleware name or path
+   * Get plugins configuration
+   * @param name - Plugin name or path
    */
 
-  public config<T extends MiddlewareConfig = MiddlewareConfig>(name: string) {
+  public config<T extends PluginConfig = PluginConfig>(name: string) {
     if (!this.registry.has(name)) {
-      throw new Error(`No middleware '${name}' found in registry`);
+      throw new Error(`No plugins '${name}' found in registry`);
     }
 
     return this.registry.get(name).config;
@@ -123,52 +124,52 @@ export default class MiddlewareContainer {
   }
 
   /**
-   * Get middleware configuration
-   * @param name - Middleware name or path
+   * Get plugins configuration
+   * @param name - Plugin name or path
    * @param id - Unique ID (format: camelCase) to link with (e.g., cors or corsPlugin)
    */
   public link(name: string, id: string) {
     if (this.isLinked(id)) {
-      throw new Error(`The ID '${id}' is already associated with a middleware '${this._links.get(name)}'`);
+      throw new Error(`The ID '${id}' is already associated with a plugins '${this._links.get(name)}'`);
     }
 
     if (!this.registry.has(name)) {
-      throw new Error(`No middleware '${name}' found in registry`);
+      throw new Error(`No plugins '${name}' found in registry`);
     }
 
     if (!/^[a-z]+([A-Z][a-z]+)*$/.test(id)) {
-      throw new Error(`Invalid ID '${id}' for middleware '${name}', Format should be a camelize`);
+      throw new Error(`Invalid ID '${id}' for plugins '${name}', Format should be a camelize`);
     }
 
     this._links.set(this.formatLinkId(id), name);
   }
 
   /**
-   * Check that middleware is registered or not
-   * @param name - Middleware name or path
+   * Check that plugins is registered or not
+   * @param name - Plugin name or path
    */
   public isRegistered(name: string): boolean {
     return this.registry.has(name);
   }
 
   /**
-   * Check that middleware has linked with ID or not
-   * @param name - Middleware name or path
+   * Check that plugins has linked with ID or not
+   * @param name - Plugin name or path
    */
   public isLinked(name: string): boolean {
     return this._links.has(this.formatLinkId(name));
   }
 
   /**
-   * Check that middleware has in registry or not
-   * @param nameOrId - Middleware name or path / Unique ID
+   * Check that plugins has in registry or not
+   * @param nameOrId - Plugin name or path / Unique ID
    */
   public has(nameOrId: string): boolean {
     return this.isRegistered(nameOrId) || this.isLinked(nameOrId);
   }
 
   /**
-   * Translate link id to middleware name or path
+   * Translate link id to plugins name or path
    * @param id - Unique ID
    */
   public toName(id: string): string | undefined {
@@ -178,8 +179,8 @@ export default class MiddlewareContainer {
   }
 
   /**
-   * Translate middleware name or path to link id
-   * @param name - Middleware name or path
+   * Translate plugins name or path to link id
+   * @param name - Plugin name or path
    */
   public toId(name: string): string | undefined {
     for (const [key, value] of this._links) {
@@ -192,10 +193,10 @@ export default class MiddlewareContainer {
   }
 
   /**
-   * Get middleware data
-   * @param nameOrId - Middleware name or path / Unique ID
+   * Get plugins data
+   * @param nameOrId - Plugin name or path / Unique ID
    */
-  protected getByIdOrName(nameOrId: string): MiddlewareConfig {
+  protected getByIdOrName(nameOrId: string): PluginConfig {
     if (this.registry.has(nameOrId)) {
       return this.registry.get(nameOrId);
     }
@@ -205,12 +206,12 @@ export default class MiddlewareContainer {
       return this.registry.get(name);
     }
 
-    throw new Error(`Unknown ID/Name '${nameOrId}' for middleware'`);
+    throw new Error(`Unknown ID/Name '${nameOrId}' for plugins'`);
   }
 
   /**
-   * Get middleware metadata
-   * @param nameOrId - Middleware name or path / Unique ID
+   * Get plugins metadata
+   * @param nameOrId - Plugin name or path / Unique ID
    */
 
   public metadata<T extends MetaData = MetaData>(nameOrId: string): MetaData {
@@ -218,49 +219,49 @@ export default class MiddlewareContainer {
   }
 
   /**
-   * Get middleware directory path
-   * @param nameOrId - Middleware name or path / Unique ID
+   * Get plugins directory path
+   * @param nameOrId - Plugin name or path / Unique ID
    */
   public getDirectory(nameOrId: string): string {
     return this.metadata(nameOrId).directory;
   }
 
   /**
-   * Get middleware directory path
-   * @param nameOrId - Middleware name or path / Unique ID
+   * Get plugins directory path
+   * @param nameOrId - Plugin name or path / Unique ID
    */
   public getType(nameOrId: string): string {
     return this.metadata(nameOrId).type;
   }
 
   /**
-   * Sets middleware attribute
-   * @param nameOrId - Middleware name or path / Unique ID
+   * Sets plugins attribute
+   * @param nameOrId - Plugin name or path / Unique ID
    * @param name - Attribute name
    * @param value - The value to store
    */
   public setAttr(nameOrId: string, name: string | symbol, value: any) {
     if (!this.has(nameOrId)) {
-      throw new Error(`Unknown ID/Name '${nameOrId}' for middleware'`);
+      throw new Error(`Unknown ID/Name '${nameOrId}' for plugins'`);
     }
     this.getByIdOrName(nameOrId).attributes[name] = value;
   }
 
   /**
-   * Checks middleware attribute
-   * @param nameOrId - Middleware name or path / Unique ID
+   * Checks plugins attribute
+   * @param nameOrId - Plugin name or path / Unique ID
    * @param name - Attribute name
    */
   public hasAttr(nameOrId: string, name: string | symbol): boolean {
     if (!this.has(nameOrId)) {
-      throw new Error(`Unknown ID/Name '${nameOrId}' for middleware'`);
+      throw new Error(`Unknown ID/Name '${nameOrId}' for plugins'`);
     }
     return name in this.attributes(nameOrId);
   }
 
   /**
-   * Gets middleware attribute
-   * @param nameOrId - Middleware name or path / Unique ID
+   * Gets plugins attribute
+   * @param nameOrId - Plugin name or path / Unique ID
    * @param name - Attribute name
    */
   public getAttr<T>(nameOrId: string, name: string | symbol): T | undefined {
@@ -271,12 +272,12 @@ export default class MiddlewareContainer {
   }
 
   /**
-   * Gets middleware attributes
-   * @param nameOrId - Middleware name or path / Unique ID
+   * Gets plugins attributes
+   * @param nameOrId - Plugin name or path / Unique ID
    */
-  public attributes<T = MiddlewareAttributes>(nameOrId: string): T {
+  public attributes<T = PluginAttributes>(nameOrId: string): T {
     if (!this.has(nameOrId)) {
-      throw new Error(`Unknown ID/Name '${nameOrId}' for middleware'`);
+      throw new Error(`Unknown ID/Name '${nameOrId}' for plugins'`);
     }
     return <T>(this.getByIdOrName(nameOrId)?.attributes || {});
   }
