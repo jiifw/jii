@@ -8,7 +8,10 @@
     "url": "https://github.com/blacksmoke26"
   },
   "homepage": "",
-  "license": "ISC",
+  "license": "Apache-2.0",
+  "bin": {
+    "jii": "dist/cli.js"
+  },
   "directories": {
     "dist": "dist"
   },
@@ -36,9 +39,9 @@
     "cli-dev": "ts-node -r tsconfig-paths/register ./src/cli.ts"
   },
   "dependencies": {
-    "@jii/core": "^0.0.1",
-    "@jii/server": "^0.0.1",
     "@jii/cli": "^0.0.1",
-    "@jii/cors": "^0.0.1"
+    "@jii/core": "^0.0.1",
+    "@jii/cors": "^0.0.1",
+    "@jii/server": "^0.0.1"
   }
 }
