@@ -6,11 +6,11 @@
  * @since 0.0.1
  */
 
-import {MiddlewareDefinition} from './middleware';
 import {ComponentsDefinition} from './components';
+import {PluginsDefinition} from './plugin';
 
 export type CliDirectory = string | { path: string; recursive?: boolean } | (string | { path: string; recursive?: boolean })[];
-export {MiddlewareDefinition, ComponentsDefinition};
+export {ComponentsDefinition};
 
 /**
  * Application configuration typing interface
@@ -136,7 +136,7 @@ export interface ApplicationConfig {
    * ]
    * @default []
    */
-  middleware?: Array<MiddlewareDefinition>;
+  plugins?: PluginsDefinition;
 
   /**
    * Components to register with the application<br>
