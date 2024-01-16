@@ -12,23 +12,7 @@ import PluginEvent from './PluginEvent';
 
 // types
 import {importPluginConfig} from '../base/config';
-
-/**
- * A plugin wrapper class to create server plugins
- */
-export interface PluginMetadata {
-  /** Bare-minimum version of Fastify for your plugin, just add the semver range that you need. */
-  fastify?: string,
-  /** Decorator dependencies for this plugin */
-  decorators?: {
-    fastify?: (string | symbol)[],
-    reply?: (string | symbol)[],
-    request?: (string | symbol)[]
-  },
-  /** The plugin dependencies */
-  dependencies?: string[],
-  encapsulate?: boolean
-}
+import {PluginType} from '../typings/plugin';
 
 /**
  * A plugin class to create server plugins
@@ -54,6 +38,11 @@ export default abstract class Plugin extends Component {
   public id: Lowercase<string>;
 
   /**
+   * The plugin directory
+   */
+  public basePath: string;
+
+  /**
    * The plugin name, e.g., plugin-cors, plugin-body-parser, etc.<br>
    * **Note**: It will register in the plugin registry with the same name
    */
@@ -65,9 +54,16 @@ export default abstract class Plugin extends Component {
   public description: string = null;
 
   /**
-   * Target platform to register plugin with
+   * Plugin type
    */
-  public target: 'web' | 'cli' = 'web';
+  public type: PluginType = 'none';
+
+  /**
+   * Get plugin version
+   */
+  public getVersion(): string {
+    return '1.0';
+  }
 
   /**
    * Reads the plugin config file (app), also merge supplied options with the plugin config
@@ -81,7 +77,7 @@ export default abstract class Plugin extends Component {
   /**
    * Returns the metadata for the plugin
    */
-  metadata(): Partial<PluginMetadata> {
+  getMetadata<T = { [key: string]: any }>(): Partial<T> {
     return {};
   }
 
