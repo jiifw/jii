@@ -10,9 +10,12 @@
 import Component from './Component';
 import PluginEvent from './PluginEvent';
 
-// types
-import {importPluginConfig} from '../base/config';
-import {PluginType} from '../typings/plugin';
+/**
+ * The plugin types
+ */
+export const PLUGIN_TYPES = ['server', 'config', 'request', 'response', 'cli', 'silent'] as const;
+
+export type PluginType = typeof PLUGIN_TYPES[number];
 
 /**
  * A plugin class to create server plugins
@@ -35,18 +38,12 @@ export default abstract class Plugin extends Component {
   /**
    * The unique plugin id, e.g., cors, body-parser, etc.
    */
-  public id: Lowercase<string>;
+  public id: Lowercase<string> = null;
 
   /**
    * The plugin directory
    */
-  public basePath: string;
-
-  /**
-   * The plugin name, e.g., plugin-cors, plugin-body-parser, etc.<br>
-   * **Note**: It will register in the plugin registry with the same name
-   */
-  public name: Lowercase<string>;
+  public basePath: string = null;
 
   /**
    * The plugin description
@@ -54,32 +51,14 @@ export default abstract class Plugin extends Component {
   public description: string = null;
 
   /**
+   * The plugin version
+   */
+  public version: string = '1.0';
+
+  /**
    * Plugin type
    */
-  public type: PluginType = 'none';
-
-  /**
-   * Get plugin version
-   */
-  public getVersion(): string {
-    return '1.0';
-  }
-
-  /**
-   * Reads the plugin config file (app), also merge supplied options with the plugin config
-   * @param [options] - The plugin options
-   * @returns The plugin config
-   */
-  async getConfig<T = Record<string, any>>(options: T | { [key: string]: any } = {}): Promise<T> {
-    return importPluginConfig<T>(this.id, <T>options);
-  };
-
-  /**
-   * Returns the metadata for the plugin
-   */
-  getMetadata<T = { [key: string]: any }>(): Partial<T> {
-    return {};
-  }
+  public type: PluginType = 'silent';
 
   /**
    * The plugin handler
