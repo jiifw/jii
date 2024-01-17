@@ -135,8 +135,8 @@ export default async ({app, config, validators}: Args): Promise<DeepPartial<Appl
       continue;
     }
 
-    validator.setConfig(validatorConfig as any);
     validator.init();
+    validator.setConfig(validatorConfig as any);
 
     const result = await processConfig(validator);
     if (result instanceof SkipProcessing) {
