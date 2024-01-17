@@ -87,19 +87,20 @@ export default class CoreConfigValidator extends ConfigValidator {
    * @inheritDoc
    */
   async validate(): Promise<void> {
-    if (!isPath(this.getConfig()?.basePath, 'dir')) {
+    const config = this.getConfig();
+    if (!isPath(config?.basePath, 'dir')) {
       throw new InvalidConfigError(`Application's 'basePath' must be a valid directory`);
     }
 
-    if (this.getConfig()?.language && !isLanguage(this.getConfig().language)) {
+    if (config?.language && !isLanguage(config.language)) {
       throw new InvalidConfigError(`Application's 'language' must be a part of ISO 639`);
     }
 
-    if (this.getConfig()?.sourceLanguage && !isLanguage(this.getConfig().sourceLanguage)) {
+    if (config?.sourceLanguage && !isLanguage(config.sourceLanguage)) {
       throw new InvalidConfigError(`Application's 'sourceLanguage' must be a part of ISO 639`);
     }
 
-    if (this.getConfig()?.timeZone && !isTimezone(this.getConfig().timeZone)) {
+    if (config?.timeZone && !isTimezone(config.timeZone)) {
       throw new InvalidConfigError(`Application's 'timeZone' must be a valid time zone`);
     }
   }
@@ -107,35 +108,35 @@ export default class CoreConfigValidator extends ConfigValidator {
   /**
    * @inheritDoc
    */
-  async apply(app): Promise<void> {
+  async apply(): Promise<void> {
     const config = this.getConfig();
 
     Jii.setAlias('@app', normalize(config.basePath), true);
 
-    app.id = config.id;
+    this.getApp().id = config.id;
     delete config.id;
 
     if (toString(config?.name, true)) {
-      app.name = config.name;
+      this.getApp().name = config.name;
       delete config.name;
     }
 
     if (toString(config?.language, true)) {
-      app.language = config.language;
+      this.getApp().language = config.language;
       delete config.language;
     }
 
     if (toString(config?.sourceLanguage, true)) {
-      app.sourceLanguage = config.sourceLanguage;
+      this.getApp().sourceLanguage = config.sourceLanguage;
       delete config.sourceLanguage;
     }
 
     if (toString(config?.timeZone, true)) {
-      app.timeZone = config.timeZone;
+      this.getApp().timeZone = config.timeZone;
       delete config.timeZone;
     }
 
-    app.setBasePath(config.basePath);
+    this.getApp().setBasePath(config.basePath);
 
     this.setConfig(config);
   }

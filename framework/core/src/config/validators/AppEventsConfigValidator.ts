@@ -19,8 +19,8 @@ export default class AppEventsConfigValidator extends ConfigValidator {
   /**
    * @inheritDoc
    */
-  public propertyName(config): PropertyPath | PropertyPath[] {
-    return Object.keys(config)
+  public propertyName(): PropertyPath | PropertyPath[] {
+    return Object.keys(this.getConfig())
       .filter(prop => {
         return prop.startsWith('as ')
           || prop.startsWith('on ');
@@ -42,9 +42,7 @@ export default class AppEventsConfigValidator extends ConfigValidator {
   /**
    * @inheritDoc
    */
-  async apply(app): Promise<void> {
-    const config = this.getConfig();
-
+  async apply(): Promise<void> {
     const list = Object.entries(this.getConfig());
     if (!list.length) {
       return;
@@ -53,9 +51,9 @@ export default class AppEventsConfigValidator extends ConfigValidator {
       const [type, name] = prop.split(' ');
 
       if (type.toLowerCase() === 'as') {
-        app.attachBehavior(name, handler);
+        this.getApp().attachBehavior(name, handler);
       } else if (type.toLowerCase() === 'on') {
-        app.on(name, handler);
+        this.getApp().on(name, handler);
       }
     }
   }

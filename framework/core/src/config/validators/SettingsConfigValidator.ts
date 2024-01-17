@@ -86,24 +86,24 @@ export default class SettingsConfigValidator extends ConfigValidator {
   /**
    * @inheritDoc
    */
-  async apply(app): Promise<void> {
+  async apply(): Promise<void> {
     const config = this.getConfig();
 
     // register aliases
     if (config?.aliases) {
-      app.setAliases(config.aliases);
+      this.getApp().setAliases(config.aliases);
       delete config.aliases;
     }
 
     if (isPlainObject(config?.params)) {
-      app.params = config.params;
+      this.getApp().params = config.params;
       delete config.params;
     }
 
     this.setConfig(config);
 
     // register events
-    app.on(Application.EVENT_BEFORE_FINALIZE_CONFIG, async () => {
+    this.getApp().on(Application.EVENT_BEFORE_FINALIZE_CONFIG, async () => {
       await this.invokeBootstraps();
     });
   }
