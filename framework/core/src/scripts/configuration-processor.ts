@@ -68,30 +68,24 @@ const extractConfig = (config: OptionalConf, properties: PropertyPath | Property
 
 /**
  * Validates validator based configuration
- * @param app - Application instance
  * @param validator - ConfigValidator instance
  */
-const processConfig = async ({app, validator}: { app: Application, validator: ConfigValidator }): Promise<SkipProcessing | true> => {
-  const config = validator.getConfig();
-  const jsonSchema = await validator.getSchema();
+const processConfig = async (validator: ConfigValidator): Promise<SkipProcessing | true> => {
+  const jsonSchema = await validator.getSchema() as JSONSchema7;
 
   if ( jsonSchema ) {
-    (new Configuration(
-      validator.getConfig(), await validator.getSchema() as JSONSchema7,
-    )).validate({}, true);
+    (new Configuration(validator.getConfig(), jsonSchema)).validate({}, true);
 
-    if (!(await validator.afterSchemaValidate(config))) {
+    if (!(await validator.afterSchemaValidate())) {
       return new SkipProcessing();
     }
   }
 
-  await validator.validate(app);
+  await validator.validate();
 
-  if (!(await validator.afterValidate(config, app))) {
+  if (!(await validator.afterValidate())) {
     return new SkipProcessing();
   }
-
-  validator.setConfig(config);
 
   return true;
 };
@@ -99,15 +93,16 @@ const processConfig = async ({app, validator}: { app: Application, validator: Co
 /**
  * Create a config validator class from the given path
  * @param path - Path to the class
+ * @param args - Argument pass to the constructor
  */
-const createClassInstance = (path: string): ConfigValidator => {
+const createClassInstance = (path: string, args: any[] = []): ConfigValidator => {
   const ConfigClass = Instance.classFromPath(path) as Class<ConfigValidator>;
 
   if (!isConstructor(ConfigClass)) {
     throw new InvalidArgumentError(`The class '${basename(path)}' must be a constructor.`);
   }
 
-  const validator = new ConfigClass();
+  const validator = new ConfigClass(...args as any);
 
   if (!(validator instanceof ConfigValidator)) {
     throw new InvalidArgumentError(`The class '${basename(path)}' must be extended by 'ConfigValidator'.`);
@@ -131,9 +126,9 @@ export default async ({app, config, validators}: Args): Promise<DeepPartial<Appl
   let confInstance = new Configuration(config);
 
   for await (const path of validators) {
-    const validator = createClassInstance(path);
+    const validator = createClassInstance(path, [app, config, {}]);
     const validatorConfig = extractConfig(
-      confInstance.getConfig(), validator.propertyName(config)
+      confInstance.getConfig(), validator.propertyName()
     );
 
     if (!validatorConfig) {
@@ -143,12 +138,12 @@ export default async ({app, config, validators}: Args): Promise<DeepPartial<Appl
     validator.setConfig(validatorConfig as any);
     validator.init();
 
-    const result = await processConfig({app, validator});
+    const result = await processConfig(validator);
     if (result instanceof SkipProcessing) {
       continue;
     }
 
-    await validator.apply(app);
+    await validator.apply();
     confInstance.merge(validator.getConfig());
   }
 
