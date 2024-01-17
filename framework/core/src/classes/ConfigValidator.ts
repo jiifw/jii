@@ -40,6 +40,11 @@ export default class ConfigValidator<
   }
 
   /**
+   * An event that triggers after the config is set and processing is being start
+   */
+  public async beforeProcess (): Promise<void> {}
+
+  /**
    * Returns property name to retrieve object in application configuration
    */
   public propertyName(): PropertyPath | PropertyPath[] {
