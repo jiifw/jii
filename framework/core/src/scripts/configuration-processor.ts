@@ -123,20 +123,20 @@ export default async ({app, config, validators}: Args): Promise<DeepPartial<Appl
     return config;
   }
 
-  let confInstance = new Configuration(config);
+  const confInstance = new Configuration(config);
 
   for await (const path of validators) {
-    const validator = createClassInstance(path, [app, config, {}]);
+    const validator = createClassInstance(path, [app, confInstance.getConfig(), {}]);
     const validatorConfig = extractConfig(
       confInstance.getConfig(), validator.propertyName()
     );
 
+    validator.setConfig(validatorConfig as any);
+    validator.init();
+
     if (!validatorConfig) {
       continue;
     }
-
-    validator.setConfig(validatorConfig as any);
-    validator.init();
 
     const result = await processConfig(validator);
     if (result instanceof SkipProcessing) {
