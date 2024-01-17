@@ -11,6 +11,7 @@ import {accessSync, readFileSync, unlinkSync, writeFileSync} from 'node:fs';
 // utils
 import {isPath, resolve} from './path';
 import {getAlias} from '../base/aliases';
+import {normalize} from 'path';
 
 /**
  * Read and parse a json file
@@ -20,6 +21,16 @@ export function readJsonFile(path: string): any {
   return JSON.parse(
     readFileSync(path, {encoding: 'utf8'}).trim() || '{}',
   );
+}
+
+/**
+ * Read and parse json schema file
+ * @param path - File path
+ * @returns Schema object
+ */
+export function readSchemaFile(path: string): any {
+  const filePath = require.resolve(normalize(getAlias(path)));
+  return require(filePath).default ?? {};
 }
 
 /**
