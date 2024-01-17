@@ -132,7 +132,7 @@ export default async ({app, config, validators}: Args): Promise<DeepPartial<Appl
     );
 
     validator.setConfig(validatorConfig as any);
-    validator.init();
+    await validator.beforeProcess();
 
     if (!validatorConfig) {
       continue;
