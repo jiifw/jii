@@ -6,25 +6,22 @@
  * @since 0.0.1
  */
 
-import objPath from 'object-path';
-
 // classes
 import Module from './Module';
+import ConfigurationEvent from './ConfigurationEvent';
+import InvalidConfigError from './InvalidConfigError';
 
 // utils
 import Jii from '../Jii';
-import {toString} from '../helpers/string';
-import {isPlainObject} from '../helpers/object';
-import {invokeModuleMethod} from '../helpers/file';
 import {APP_CONFIG, CONTAINER_APP_KEY} from '../utils/symbols';
 
 // scripts
-import configValidator from '../scripts/config-validator';
+import configurationProcessor from '../scripts/configuration-processor';
 
 // types
 import {Props} from './BaseObject';
-import InvalidConfigError from './InvalidConfigError';
 import {ApplicationConfig, ComponentsDefinition} from '../typings/app-config';
+
 export type Platform = 'web' | 'cli' | string;
 
 /**
@@ -33,9 +30,14 @@ export type Platform = 'web' | 'cli' | string;
 export default abstract class Application<
   T extends ApplicationConfig = ApplicationConfig
 > extends Module {
-
   // allow props
   [property: string | symbol]: any;
+
+  /**
+   * An event raised when the configuration is being finalized.
+   * @event ConfigurationEvent
+   */
+  public static readonly EVENT_BEFORE_FINALIZE_CONFIG: string = 'beforeFinalizeConfig';
 
   /**
    * Application state used by {@link state} application just started.
@@ -85,10 +87,16 @@ export default abstract class Application<
   protected _platform: 'web' | 'cli' | string = null;
 
   /**
+   * Application configuration
+   * @protected
+   */
+  private _appConfig: T = null;
+
+  /**
    * Get application type (a web platform or command line interface)
    */
   get platform(): Platform {
-    return this._appType;
+    return this._platform;
   }
 
   /**
@@ -98,11 +106,9 @@ export default abstract class Application<
    */
   constructor(config: T, props: Props = {}) {
     super(null, null, props);
-
+    this._appConfig = config;
     Jii.container.memoSync(CONTAINER_APP_KEY, this, {freeze: true});
     this.state = Application.STATE_BEGIN;
-
-    this.preInit(config);
   }
 
   /**
@@ -125,122 +131,81 @@ export default abstract class Application<
    * @param config - The application configuration
    */
   public preInitConfig(config: ApplicationConfig): void {
-    if ( !this._platform ) {
-      throw new InvalidConfigError('You must specify the application type');
-    }
-
-    if (!objPath.has(config, 'components') || !isPlainObject(config.components)) {
-      config.components = {};
-    }
-
-    if (config?.components) {
-      for (const key in config.components) {
-        const {platform = 'web'} = config.components[key];
-
-        if (!platform || platform !== this._platform) {
-          delete config.components[key];
-        }
-      }
-    }
-
-    // merge core components with custom components
-    for (const [id, component] of Object.entries(this.coreComponents())) {
-      if (!objPath.has(config, ['components', id])) {
-        config['components'][id] = component;
-      } else if (isPlainObject(config.components[id])
-        && !objPath.has(config, ['components', id, 'class'])) {
-        objPath.set(config, ['components', id, 'class'], component['class']);
-      }
-    }
   }
 
   /**
    * Pre-initializes the application.<br>
    * This method is called at the beginning of the application constructor.<br>
    * It initializes several important application properties.<br>
-   * If you override this method, please make sure you call the parent implementation.<br>
+   * <b style="color:red">Warning</b>: If you override this method, please make sure you call the parent implementation.<br>
    * @param config - The application configuration
    * @throws InvalidConfigError if either {@link id} or {@link basePath} configuration is missing.
    */
-  public preInit(config: T): void {
+  public async preInit(config: T): Promise<void> {
+    if (!this._platform) {
+      throw new InvalidConfigError('You must specify the application type');
+    }
+
     this.preInitConfig(config);
 
-    // validates/verify configuration
-    configValidator(<ApplicationConfig>config);
+    const validators = [
+      '@jiiRoot/config/validators/CoreConfigValidator',
+      '@jiiRoot/config/validators/SettingsConfigValidator',
+      '@jiiRoot/config/validators/AppEventsConfigValidator',
+      '@jiiRoot/config/validators/PluginsConfigValidator',
+      '@jiiRoot/config/validators/ComponentsConfigValidator',
+      ...this.coreConfigValidators(),
+    ];
 
-    if (!toString(config?.id, true)) {
-      throw new InvalidConfigError('The "id" configuration for the Application is required.');
-    }
+    // validates, verify and apply the configuration
+    const updatedConfig = await configurationProcessor({
+      app: this, config, validators,
+    });
+
+    const event = new ConfigurationEvent();
+    event.sender = this;
+    event.config = updatedConfig as ApplicationConfig;
+
+    await this.trigger(Application.EVENT_BEFORE_FINALIZE_CONFIG, event);
 
     // memorize the configuration for future reference and usage
-    Jii.container.memoSync(APP_CONFIG, config, {freeze: true});
-
-    this.id = config.id;
-    delete config.id;
-
-    if (toString(config?.name, true)) {
-      this.name = config.name;
-      delete config.name;
-    }
-
-    if (toString(config?.language, true)) {
-      this.language = config.language;
-      delete config.language;
-    }
-
-    if (toString(config?.sourceLanguage, true)) {
-      this.sourceLanguage = config.sourceLanguage;
-      delete config.sourceLanguage;
-    }
-
-    if (toString(config?.timeZone, true)) {
-      this.timeZone = config.timeZone;
-      delete config.timeZone;
-    }
-
-    if (isPlainObject(config?.params)) {
-      this.params = config.params;
-      delete config.params;
-    }
-
-    this.setBasePath(config.basePath);
-
-    // register aliases
-    this.setAliases(config.aliases);
-
-    this.setComponents(config?.components);
+    Jii.container.memoSync(APP_CONFIG, event.config, {freeze: true});
   }
 
   /**
-   * Returns the configuration of core application components.
-   * @see set()
+   * Returns the predefined configuration of application components.
+   * @see {@link setComponents setComponents()}
+   *
+   * @example
+   * coreComponents() {
+   *   return {
+   *     server: { class: '@jiiRoot/classes/Component' },
+   *     ...,
+   *   }
+   * }
    */
   public coreComponents(): ComponentsDefinition {
     return {};
   }
 
   /**
-   * Invoke bootstrapper files<br>
-   * If you override this method, please make sure you call the parent implementation.
+   * Returns configuration validators *(aliased paths)*
+   * @example
+   * [
+   *   '@jiiRoot/config/validators/CoreConfigValidator',
+   *   ...,
+   * ]
    */
-  protected async invokeBootstraps (): Promise<void>  {
-    // memorize the configuration for future reference and usage
-    const {bootstrap = []} = Jii.container.retrieve<ApplicationConfig>(APP_CONFIG);
-    const list = Array.isArray(bootstrap) ? bootstrap : [bootstrap];
-
-    if (!list.length) return;
-
-    await Promise.all(
-      list.map(path => invokeModuleMethod(path, 'default'))
-    );
-  };
+  public coreConfigValidators(): string[] {
+    return [];
+  }
 
   /**
    * Run the application<br>
    * If you override this method, please make sure you call the parent implementation.
    */
   public async run(): Promise<void> {
-    // invoke bootstrapper files
-    await this.invokeBootstraps();
+    // initialize configuration
+    await this.preInit(this._appConfig);
   }
 }
