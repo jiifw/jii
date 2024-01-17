@@ -27,8 +27,13 @@ export function readJsonFile(path: string): any {
  * Read and parse json schema file
  * @param path - File path
  * @returns Schema object
+ * @example Without postfix
+ * const schema = readSchemaFile('@app/schemas/request');
+ * @example With postfix
+ * const schema = readSchemaFile('@app/schemas/request.schema');
  */
 export function readSchemaFile(path: string): any {
+  path = /\.schema$/.test(path) ? path : `${path}.schema`;
   const filePath = require.resolve(normalize(getAlias(path)));
   return require(filePath).default ?? {};
 }
