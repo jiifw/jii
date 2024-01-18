@@ -39,9 +39,9 @@
     "cli-dev": "ts-node -r tsconfig-paths/register ./src/cli.ts"
   },
   "dependencies": {
-    "@jii/cli": "^0.0.1",
+    "@jii/console": "^0.0.1",
     "@jii/core": "^0.0.1",
     "@jii/cors": "^0.0.1",
-    "@jii/server": "^0.0.1"
+    "@jii/web": "^0.0.1"
   }
 }
