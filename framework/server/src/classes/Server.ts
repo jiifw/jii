@@ -21,6 +21,10 @@ import {
   MiddlewareAfter, MiddlewareCallback, MiddlewareDefinition,
   MiddlewareMiddleware, MiddlewareRegister, MiddlewareType
 } from '../typings/classes/Server';
+import WebPluginEvent from './WebPluginEvent';
+import Event from '@jii/core/dist/classes/Event';
+import Jii from '@jii/core/dist/Jii';
+import WebPlugin from './WebPlugin';
 
 /**
  * Middleware supported types
@@ -158,7 +162,17 @@ export default class Server extends Component {
   public async createServer(): Promise<void> {
     this.state = Server.STATE_INIT;
     // register middleware engine
-    await this._server.register(require('@fastify/middie'));
+    await this.getServer().register(require('@fastify/middie'));
+
+    /////////////// STARTS: PLUGIN EVENT (BEFORE_APP_RUN) TRIGGER //////////////
+    let pluginEvent = new WebPluginEvent();
+    pluginEvent.server = this.getServer();
+    pluginEvent.owner = this;
+    for (const handler of Object.values(Jii.plugins.getPluginsEvent(WebPlugin.EVENT_SERVER_INIT))) {
+      await Event.triggerHandler(WebPlugin.EVENT_SERVER_INIT, handler, {}, pluginEvent);
+    }
+    pluginEvent = null;
+    /////////////// ENDS: PLUGIN EVENT (BEFORE_APP_RUN) TRIGGER ////////////////
 
     // register predefined middleware
     await this.applyMiddleware(this.getPredefinedMiddleware());
