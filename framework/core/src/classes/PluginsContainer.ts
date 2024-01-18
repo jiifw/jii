@@ -20,13 +20,14 @@ import InvalidConfigError from './InvalidConfigError';
 
 // utils
 import Jii from '../Jii';
-import {contains} from '../helpers/array';
 import {readSchemaFile} from '../helpers/file';
 import {isPlainObject} from '../helpers/object';
 
 // types
 import {Class} from 'utility-types';
 import {PluginDefinition, PluginsDefinition} from '../typings/plugin';
+import {isSyncFunction} from '../helpers/function';
+import InvalidArgumentError from './InvalidArgumentError';
 
 export type PluginAttributes = {
   [name: string | symbol]: any;
@@ -121,11 +122,20 @@ export default class PluginsContainer extends BaseObject {
    *
    * @param fields - Metadata fields to retrieve
    * @param [returnDisabled] - True to return disable, false to return on enabled
+   * @param [callback] - True to return disable, false to return on enabled
    * @returns Registered plugins metadata
    */
-  public pluginsMetadata(fields: PluginMetadataType[], returnDisabled: boolean = false): Record<string, { [field: PluginMetadataType | string]: any }> {
+  public pluginsMetadata(
+    fields: PluginMetadataType[],
+    returnDisabled: boolean = false,
+    callback: (definition: PluginDefinition, plugin: Plugin,
+    ) => any = undefined): Record<string, { [field: PluginMetadataType | string]: any }> {
     if (!this._definitions.size) {
       return {};
+    }
+
+    if (callback && !isSyncFunction(callback)) {
+      throw new InvalidArgumentError(`The 'callback' argument must be a sync function`);
     }
 
     const list: Record<string, { [field: PluginMetadataType | string]: any }> = {};
@@ -155,24 +165,26 @@ export default class PluginsContainer extends BaseObject {
         metadata['config'] = definition.config;
       }
 
-      if (contains(fields, ['events', 'instance', 'base-path', 'version'])) {
-        const instance = this.get<Plugin>(pluginId);
+      const instance = this.get<Plugin>(pluginId);
 
-        if (fields.includes('instance')) {
-          metadata['instance'] = instance;
-        }
+      if (fields.includes('instance')) {
+        metadata['instance'] = instance;
+      }
 
-        if (fields.includes('events')) {
-          metadata['events'] = instance.events();
-        }
+      if (fields.includes('events')) {
+        metadata['events'] = instance.events();
+      }
 
-        if (fields.includes('base-path')) {
-          metadata['base-path'] = instance.basePath;
-        }
+      if (fields.includes('base-path')) {
+        metadata['base-path'] = instance.basePath;
+      }
 
-        if (fields.includes('version')) {
-          metadata['version'] = instance.version;
-        }
+      if (fields.includes('version')) {
+        metadata['version'] = instance.version;
+      }
+
+      if (callback) {
+        metadata['custom'] = callback(definition, instance);
       }
 
       list[pluginId] = metadata;
