@@ -53,10 +53,8 @@ export default abstract class BaseJii {
   constructor() {
     this._container = new Container();
     this.logger = new Logger();
-    this._container.memo(INTERNAL_METADATA, () => () => new Error('Inaccessible internal'), {freeze: true});
-    this._container.memoSync(CONTAINER_PLUGINS_KEY, new PluginsContainer(), {
-      freeze: true,
-    });
+    this._container.memoSync(INTERNAL_METADATA, () => () => new Error('Inaccessible internal'), {freeze: true});
+    this._container.memoSync(CONTAINER_PLUGINS_KEY, new PluginsContainer(), { freeze: true});
     bindClass(this);
 
     // initialize core aliases
