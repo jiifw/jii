@@ -7,8 +7,7 @@
  */
 
 // classes
-import Component from './Component';
-import PluginEvent from './PluginEvent';
+import Component, {EventHandler as ComponentEventHandler} from './Component';
 
 /**
  * The plugin types
@@ -16,9 +15,10 @@ import PluginEvent from './PluginEvent';
 export const PLUGIN_TYPES = ['server', 'config', 'request', 'response', 'cli', 'silent'] as const;
 
 export type PluginType = typeof PLUGIN_TYPES[number];
+export type EventHandler = ComponentEventHandler;
 
 /**
- * A plugin class to create server plugins
+ * A base plugin class to create application specific plugins
  */
 export default abstract class Plugin extends Component {
   /**
@@ -34,6 +34,68 @@ export default abstract class Plugin extends Component {
    * An event raised right after executing a plugin registered.
    */
   public static EVENT_AFTER_REGISTER: string = 'afterRegister';
+
+  /**
+   * @event PluginAppEvent
+   * An event raised while application is being initialized
+   *
+   * You may seek {@link PluginAppEvent#app PluginAppEvent.app} to be change behavior of the application instance
+   */
+  public static EVENT_BEFORE_APP_INIT: string = 'beforeAppInit';
+
+  /**
+   * @event PluginAppEvent
+   * An event raised while application is preparing to run
+   *
+   * You may seek {@link PluginAppEvent#app PluginAppEvent.app} to be change behavior of the application instance
+   */
+  public static EVENT_BEFORE_APP_RUN: string = 'beforeAppRun';
+
+  /**
+   * @event PluginAppConfigEvent
+   * An event raised right before the application config is preparing
+   *
+   * You may seek {@link PluginAppConfigEvent#config PluginAppConfigEvent.config} to modify the application configuration before preparing
+   */
+  public static EVENT_BEFORE_CONFIG_PROCESS: string = 'beforeConfigProcess';
+
+  /**
+   * @event PluginAppConfigEvent
+   * An event raised right after the application  config is finalized
+   *
+   * You may seek {@link PluginAppConfigEvent#config PluginAppConfigEvent.config} to modify the application configuration after finalized
+   */
+  public static EVENT_AFTER_CONFIG_PROCESS: string = 'afterConfigProcess';
+
+  /**
+   * Declares event handlers for the {@link owner}'s events.
+   *
+   * Child classes may override this method to declare what callbacks should
+   * be attached to the events of the {@link owner} plugin.
+   *
+   * The callbacks can be any of the following:
+   *
+   * 1. <code style="color:#B87333">async (event: Event, data: any): Promise<void> => { ... }</code> // Anonymous async function
+   * 2. <code style="color:#B87333">(event: Event, data: any): void => { ... }</code> // Anonymous sync function
+   * 3. <code style="color:#B87333">[instance, 'handleAdd']</code> // object method
+   * 4. <code style="color:#B87333">[Page, 'handleAdd']</code> // static class method
+   * 4. <code style="color:#B87333">['@app/classes/Page', 'handleAdd']</code> // alias based class path
+   * 6. <code style="color:#B87333">'handleAdd'</code> // global function
+   *
+   * The following is an example:
+   *
+   * ```
+   * {
+   *     [Plugin.EVENT_BEFORE_REGISTER]: 'beforeRegister',
+   *     [Plugin.EVENT_AFTER_REGISTER]: 'afterRegister',
+   * }
+   * ```
+   *
+   * @returns events (object keys) and the corresponding event handler methods (object values).
+   */
+  public events(): Record<string, EventHandler> {
+    return {};
+  }
 
   /**
    * The unique plugin id, e.g., cors, body-parser, etc.
@@ -59,29 +121,4 @@ export default abstract class Plugin extends Component {
    * Plugin type
    */
   public type: PluginType = 'silent';
-
-  /**
-   * The plugin handler
-   */
-  async handler(): Promise<void> {
-    throw new Error('Plugin handler implementation is required');
-  }
-
-  /**
-   * Trigger event before the plugin register
-   */
-  async beforeRegister(): Promise<boolean> {
-    const event = new PluginEvent();
-    await this.trigger(Plugin.EVENT_BEFORE_REGISTER, event);
-    return event.isValid;
-  }
-
-  /**
-   * Trigger event after the plugin register
-   */
-  async afterRegister(): Promise<any> {
-    const event = new PluginEvent();
-    await this.trigger(Plugin.EVENT_AFTER_REGISTER, event);
-    return event.result;
-  }
 }
