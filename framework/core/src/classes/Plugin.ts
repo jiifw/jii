@@ -54,6 +54,46 @@ export default abstract class Plugin extends Component {
   public static EVENT_AFTER_CONFIG_PROCESS: string = 'afterConfigProcess';
 
   /**
+   * The unique plugin id, e.g., cors, body-parser, etc.
+   */
+  public id: Lowercase<string> = null;
+
+  /**
+   * The plugin directory
+   */
+  public basePath: string = null;
+
+  /**
+   * The plugin description
+   */
+  public description: string = null;
+
+  /**
+   * The plugin version
+   */
+  public version: string = '1.0';
+
+  /**
+   * Plugin type
+   */
+  public type: PluginType = 'silent';
+
+  /**
+   * Returns the list of core validators for the plugin
+   *
+   * It will inject the validators into application core validators at runtime
+   *
+   * @example
+   * [
+   *   '@jiiRoot/config/validators/CoreConfigValidator',
+   *   ...,
+   * ]
+   */
+  public configValidators(): string[] {
+    return [];
+  }
+
+  /**
    * Declares event handlers for the {@link owner}'s events.
    *
    * Child classes may override this method to declare what callbacks should
@@ -82,29 +122,4 @@ export default abstract class Plugin extends Component {
   public events(): Record<string, EventHandler> {
     return {};
   }
-
-  /**
-   * The unique plugin id, e.g., cors, body-parser, etc.
-   */
-  public id: Lowercase<string> = null;
-
-  /**
-   * The plugin directory
-   */
-  public basePath: string = null;
-
-  /**
-   * The plugin description
-   */
-  public description: string = null;
-
-  /**
-   * The plugin version
-   */
-  public version: string = '1.0';
-
-  /**
-   * Plugin type
-   */
-  public type: PluginType = 'silent';
 }
