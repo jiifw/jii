@@ -8,14 +8,16 @@
 
 // classes
 import Event from './Event';
-import Application from './Application';
+
+// types
+import {ApplicationConfig} from '../typings/app-config';
 
 /**
  * The event class for the plugin.
  */
 export default class PluginAppConfigEvent extends Event {
   /**
-   * The application instance
+   * The application configuration
    */
-  public app: Application;
+  public config: ApplicationConfig;
 }
