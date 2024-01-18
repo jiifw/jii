@@ -37,7 +37,7 @@ export default class Application extends BaseApplication {
   //public static readonly EVENT_AFTER_REQUEST = 'afterRequest';
 
   init() {
-    this.setAliases({'@jiiServer': dirname(__dirname)});
+    this.setAliases({'@jiiWeb': dirname(__dirname)});
     super.init();
   }
 
@@ -54,7 +54,7 @@ export default class Application extends BaseApplication {
    */
   public coreComponents(): ComponentsDefinition {
     return merge(super.coreComponents(), {
-      server: {class: '@jiiServer/classes/Server'},
+      server: {class: '@jiiWeb/classes/Server'},
     });
   }
 }
