@@ -7,38 +7,69 @@
  */
 
 // classes
-import {Class} from 'utility-types';
 import {EventHandler} from '../classes/Event';
 import {BehaviorArgs} from '../classes/Behavior';
-
-export type PluginType = 'server' | 'config' | 'request' | 'response' | 'cli' | 'none';
+import {ComponentsDefinition} from './components';
 
 export type PluginDefinition = {
   /**
-   * Class path, Object
+   * Directory path or alias to the plugin
+   * @example App level path
+   * '@plugins/my-plugin'
+   * @example Package level path
+   * '@jii/core'
    */
-  class: string | Class<any>;
+  path: string;
+
   /**
-   * Platform to target components for.
+   * Main filename (w/o extension) which contains plugin bootstrapper class<br>
+   * For example, `'index'` or `'MyPluginFile'` *(it will automatically resolve the file extension)*
    */
-  type?: PluginType;
+  file?: string;
+
   /**
-   * Enable plugin functionality, false to disable.
+   * The unique plugin alias (without @ symbol) to register in root level aliases<br>
+   * If not set, the plugin *id* will be used as alias,<br>
+   * By using `Jii.getAlias('@[id]')`, you can get the plugin's base path
+   * @see {@link path}
    */
-  enabled?: boolean;
+  alias?: string;
+
+  /**
+   * Disable plugin functionality, false to enable.
+   * @default false
+   */
+  disabled?: boolean;
+
   /**
    * Allow support for CLI commands (commands/*.ts)
    */
   commands?: boolean;
 
-  [event: `on ${string}`]: EventHandler;
-  [behavior: `as ${string}`]: BehaviorArgs;
-  [prop: string]: any;
-
   /**
    * Plugin additional configuration
    */
   config?: Record<string, any>;
+
+  /**
+   * Components to attach with the application
+   */
+  components?: ComponentsDefinition;
+
+  /**
+   * Plugin events to register
+   */
+  [event: `on ${string}`]: EventHandler;
+
+  /**
+   * Plugin behaviors to attach with
+   */
+  [behavior: `as ${string}`]: BehaviorArgs;
+
+  /**
+   * Additional properties
+   */
+  [prop: string]: any;
 }
 
 export interface PluginsDefinition {
