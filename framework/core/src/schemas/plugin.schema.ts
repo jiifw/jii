@@ -10,8 +10,6 @@
 import {JSONSchema7} from 'json-schema';
 
 // utils
-import {PLUGIN_TYPES} from '../classes/Plugin';
-
 export default <JSONSchema7>{
   type: 'object',
   additionalProperties: {
@@ -30,13 +28,6 @@ export default <JSONSchema7>{
         description: 'File path to plugin',
         default: 'index',
       },
-      version: {
-        title: 'Version',
-        description: 'Plugin version (semver)',
-        type: 'string',
-        pattern: '^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$',
-        default: 'index',
-      },
       alias: {
         type: 'string',
         minLength: 3,
@@ -45,14 +36,6 @@ export default <JSONSchema7>{
         title: 'Alias',
         description: 'Alias for the plugin',
         default: '',
-      },
-      type: {
-        type: 'string',
-        pattern: '^[a-z]+$',
-        enum: PLUGIN_TYPES as any,
-        default: 'none',
-        title: 'Type',
-        description: 'Type of plugin',
       },
       disabled: {
         type: 'boolean',
