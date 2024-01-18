@@ -150,10 +150,25 @@ export default abstract class Application<
       throw new InvalidConfigError('You must specify the application type');
     }
 
+    let validators: string[] = [
+      '@jiiRoot/config/validators/CoreConfigValidator',
+      '@jiiRoot/config/validators/SettingsConfigValidator',
+      '@jiiRoot/config/validators/AppEventsConfigValidator',
+      '@jiiRoot/config/validators/ComponentsConfigValidator',
+      ...this.coreConfigValidators(),
+    ];
+
     // invoke plugins
     await configurationProcessor({
       app: this, config, validators: ['@jiiRoot/config/validators/PluginsConfigValidator'],
     });
+
+    const pluginCoreConfig = Jii.plugins.pluginsMetadata(
+      [], false, (definition, plugin) => (plugin.configValidators())
+    );
+
+    validators.push(...Object.values(pluginCoreConfig).map(item => item.custom).flat());
+    validators = [...new Set(validators)];
 
     let pluginEvent = null;
 
@@ -177,14 +192,6 @@ export default abstract class Application<
     config = pluginEvent.config as T;
     pluginEvent = null;
     /////////////// ENDS: PLUGIN EVENT (BEFORE_CONFIG_PROCESS) TRIGGER ////////////////
-
-    const validators: string[] = [
-      '@jiiRoot/config/validators/CoreConfigValidator',
-      '@jiiRoot/config/validators/SettingsConfigValidator',
-      '@jiiRoot/config/validators/AppEventsConfigValidator',
-      '@jiiRoot/config/validators/ComponentsConfigValidator',
-      ...this.coreConfigValidators(),
-    ];
 
     // validates, verify and apply the configuration
     let updatedConfig = await configurationProcessor({
