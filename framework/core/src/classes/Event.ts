@@ -160,6 +160,57 @@ export default class Event<T = object> extends BaseObject {
   }
 
   /**
+   * Triggers an event handler in a sandbox.
+   * @param name - The event name
+   * @param handler - The event handler to be triggered.
+   * @param [data] - The event data.
+   * @param [event] - The event parameter. If not set, a default Event object will be created.
+   */
+  public static async triggerHandler(name: string, handler: EventHandler, data: EventData = {}, event: Event | null = null): Promise<void> {
+    if (!event) {
+      event = new Event();
+    }
+
+    event.handled = false;
+    event.name = name;
+
+    if (!event.sender) {
+      event.sender = this;
+    }
+
+    event.data = data;
+
+    if (typeof handler === 'string') {
+      // global function
+      await invoke(handler, [event]);
+    }
+
+    if (typeof handler === 'function') {
+      // anonymous function
+      await invoke(handler, [event]);
+    }
+
+    if (Array.isArray(handler)) {
+      const [target, funcName] = handler;
+
+      if ('string' === typeof target && target.startsWith('@')) {
+        // module method
+        await invokeModuleMethod(target, funcName, [event]);
+      } else if (['object', 'function'].includes(typeof target)) {
+        // object method or a static class method
+        await invokeMethod(<object | Function>target, funcName, [event]);
+      } else {
+        throw new InvalidCallError('Handler must be be a valid function or a method');
+      }
+    }
+
+    // stop further handling if the event is handled
+    if (event.handled) {
+      return;
+    }
+  }
+
+  /**
    * Triggers a class-level event.
    * This method will cause invocation of event handlers that are attached to the named event
    * for the specified class and all its parent classes.
@@ -171,47 +222,8 @@ export default class Event<T = object> extends BaseObject {
       return;
     }
 
-    if (!event) {
-      event = new Event();
-    }
-    if (!event.sender) {
-      event.sender = this;
-    }
-
-    event.handled = false;
-    event.name = name;
-
     for await (const [handler, data] of Event._events.get(name).entries()) {
-      event.data = data;
-
-      if (typeof handler === 'string') {
-        // global function
-        await invoke(handler, [event]);
-      }
-
-      if (typeof handler === 'function') {
-        // anonymous function
-        await invoke(handler, [event]);
-      }
-
-      if (Array.isArray(handler)) {
-        const [target, funcName] = handler;
-
-        if ('string' === typeof target && target.startsWith('@')) {
-          // module method
-          await invokeModuleMethod(target, funcName, [event]);
-        } else if (['object', 'function'].includes(typeof target)) {
-          // object method or a static class method
-          await invokeMethod(<object | Function>target, funcName, [event]);
-        } else {
-          throw new InvalidCallError('Handler must be be a valid function or a method');
-        }
-      }
-
-      // stop further handling if the event is handled
-      if (event.handled) {
-        return;
-      }
+      await Event.triggerHandler(name, handler, data, event);
     }
   }
 }
