@@ -12,11 +12,15 @@ import fastify from 'fastify';
 // classes
 import ServerEvent from './ServerEvent';
 import Component from '@jii/core/dist/classes/Component';
+import InvalidCallError from '@jii/core/dist/classes/InvalidCallError';
+import InvalidConfigError from '@jii/core/dist/classes/InvalidConfigError';
 
 // types
 import {ServerInstance, ServerHTTPOptions} from '../typings/server';
-import {MiddlewareAfter, MiddlewareCallback, MiddlewareDefinition, MiddlewareMiddleware, MiddlewareRegister, MiddlewareType} from '../typings/classes/Server';
-import InvalidConfigError from '@jii/core/dist/classes/InvalidConfigError';
+import {
+  MiddlewareAfter, MiddlewareCallback, MiddlewareDefinition,
+  MiddlewareMiddleware, MiddlewareRegister, MiddlewareType
+} from '../typings/classes/Server';
 
 /**
  * Middleware supported types
@@ -26,7 +30,7 @@ export const MIDDLEWARE_TYPES: MiddlewareType[] = [
 ];
 
 /**
- * Server class to handle the server instance.
+ * Server component to handle the server fastify.
  */
 export default class Server extends Component {
   /**
@@ -109,6 +113,12 @@ export default class Server extends Component {
   private _server: ServerInstance = null;
 
   /**
+   * Whatever the server is started or not.
+   * @protected
+   */
+  protected isStarted: boolean = false;
+
+  /**
    * Gets the defaults and customer options to pass to the server.
    * @private
    */
@@ -165,6 +175,7 @@ export default class Server extends Component {
   public async onInitialize(): Promise<void> {
     const severEvent = new ServerEvent();
     severEvent.server = this._server;
+    severEvent.owner = this;
     await this.trigger(Server.EVENT_INITIALIZE);
   }
 
@@ -173,7 +184,8 @@ export default class Server extends Component {
    */
   public async onListen(): Promise<void> {
     const severEvent = new ServerEvent();
-    severEvent.server = this._server;
+    severEvent.server = this.getServer();
+    severEvent.owner = this;
     await this.trigger(Server.EVENT_LISTEN);
   }
 
@@ -182,6 +194,7 @@ export default class Server extends Component {
    */
   public async onError(error: Error | any): Promise<void> {
     const event = new ServerEvent();
+    event.server = this.getServer();
     event.data = error;
     event.owner = this;
     await this.trigger(Server.EVENT_ERROR, event);
@@ -189,22 +202,26 @@ export default class Server extends Component {
 
   /**
    * Starts the server.
+   * @throws {InvalidCallError} If the server is already started.
    */
-  public async start(callback?: (server?: any) => Promise<void>): Promise<void> {
+  public async start(): Promise<void> {
+    if ( this.isStarted ) {
+      throw new InvalidCallError('The server is already started.');
+    }
+
     await this.createServer();
 
     try {
-      await this._server.listen({host: this.host, port: this.port});
+      await this.getServer().listen({host: this.host, port: this.port});
       console.log(`Server is listening on: http://${this.host}:${this.port}`);
 
       this.state = Server.STATE_STARTED;
       await this.onListen();
 
-      // invoke supplied callback
-      'function' === typeof callback && await callback.call(null, this._server);
+      this.isStarted = true;
     } catch (err) {
       await this.onError(err);
-      this._server.log.error(err);
+      this.getServer().log.error(err);
       process.exit(1);
     }
   }
