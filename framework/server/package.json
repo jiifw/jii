@@ -19,6 +19,7 @@
     "access": "public"
   },
   "scripts": {
+    "dev": "nodemon --exec babel-node ./src/index.local.ts --extensions .ts,.tsx,.js,.jsx",
     "clean": "rimraf coverage dist tmp && mkdir coverage dist",
     "prebuild": "npm run lint",
     "build": "yarn run clean && yarn run build-code && yarn run build-types",
