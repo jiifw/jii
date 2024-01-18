@@ -14,27 +14,13 @@ import Component, {EventHandler as ComponentEventHandler} from './Component';
  */
 export const PLUGIN_TYPES = ['server', 'config', 'request', 'response', 'cli', 'silent'] as const;
 
-export type PluginType = typeof PLUGIN_TYPES[number];
+export type PluginType = typeof PLUGIN_TYPES[number] | string;
 export type EventHandler = ComponentEventHandler;
 
 /**
  * A base plugin class to create application specific plugins
  */
 export default abstract class Plugin extends Component {
-  /**
-   * @event PluginEvent
-   * An event raised right before executing a plugin register.
-   *
-   * You may set {@link PluginEvent#isValid PluginEvent.isValid} to be false to cancel the plugin execution.
-   */
-  public static EVENT_BEFORE_REGISTER: string = 'beforeRegister';
-
-  /**
-   * @event PluginEvent
-   * An event raised right after executing a plugin registered.
-   */
-  public static EVENT_AFTER_REGISTER: string = 'afterRegister';
-
   /**
    * @event PluginAppEvent
    * An event raised while application is being initialized
