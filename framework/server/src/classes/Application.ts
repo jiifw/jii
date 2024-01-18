@@ -8,20 +8,24 @@
 import merge from 'deepmerge';
 
 // classes
-import BaseApplication from '@jii/core/dist/classes/Application';
 import Server from './Server';
+import BaseApplication from '@jii/core/dist/classes/Application';
 
 // utils
 import {dirname} from '@jii/core/dist/helpers/path';
 
 // types
-import {ApplicationConfig} from '../typings/app-config';
 import {ComponentsDefinition} from '@jii/core/dist/typings/components';
 
 /**
  * Application is the base class for all web application classes.
  */
 export default class Application extends BaseApplication {
+  /**
+   * @inheritDoc
+   */
+  protected _platform: 'web' | 'cli' | string = 'web';
+
   /**
    * An event raised before the application starts to handle a request.
    */
@@ -32,18 +36,13 @@ export default class Application extends BaseApplication {
    */
   //public static readonly EVENT_AFTER_REQUEST = 'afterRequest';
 
-  preInitConfig(config: ApplicationConfig) {
-    this._platform = 'web';
-    super.preInitConfig(config);
-  }
-
-  preInit(config: ApplicationConfig) {
+  init() {
     this.setAliases({'@jiiServer': dirname(__dirname)});
-    super.preInit(config);
+    super.init();
   }
 
   /**
-   * Run the application
+   * @inheritDoc
    */
   public async run(): Promise<void> {
     await super.run();
@@ -51,8 +50,7 @@ export default class Application extends BaseApplication {
   }
 
   /**
-   * Returns the configuration of core application components.
-   * @see set()
+   * @inheritDoc
    */
   public coreComponents(): ComponentsDefinition {
     return merge(super.coreComponents(), {
