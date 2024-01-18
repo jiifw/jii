@@ -1,5 +1,5 @@
 {
-  "name": "@jii/cli",
+  "name": "@jii/console",
   "version": "0.0.1",
   "description": "Cli tools for Jii framework",
   "author": {
