@@ -10,22 +10,21 @@
 import Event from './Event';
 import Plugin from './Plugin';
 import Module from './Module';
-import ConfigurationEvent from './ConfigurationEvent';
+import PluginAppEvent from './PluginAppEvent';
 import InvalidConfigError from './InvalidConfigError';
+
+// scripts
+import applyAppCoreConfiguration from '../scripts/app-core-configuration';
 
 // utils
 import Jii from '../Jii';
 import {APP_CONFIG, CONTAINER_APP_KEY} from '../utils/symbols';
 
-// scripts
-import configurationProcessor from '../scripts/configuration-processor';
-
 // types
 import {Props} from './BaseObject';
 import {ApplicationConfig, ComponentsDefinition} from '../typings/app-config';
-import PluginAppEvent from './PluginAppEvent';
-import PluginAppConfigEvent from './PluginAppConfigEvent';
 
+// public types
 export type Platform = 'web' | 'cli' | string;
 
 /**
@@ -88,7 +87,7 @@ export default abstract class Application<
    * Application type
    * @protected
    */
-  protected _platform: 'web' | 'cli' | string = null;
+  protected _platform: Platform = null;
 
   /**
    * Application configuration
@@ -150,73 +149,10 @@ export default abstract class Application<
       throw new InvalidConfigError('You must specify the application type');
     }
 
-    let validators: string[] = [
-      '@jiiRoot/config/validators/CoreConfigValidator',
-      '@jiiRoot/config/validators/SettingsConfigValidator',
-      '@jiiRoot/config/validators/AppEventsConfigValidator',
-      '@jiiRoot/config/validators/ComponentsConfigValidator',
-      ...this.coreConfigValidators(),
-    ];
-
-    // invoke plugins
-    await configurationProcessor({
-      app: this, config, validators: ['@jiiRoot/config/validators/PluginsConfigValidator'],
-    });
-
-    const pluginCoreConfig = Jii.plugins.pluginsMetadata(
-      [], false, (definition, plugin) => (plugin.configValidators())
-    );
-
-    validators.push(...Object.values(pluginCoreConfig).map(item => item.custom).flat());
-    validators = [...new Set(validators)];
-
-    let pluginEvent = null;
-
-    /////////////// STARTS: PLUGIN EVENT (BEFORE_APP_INIT) TRIGGER //////////////
-    pluginEvent = new PluginAppEvent();
-    pluginEvent.sender = this;
-    for (const handler of Object.values(Jii.plugins.getPluginsEvent(Plugin.EVENT_BEFORE_APP_INIT))) {
-      await Event.triggerHandler(Plugin.EVENT_BEFORE_APP_INIT, handler, {}, pluginEvent);
-    }
-    /////////////// ENDS: PLUGIN EVENT (BEFORE_APP_INIT) TRIGGER ////////////////
-
-    this.preInitConfig(config);
-
-    /////////////// STARTS: PLUGIN EVENT (BEFORE_CONFIG_PROCESS) TRIGGER //////////////
-    pluginEvent = new PluginAppConfigEvent();
-    pluginEvent.sender = this;
-    pluginEvent.config = config;
-    for (const handler of Object.values(Jii.plugins.getPluginsEvent(Plugin.EVENT_BEFORE_CONFIG_PROCESS))) {
-      await Event.triggerHandler(Plugin.EVENT_BEFORE_CONFIG_PROCESS, handler, {}, pluginEvent);
-    }
-    config = pluginEvent.config as T;
-    pluginEvent = null;
-    /////////////// ENDS: PLUGIN EVENT (BEFORE_CONFIG_PROCESS) TRIGGER ////////////////
-
-    // validates, verify and apply the configuration
-    let updatedConfig = await configurationProcessor({
-      app: this, config, validators,
-    });
-
-    /////////////// STARTS: PLUGIN EVENT (AFTER_CONFIG_PROCESS) TRIGGER //////////////
-    pluginEvent = new PluginAppConfigEvent();
-    pluginEvent.sender = this;
-    pluginEvent.config = updatedConfig;
-    for (const handler of Object.values(Jii.plugins.getPluginsEvent(Plugin.EVENT_AFTER_CONFIG_PROCESS))) {
-      await Event.triggerHandler(Plugin.EVENT_AFTER_CONFIG_PROCESS, handler, {}, pluginEvent);
-    }
-    updatedConfig = pluginEvent.config as T;
-    pluginEvent = null;
-    /////////////// ENDS: PLUGIN EVENT (AFTER_CONFIG_PROCESS) TRIGGER ////////////////
-
-    const event = new ConfigurationEvent();
-    event.sender = this;
-    event.config = updatedConfig as ApplicationConfig;
-
-    await this.trigger(Application.EVENT_BEFORE_FINALIZE_CONFIG, event);
+    const _config = await applyAppCoreConfiguration(this, config)
 
     // memorize the configuration for future reference and usage
-    Jii.container.memoSync(APP_CONFIG, event.config, {freeze: true});
+    Jii.container.memoSync(APP_CONFIG, _config, {freeze: true});
 
     // flush tmp configuration
     this._appConfig = null;
