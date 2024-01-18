@@ -377,7 +377,7 @@ export default class PluginsContainer extends BaseObject {
    * @param name - Attribute name
    * @return The value or `undefined` if the attribute does not exist.
    */
-  public getAttribute<T extends any = any>(id: string, name: string | symbol): T | undefined {
+  public getAttribute<T = any>(id: string, name: string | symbol): T | undefined {
     if (!this.hasAttribute(id, name)) {
       return undefined;
     }
