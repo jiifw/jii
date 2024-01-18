@@ -55,7 +55,7 @@
   },
   "dependencies": {
     "@jii/core": "^0.0.1",
-    "@jii/server": "^0.0.1",
+    "@jii/web": "^0.0.1",
     "cors": "^2.8.5"
   },
   "devDependencies": {
