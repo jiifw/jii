@@ -7,6 +7,8 @@
  */
 
 // classes
+import Event from './Event';
+import Plugin from './Plugin';
 import Module from './Module';
 import ConfigurationEvent from './ConfigurationEvent';
 import InvalidConfigError from './InvalidConfigError';
@@ -21,6 +23,8 @@ import configurationProcessor from '../scripts/configuration-processor';
 // types
 import {Props} from './BaseObject';
 import {ApplicationConfig, ComponentsDefinition} from '../typings/app-config';
+import PluginAppEvent from './PluginAppEvent';
+import PluginAppConfigEvent from './PluginAppConfigEvent';
 
 export type Platform = 'web' | 'cli' | string;
 
@@ -146,21 +150,57 @@ export default abstract class Application<
       throw new InvalidConfigError('You must specify the application type');
     }
 
+    // invoke plugins
+    await configurationProcessor({
+      app: this, config, validators: ['@jiiRoot/config/validators/PluginsConfigValidator'],
+    });
+
+    let pluginEvent = null;
+
+    /////////////// STARTS: PLUGIN EVENT (BEFORE_APP_INIT) TRIGGER //////////////
+    pluginEvent = new PluginAppEvent();
+    pluginEvent.sender = this;
+    for (const handler of Object.values(Jii.plugins.getPluginsEvent(Plugin.EVENT_BEFORE_APP_INIT))) {
+      await Event.triggerHandler(Plugin.EVENT_BEFORE_APP_INIT, handler, {}, pluginEvent);
+    }
+    /////////////// ENDS: PLUGIN EVENT (BEFORE_APP_INIT) TRIGGER ////////////////
+
     this.preInitConfig(config);
 
-    const validators = [
+    /////////////// STARTS: PLUGIN EVENT (BEFORE_CONFIG_PROCESS) TRIGGER //////////////
+    pluginEvent = new PluginAppConfigEvent();
+    pluginEvent.sender = this;
+    pluginEvent.config = config;
+    for (const handler of Object.values(Jii.plugins.getPluginsEvent(Plugin.EVENT_BEFORE_CONFIG_PROCESS))) {
+      await Event.triggerHandler(Plugin.EVENT_BEFORE_CONFIG_PROCESS, handler, {}, pluginEvent);
+    }
+    config = pluginEvent.config as T;
+    pluginEvent = null;
+    /////////////// ENDS: PLUGIN EVENT (BEFORE_CONFIG_PROCESS) TRIGGER ////////////////
+
+    const validators: string[] = [
       '@jiiRoot/config/validators/CoreConfigValidator',
       '@jiiRoot/config/validators/SettingsConfigValidator',
       '@jiiRoot/config/validators/AppEventsConfigValidator',
-      '@jiiRoot/config/validators/PluginsConfigValidator',
       '@jiiRoot/config/validators/ComponentsConfigValidator',
       ...this.coreConfigValidators(),
     ];
 
     // validates, verify and apply the configuration
-    const updatedConfig = await configurationProcessor({
+    let updatedConfig = await configurationProcessor({
       app: this, config, validators,
     });
+
+    /////////////// STARTS: PLUGIN EVENT (AFTER_CONFIG_PROCESS) TRIGGER //////////////
+    pluginEvent = new PluginAppConfigEvent();
+    pluginEvent.sender = this;
+    pluginEvent.config = updatedConfig;
+    for (const handler of Object.values(Jii.plugins.getPluginsEvent(Plugin.EVENT_AFTER_CONFIG_PROCESS))) {
+      await Event.triggerHandler(Plugin.EVENT_AFTER_CONFIG_PROCESS, handler, {}, pluginEvent);
+    }
+    updatedConfig = pluginEvent.config as T;
+    pluginEvent = null;
+    /////////////// ENDS: PLUGIN EVENT (AFTER_CONFIG_PROCESS) TRIGGER ////////////////
 
     const event = new ConfigurationEvent();
     event.sender = this;
@@ -170,6 +210,9 @@ export default abstract class Application<
 
     // memorize the configuration for future reference and usage
     Jii.container.memoSync(APP_CONFIG, event.config, {freeze: true});
+
+    // flush tmp configuration
+    this._appConfig = null;
   }
 
   /**
@@ -207,5 +250,14 @@ export default abstract class Application<
   public async run(): Promise<void> {
     // initialize configuration
     await this.preInit(this._appConfig);
+
+    /////////////// STARTS: PLUGIN EVENT (BEFORE_APP_RUN) TRIGGER //////////////
+    let pluginEvent = new PluginAppEvent();
+    pluginEvent.sender = this;
+    for (const handler of Object.values(Jii.plugins.getPluginsEvent(Plugin.EVENT_BEFORE_APP_RUN))) {
+      await Event.triggerHandler(Plugin.EVENT_BEFORE_APP_RUN, handler, {}, pluginEvent);
+    }
+    pluginEvent = null;
+    /////////////// ENDS: PLUGIN EVENT (BEFORE_APP_RUN) TRIGGER ////////////////
   }
 }
