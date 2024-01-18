@@ -5,280 +5,405 @@
  * @author Junaid Atari <mj.atari@gmail.com>
  * @since 0.0.1
  */
-import {PluginType} from '../typings/plugin';
 
-export type MetaData = {
-  [name: string | symbol]: any;
-  directory: string;
-  type: PluginType;
-}
+import merge from 'deepmerge';
+import {join, normalize} from 'node:path';
+
+// classes
+import Plugin, {EventHandler} from './Plugin';
+import Instance from './Instance';
+import Component from './Component';
+import BaseObject from './BaseObject';
+import Configuration from './Configuration';
+import InvalidCallError from './InvalidCallError';
+import InvalidConfigError from './InvalidConfigError';
+
+// utils
+import Jii from '../Jii';
+import {contains} from '../helpers/array';
+import {readSchemaFile} from '../helpers/file';
+import {isPlainObject} from '../helpers/object';
+
+// types
+import {Class} from 'utility-types';
+import {PluginDefinition, PluginsDefinition} from '../typings/plugin';
 
 export type PluginAttributes = {
   [name: string | symbol]: any;
 }
 
-export interface PluginConfig {
-  metadata: MetaData;
-  config: {
-    [name: string]: any;
-  };
-  attributes: PluginAttributes;
-}
-
-const LINK_PREFIX: string = '$$_';
+export type PluginMetadataType =
+  | 'events' | 'disabled' | 'components'
+  | 'config' | 'instance' | 'base-path'
+  | 'version' | 'commands';
 
 /**
  * Plugins registrar container
  */
-export default class PluginsContainer {
-  protected registry: Map<string, PluginConfig>;
-  protected _links: Map<string, string>;
+export default class PluginsContainer extends BaseObject {
+  /**
+   * Plugin definitions indexed by their IDs
+   */
+  protected _definitions: Map<string, PluginDefinition> = new Map();
 
   /**
-   * PluginsContainer constructor
+   * Plugin instances indexed by their IDs
    */
-  constructor() {
-    this.registry = new Map();
-    this._links = new Map();
-  }
+  protected _plugins: Map<string, InstanceType<typeof Plugin>> = new Map();
 
   /**
-   * Normalize configuration
-   * @param name - Plugin name or path
-   * @param [config] - Configuration object
-   * @param [metadata] - Additional metadata
+   * Plugin attributes indexed by their IDs
    */
-  protected processConfig<T = Record<string, any>>(name: string, config: T, metadata: MetaData): PluginConfig {
-    return {
-      metadata,
-      config,
-      attributes: {},
-    };
-  }
+  protected _attributes: Map<string, Map<string | symbol, any>> = new Map();
 
   /**
-   * Get linked plugins list
+   * Returns the list of the plugin definitions or the loaded plugin instances.
+   * @param [returnDefinitions] - Whether to return plugin definitions instead of the loaded plugin instances.
+   * @return The list of the plugin definitions or the loaded plugin instances (ID: definition or instance).
    */
-  get links(): { [name: string]: string } {
-    const collection = [...this._links.entries()].map(([k, v]) => {
-      return [this.omitLinkId(k), v];
-    });
-    return Object.fromEntries(collection);
-  }
-
-  /**
-   * Get plugins list
-   */
-  get list(): string[] {
-    return [...this.registry.keys()];
-  }
-
-  /**
-   * Register a plugins along with the configuration
-   * @param name - Middleware name or path
-   * @param config - Configuration object
-   * @param [metadata] - Additional metadata
-   */
-  public register<T = Record<string, any>>(name: string, config: T, metadata: MetaData) {
-    if (this.registry.has(name)) {
-      throw new Error(`Plugin '${name}' is already registered`);
-    }
-
-    this.registry.set(
-      name,
-      this.processConfig(name, config || {}, metadata),
+  public getPlugins(returnDefinitions: boolean = true): { [p: string]: any } {
+    return Object.fromEntries(
+      returnDefinitions
+        ? this._definitions.entries()
+        : this._plugins.entries(),
     );
   }
 
   /**
-   * Get plugins configuration
-   * @param name - Plugin name or path
-   */
-
-  public config<T extends PluginConfig = PluginConfig>(name: string) {
-    if (!this.registry.has(name)) {
-      throw new Error(`No plugins '${name}' found in registry`);
-    }
-
-    return this.registry.get(name).config;
-  }
-
-  /**
-   * Formats a link id
-   * @param id - Unique ID
+   * Initializes the plugin instance
+   * @param id - Plugin ID (e.g. `myPlugin`).
+   * @param definition - Plugin definition
+   * @return The plugin instance
    * @protected
    */
-  protected formatLinkId(id: string): string {
-    return LINK_PREFIX + id;
-  }
+  protected createInstance(id: string, definition: PluginDefinition): InstanceType<typeof Plugin> {
+    const def: PluginDefinition = merge({
+      file: 'index',
+      commands: true,
+      disabled: false,
+      alias: id,
+      config: {},
+      components: {},
+    }, definition);
 
-  /**
-   * Clears prefix from id
-   * @param id - Unique ID
-   * @return Normalized link id
-   */
-  protected omitLinkId(id: string): string {
-    const regStr = LINK_PREFIX.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const regex = new RegExp(`^${regStr}`);
-    return id.replace(regex, '');
-  }
+    const PluginClass = Instance.classFromPath<Class<Plugin>>(join(def.path, def.file));
+    const plugin = new PluginClass(def.config);
+    plugin.basePath = normalize(Jii.getAlias(def.path));
 
-  /**
-   * Get plugins configuration
-   * @param name - Plugin name or path
-   * @param id - Unique ID (format: camelCase) to link with (e.g., cors or corsPlugin)
-   */
-  public link(name: string, id: string) {
-    if (this.isLinked(id)) {
-      throw new Error(`The ID '${id}' is already associated with a plugins '${this._links.get(name)}'`);
+    if (!plugin?.id) {
+      plugin.id = id as Lowercase<string>;
     }
 
-    if (!this.registry.has(name)) {
-      throw new Error(`No plugins '${name}' found in registry`);
+    for (const [eventName, handler] of Object.entries(Instance.eventsOf(def))) {
+      plugin.on(eventName, handler);
     }
 
-    if (!/^[a-z]+([A-Z][a-z]+)*$/.test(id)) {
-      throw new Error(`Invalid ID '${id}' for plugins '${name}', Format should be a camelize`);
+    for (const [name, behavior] of Object.entries(Instance.behaviorsOf(def))) {
+      plugin.attachBehavior(name, behavior);
     }
 
-    this._links.set(this.formatLinkId(id), name);
+    if (Object.keys(def.components).length) {
+      Jii.app().setComponents(def.components);
+    }
+
+    Jii.setAlias(def.alias, plugin.basePath);
+    this.setAttribute(id, 'allowCommands', def.commands as boolean);
+    this.setAttribute(id, 'disabled', def.disabled);
+
+    return plugin;
   }
 
   /**
-   * Check that plugins is registered or not
-   * @param name - Plugin name or path
+   * Get all registered plugins metadata
+   *
+   * **Note**: This method with intentionally load all the plugins from present definitions, if the following fields are requested:<br>
+   * `'events', 'instance', 'base-path', 'version'`
+   *
+   * @param fields - Metadata fields to retrieve
+   * @param [returnDisabled] - True to return disable, false to return on enabled
+   * @returns Registered plugins metadata
    */
-  public isRegistered(name: string): boolean {
-    return this.registry.has(name);
+  public pluginsMetadata(fields: PluginMetadataType[], returnDisabled: boolean = false): Record<string, { [field: PluginMetadataType | string]: any }> {
+    if (!this._definitions.size) {
+      return {};
+    }
+
+    const list: Record<string, { [field: PluginMetadataType | string]: any }> = {};
+
+    for (const [pluginId, definition] of this._definitions.entries()) {
+      const disabled = this.checkDisabled(pluginId);
+
+      if (disabled && !returnDisabled) {
+        continue;
+      }
+
+      const metadata: { [field: PluginMetadataType | string]: any } = {};
+
+      if (fields.includes('disabled')) {
+        metadata['disabled'] = disabled;
+      }
+
+      if (fields.includes('components')) {
+        metadata['components'] = definition.components;
+      }
+
+      if (fields.includes('commands')) {
+        metadata['commands'] = this.getAttribute(pluginId, 'allowCommands');
+      }
+
+      if (fields.includes('config')) {
+        metadata['config'] = definition.config;
+      }
+
+      if (contains(fields, ['events', 'instance', 'base-path', 'version'])) {
+        const instance = this.get<Plugin>(pluginId);
+
+        if (fields.includes('instance')) {
+          metadata['instance'] = instance;
+        }
+
+        if (fields.includes('events')) {
+          metadata['events'] = instance.events();
+        }
+
+        if (fields.includes('base-path')) {
+          metadata['base-path'] = instance.basePath;
+        }
+
+        if (fields.includes('version')) {
+          metadata['version'] = instance.version;
+        }
+      }
+
+      list[pluginId] = metadata;
+    }
+
+    return list;
   }
 
   /**
-   * Check that plugins has linked with ID or not
-   * @param name - Plugin name or path
+   * Get all plugins event-handler by the given event name
+   *
+   * **Note**: This method with intentionally load all the plugins from present definitions
+   *
+   * @param eventName - The plugin event name
+   * @param [returnDisabled] - True to return disable, false to return on enabled
+   * @returns Plugins event *{pluginId: EventHandler, ...}*
+   * @see {@link pluginsMetadata pluginsMetadata()}
    */
-  public isLinked(name: string): boolean {
-    return this._links.has(this.formatLinkId(name));
-  }
+  public getPluginsEvent(eventName: string, returnDisabled: boolean = false): { [id: string]: EventHandler } {
+    const pluginsMeta = this.pluginsMetadata(['instance', 'events'], returnDisabled);
 
-  /**
-   * Check that plugins has in registry or not
-   * @param nameOrId - Plugin name or path / Unique ID
-   */
-  public has(nameOrId: string): boolean {
-    return this.isRegistered(nameOrId) || this.isLinked(nameOrId);
-  }
+    const list = {};
 
-  /**
-   * Translate link id to plugins name or path
-   * @param id - Unique ID
-   */
-  public toName(id: string): string | undefined {
-    return this._links.has(this.formatLinkId(id))
-      ? this._links.get(this.formatLinkId(id))
-      : undefined;
-  }
+    for (const [id, {instance, events}] of Object.entries(pluginsMeta)) {
+      let _handler: EventHandler = null;
 
-  /**
-   * Translate plugins name or path to link id
-   * @param name - Plugin name or path
-   */
-  public toId(name: string): string | undefined {
-    for (const [key, value] of this._links) {
-      if (value === name) {
-        return this.omitLinkId(key);
+      for (const [name, handler] of Object.entries(events)) {
+        if (name !== eventName) {
+          continue;
+        }
+        _handler = ('string' === typeof handler ? [instance, name] : handler) as EventHandler;
+      }
+
+      if (_handler) {
+        list[id] = _handler;
       }
     }
 
-    return undefined;
+    return list;
   }
 
   /**
-   * Get plugins data
-   * @param nameOrId - Plugin name or path / Unique ID
+   * Returns the plugin instance with the specified ID.
+   *
+   * @param id - Plugin ID (e.g. `myPlugin`).
+   * @param [throwException] - Whether to throw an exception if `id` is not registered with the locator before.
+   * @return The plugin of the specified ID. If `throwException` is false and `id`
+   * is not registered before, null will be returned.
+   * @throws InvalidConfigError - If `id` refers to a nonexistent plugin ID
+   * @see {@link has has()}
+   * @see {@link set set()}
    */
-  protected getByIdOrName(nameOrId: string): PluginConfig {
-    if (this.registry.has(nameOrId)) {
-      return this.registry.get(nameOrId);
+  public get<T extends object = object>(id: string, throwException: boolean = true): T | null {
+    if (this._plugins.has(id)) {
+      return this._plugins.get(id) as T;
     }
 
-    if (this._links.has(this.formatLinkId(nameOrId))) {
-      const name = this._links.get(this.formatLinkId(nameOrId));
-      return this.registry.get(name);
+    if (this._definitions.has(id)) {
+      const definition = this._definitions.get(id);
+
+      if (definition instanceof Component) {
+        return this._plugins.set(id, definition as any).get(id) as T;
+      }
+
+      return this._plugins.set(id, this.createInstance(id, definition)).get(id) as T;
+    } else if (throwException) {
+      throw new InvalidCallError(`Unknown plugin ID: ${id}`);
     }
 
-    throw new Error(`Unknown ID/Name '${nameOrId}' for plugins'`);
+    return null;
   }
 
   /**
-   * Get plugins metadata
-   * @param nameOrId - Plugin name or path / Unique ID
+   * Returns status of plugin is disabled or not
+   * @param id - Plugin ID (e.g. `myPlugin`).
    */
+  public checkDisabled(id: string): boolean {
+    if (!this.has(id)) {
+      return false;
+    }
 
-  public metadata<T extends MetaData = MetaData>(nameOrId: string): MetaData {
-    return this.getByIdOrName(nameOrId).metadata;
+    return this.getAttribute<boolean>(id, 'disabled');
   }
 
   /**
-   * Get plugins directory path
-   * @param nameOrId - Plugin name or path / Unique ID
+   * Registers a plugin definition with this container.
+   *
+   * If a plugin definition with the same ID already exists, it will be overwritten.
+   *
+   * @param id - Plugin ID (e.g. `myPlugin`).
+   * @param definition - The plugin definition
+   * @param [performValidation] - Perform validation against provided definition before registering.
    */
-  public getDirectory(nameOrId: string): string {
-    return this.metadata(nameOrId).directory;
+  public set(id: string, definition: PluginDefinition | null, performValidation: boolean = true): void {
+    this._plugins.delete(id);
+
+    if (definition === null) {
+      this._definitions.delete(id);
+      return;
+    }
+
+    if (isPlainObject(definition)) {
+      if (performValidation) {
+        const schema = readSchemaFile('@jiiRoot/schemas/plugin')?.additionalProperties ?? {};
+        (new Configuration<PluginDefinition>(definition, schema)).validate({}, true);
+      }
+      this._definitions.set(id, definition);
+      this._attributes.set(id, new Map);
+      return;
+    }
+
+    throw new InvalidConfigError(`Unexpected configuration type for the '${id}' plugin: ${typeof definition}`);
   }
 
   /**
-   * Get plugins directory path
-   * @param nameOrId - Plugin name or path / Unique ID
+   * Registers a set of plugin definitions in this container.
+   *
+   * This is the bulk version of {@link set set()}. The parameter should be an array
+   * whose keys are plugin IDs and values the corresponding plugin definitions.
+   *
+   * For more details on how to specify plugin IDs and definitions, please refer to {@link set set()}.
+   *
+   * If a plugin definition with the same ID already exists, it will be overwritten.
+   *
+   * The following is an example for registering two plugin definitions:
+   *
+   * @example
+   * {
+   *   pluginsId: {
+   *     path: '@plugins/my-plugin',
+   *     ...,
+   *   },
+   *   ...,
+   * }
+   *
+   * @param plugins - Plugin definitions or instances
+   * @param [performValidation] - Perform validation against each definition before registering.
    */
-  public getType(nameOrId: string): string {
-    return this.metadata(nameOrId).type;
+  public setPlugins(plugins: PluginsDefinition, performValidation: boolean = true): void {
+    for (const [id, plugin] of Object.entries(plugins)) {
+      this.set(id, plugin, performValidation);
+    }
+  }
+
+  /**
+   * Returns a value indicating whether the locator has the specified plugin definition or has instantiated the plugin.
+   * This method may return different results depending on the value of `checkInstance`.
+   *
+   * - If `checkInstance` is false (default), the method will return a value indicating whether the locator has the specified
+   *   plugin definition.
+   * - If `checkInstance` is true, the method will return a value indicating whether the locator has
+   *   instantiated the specified plugin.
+   *
+   * @param id plugin ID (e.g. `db`).
+   * @param [checkInstance] whether the method should check if the plugin is shared and instantiated.
+   * @return bool whether the locator has the specified plugin definition or has instantiated the plugin.
+   * @see set()
+   */
+  public has(id: string, checkInstance: boolean = false): boolean {
+    return checkInstance ? this._plugins.has(id) : this._definitions.has(id);
+  }
+
+  /**
+   * Removes the plugin from registry.
+   * @param id - The plugin ID
+   */
+  public clear(id: string): void {
+    this._plugins.delete(id);
+    this._definitions.delete(id);
+    this._attributes.delete(id);
   }
 
   /**
    * Sets plugins attribute
-   * @param nameOrId - Plugin name or path / Unique ID
+   * @param id - Plugin ID
    * @param name - Attribute name
    * @param value - The value to store
    */
-  public setAttr(nameOrId: string, name: string | symbol, value: any) {
-    if (!this.has(nameOrId)) {
-      throw new Error(`Unknown ID/Name '${nameOrId}' for plugins'`);
+  public setAttribute(id: string, name: string | symbol, value: any): void {
+    if (!this.has(id)) {
+      throw new Error(`Unknown plugin ID: '${id}'`);
     }
-    this.getByIdOrName(nameOrId).attributes[name] = value;
+    this._attributes.get(id).set(name, value);
   }
 
   /**
    * Checks plugins attribute
-   * @param nameOrId - Plugin name or path / Unique ID
+   * @param id - Plugin ID
    * @param name - Attribute name
    */
-  public hasAttr(nameOrId: string, name: string | symbol): boolean {
-    if (!this.has(nameOrId)) {
-      throw new Error(`Unknown ID/Name '${nameOrId}' for plugins'`);
+  public hasAttribute(id: string, name: string | symbol): boolean {
+    if (!this.has(id) || !this._attributes.has(id)) {
+      return false;
     }
-    return name in this.attributes(nameOrId);
+
+    return this._attributes.get(id).has(name);
   }
 
   /**
    * Gets plugins attribute
-   * @param nameOrId - Plugin name or path / Unique ID
+   * @param id - Plugin ID
    * @param name - Attribute name
+   * @return The value or `undefined` if the attribute does not exist.
    */
-  public getAttr<T>(nameOrId: string, name: string | symbol): T | undefined {
-    if (!this.hasAttr(nameOrId, name)) {
+  public getAttribute<T extends any = any>(id: string, name: string | symbol): T | undefined {
+    if (!this.hasAttribute(id, name)) {
       return undefined;
     }
-    return this.attributes(nameOrId)[name] || undefined;
+    return this._attributes.get(id).get(name);
   }
 
   /**
    * Gets plugins attributes
-   * @param nameOrId - Plugin name or path / Unique ID
+   * @param id - Plugin ID
    */
-  public attributes<T = PluginAttributes>(nameOrId: string): T {
-    if (!this.has(nameOrId)) {
-      throw new Error(`Unknown ID/Name '${nameOrId}' for plugins'`);
+  public attributes<T extends PluginAttributes = PluginAttributes>(id: string): T {
+    if (!this.has(id)) {
+      return {} as any;
     }
-    return <T>(this.getByIdOrName(nameOrId)?.attributes || {});
+    return <T>(Object.fromEntries(this._attributes.get(id).entries()));
+  }
+
+  /**
+   * Create plugins attributes
+   * @param id - Plugin ID
+   */
+  public clearAttributes(id: string): void {
+    if (!this.has(id)) {
+      return;
+    }
+
+    this._attributes.get(id).clear();
   }
 }
