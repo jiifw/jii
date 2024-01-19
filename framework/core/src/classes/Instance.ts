@@ -12,7 +12,7 @@ import {BehaviorArgs} from './Behavior';
 import InvalidConfigError from './InvalidConfigError';
 
 // utils
-import {resolve} from '../helpers/path';
+import {isPath, resolve} from '../helpers/path';
 import {isObject, isPlainObject} from '../helpers/object';
 import {isClass, hasOwnMethod, isConstructor} from '../helpers/reflection';
 
@@ -145,16 +145,20 @@ export default class Instance {
       throw new InvalidConfigError(`Object configuration 'class' should be a string property`);
     }
 
-    if (!pathOrAlias.startsWith('@')) {
-      throw new InvalidConfigError(`Object configuration 'class' should start with a @alias.`);
-    }
-
     let Class;
 
-    try {
-      Class = require(resolve(pathOrAlias));
-    } catch (e) {
-      throw new InvalidConfigError(`Object configuration class '${pathOrAlias}' should exist`);
+    if (isPath(pathOrAlias, 'file')) {
+      Class = require(pathOrAlias);
+    } else {
+      if (!pathOrAlias.startsWith('@')) {
+        throw new InvalidConfigError(`Object configuration 'class' should start with a @alias.`);
+      }
+
+      try {
+        Class = require(resolve(pathOrAlias));
+      } catch (e) {
+        throw new InvalidConfigError(`Object configuration class '${pathOrAlias}' should exist`);
+      }
     }
 
     if (!Class?.default && !isConstructor(Class.default) && !isClass(Class.default)) {
@@ -212,7 +216,7 @@ export default class Instance {
     const Class = Instance.classOf<Constructor>(type) as T;
     const instance = Class instanceof BaseObject ? Class : new (Class as Constructor)(...params);
 
-    if ( !(instance instanceof BaseObject) ) {
+    if (!(instance instanceof BaseObject)) {
       throw new InvalidConfigError(`Class '${Class.constructor.name}' must be an instance of component`);
     }
 
