@@ -7,7 +7,7 @@
  */
 
 import {loadFile} from '@jii/core/dist/env';
-import Application from '@jii/server/dist/classes/Application';
+import Application from '@jii/web/dist/classes/Application';
 import appConfig from './config/app';
 
 loadFile('../.env');
