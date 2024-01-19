@@ -7,7 +7,6 @@
  */
 
 import merge from 'deepmerge';
-import {join, normalize} from 'node:path';
 
 // classes
 import ConfigValidator from '../../classes/ConfigValidator';
@@ -17,7 +16,7 @@ import {Schema, PropertyPath} from '../../classes/ConfigValidator';
 // utils
 import Jii from '../../Jii';
 import {isPath} from '../../helpers/path';
-import {readSchemaFile} from '../../helpers/file';
+import {readSchemaFile, resolveMainFile} from '../../helpers/file';
 
 // types
 import {PluginsDefinition} from '../../typings/plugin';
@@ -53,15 +52,13 @@ export default class PluginsConfigValidator extends ConfigValidator {
 
     for (const [id, def] of plugins) {
       const config = merge({file: 'index'} as unknown as PluginsDefinition, def);
-      const basePath = normalize(Jii.getAlias(config.path));
+      const _path = resolveMainFile(config.path, config.file);
 
-      if (!isPath(basePath, 'dir')) {
+      if (!isPath(_path.dir, 'dir')) {
         throw new InvalidConfigError(`Plugin '${id}' path '${config.path}' must be a valid directory`);
       }
 
-      const filePath = require.resolve(join(basePath, config.file));
-
-      if (!isPath(filePath, 'file')) {
+      if (!isPath(_path.path, 'file')) {
         throw new InvalidConfigError(`Plugin '${id}' file '${config.file}' must be a valid file`);
       }
     }
