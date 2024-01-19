@@ -20,7 +20,7 @@ import InvalidConfigError from './InvalidConfigError';
 
 // utils
 import Jii from '../Jii';
-import {readSchemaFile} from '../helpers/file';
+import {readSchemaFile, resolveMainFile} from '../helpers/file';
 import {isPlainObject} from '../helpers/object';
 
 // types
@@ -87,9 +87,10 @@ export default class PluginsContainer extends BaseObject {
       components: {},
     }, definition);
 
-    const PluginClass = Instance.classFromPath<Class<Plugin>>(join(def.path, def.file));
+    const _path = resolveMainFile(def.path, def.file);
+    const PluginClass = Instance.classFromPath<Class<Plugin>>(_path.path);
     const plugin = new PluginClass(def.config);
-    plugin.basePath = normalize(Jii.getAlias(def.path));
+    plugin.basePath = _path.dir;
 
     if (!plugin?.id) {
       plugin.id = id as Lowercase<string>;
