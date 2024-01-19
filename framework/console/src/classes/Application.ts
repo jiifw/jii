@@ -18,45 +18,61 @@ import {listCommands} from '../utils/commands';
 // types
 import {ApplicationConfig} from '../typings/app-config';
 
+/** Application version */
+const APP_VERSION: string = '1.0.0';
+
 /**
  * Application class
  */
-export default class Application extends BaseApplication<ApplicationConfig> {
+export default class Application<T extends ApplicationConfig = ApplicationConfig> extends BaseApplication<T> {
   /**
    * @inheritDoc
    */
-  preInitConfig(config: ApplicationConfig) {
-    this._platform = 'cli';
-    super.preInitConfig(config);
-  }
+  protected _platform: Platform = 'console';
 
   /**
-   * Run the application, start the cli server
-   * @param [callback] - Callback function to execute when the application is ready
+   * Console application instance
+   * @protected
    */
-  async run(callback?: () => Promise<void>): Promise<void> {
-    const program = new Command('jii');
+  protected console: Command = null;
 
-    console.log(figlet.textSync('Jii Framework'));
+  /**
+   * Creates a console app instance
+   * @protected
+   */
+  protected async createInstance(): Promise<void> {
+    this.setVersion(APP_VERSION);
+    this.console = new Command('jii');
 
-    program
-      .version('1.0.0')
+    this.console
+      .version(this.getVersion())
       .description('A Jii framework CLI for terminal operations');
 
-    const commands = await listCommands(program);
-    commands.forEach(command => program.addCommand(command));
-    program.showHelpAfterError('(add --help for additional information)');
+    const commands = await listCommands(this.console);
 
-    program.configureHelp({
+    commands.forEach(command => this.console.addCommand(command));
+    this.console.showHelpAfterError('(add --help for additional information)');
+
+    this.console.configureHelp({
       sortSubcommands: true,
       sortOptions: true,
     });
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public async run(): Promise<void> {
+    await this.createInstance();
+    await super.run();
+
+    console.log(figlet.textSync('Jii Framework'));
 
     if (!process.argv.length || !process.argv.slice(2).length) {
-      program.outputHelp();
+      this.console.outputHelp();
       return;
     }
 
-    await program.parseAsync();
+    await this.console.parseAsync();
   }
 }
