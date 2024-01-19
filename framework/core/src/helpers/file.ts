@@ -6,12 +6,13 @@
  * @since 0.0.1
  */
 
+import {dirname, isPath, resolve} from './path';
+import {basename, join, normalize} from 'node:path';
 import {accessSync, readFileSync, unlinkSync, writeFileSync} from 'node:fs';
 
 // utils
-import {isPath, resolve} from './path';
+import Jii from '../Jii';
 import {getAlias} from '../base/aliases';
-import {normalize} from 'path';
 
 /**
  * Read and parse a json file
@@ -128,3 +129,25 @@ export const invokeModuleMethodSync = <T = any>(
 
   return <T>module[method].call(null, ...args);
 };
+
+/**
+ * Returns resolve file path (alias or npm-package)
+ * @param path - The path / alias / npm-package to resolve
+ * @param filename - The file name (for app specific)
+ * @returns The resolved file
+ */
+export const resolveMainFile = (path: string, filename: string = 'index'): {dir: string, file: string, path: string} => {
+  const data = { dir: '', file: '', path: '' };
+
+  try {
+    data.dir = normalize(Jii.getAlias(path, true));
+    data.path = require.resolve(join(data.dir, filename));
+    data.file = basename(data.path);
+  } catch (e) {
+    data.path = normalize(require.resolve(path));
+    data.dir = dirname(data.path);
+    data.file = basename(data.path);
+  }
+
+  return data;
+}
