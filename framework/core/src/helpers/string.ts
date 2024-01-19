@@ -263,3 +263,17 @@ export const substr = (string: string, offset: number, length: number = undefine
 
   return string.slice(offset, end);
 };
+
+/**
+ * Binary safe string comparison of the first n characters
+ * @param string1 - The first string
+ * @param string2 - The second string
+ * @param length - Number of characters to use in the comparison
+ * @returns Less 0 if <i>string1</i> is less than <i>string2</i>; &gt; 0 if <i>string1</i>
+ * is greater than <i>string2</i>, and 0 if they are equal.
+ */
+export const strncmp = (string1: string, string2: string, length: number): number => {
+  const s1 = (string1 + '').substring(0, length);
+  const s2 = (string2 + '').substring(0, length);
+  return (s1 === s2 ? 0 : (s1 > s2 ? 1 : -1));
+};

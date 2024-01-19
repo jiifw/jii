@@ -45,3 +45,70 @@ export const contains = <T = any>(list: T[], haystack: T[]): boolean => {
 
   return !!list.filter(val => haystack.includes(val)).length;
 };
+
+/**
+ * Check if the array has any duplicate values
+ * @param arr - The input array
+ * @returns Whatever the duplicates has or not
+ */
+export const hasDuplicates = <T>(arr: T[]): boolean => {
+  return arr.length !== new Set(arr).size;
+};
+
+/**
+ * Remove all duplicate values from given array
+ * @param arr - The input array
+ * @returns The new array without duplicates
+ */
+export const uniqueOnly = <T>(arr: Array<T>): Array<T> => {
+  return [...new Set<T>(arr)];
+};
+
+/**
+ * Check that all values exist in a list
+ * @param list - The source array
+ * @param check - The target array
+ * @returns Whatever the items has or not
+ */
+export const containsItems = <T>(list: Array<T>, check: Array<T>): boolean => {
+  return !!check.filter(v => !list.includes(v)).length;
+};
+
+/**
+ * Check that all values doest not exist in a list
+ * @param list - The source array
+ * @param check - The target array
+ * @returns Whatever the items has or not
+ */
+export const notContainsItems = <T>(list: Array<T>, check: Array<T>): boolean => {
+  return !!check.filter(v => list.includes(v)).length;
+};
+
+/**
+ * Sort an array by key in reverse order
+ * @param input - The input array or object
+ * @param [sortArrays] - Whether to sort array or object
+ * @returns A sorted object or array
+ */
+export const krSort = <T>(input: T, sortArrays: boolean = false): T => {
+  if (!input || typeof input !== 'object') {
+    return input;
+  }
+
+  if (Array.isArray(input)) {
+    const newArr = input.map((item) => krSort(item, sortArrays));
+    if (sortArrays) {
+      newArr.sort();
+    }
+    return newArr as T;
+  }
+
+  const ordered = {};
+  Object.keys(input)
+    .sort()
+    .forEach((key) => {
+      ordered[key] = krSort(input[key], sortArrays);
+    });
+
+  return ordered as T;
+};
