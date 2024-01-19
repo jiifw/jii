@@ -127,6 +127,29 @@ export const isPath = (path: string, type: 'dir' | 'file' = 'file'): boolean => 
 };
 
 /**
+ * Tells whether the filename is a regular file
+ * @param filename - Path to the file. If filename is a relative filename,
+ * it will be checked relative to the current working directory.
+ * If filename is a symbolic or hard link then the link will be resolved and checked.
+ *
+ * @returns `true` if the filename exists and is a regular file, `false` otherwise
+ */
+export const isFile = (filename: string): boolean => {
+  return isPath(filename, 'file');
+};
+
+/**
+ * Tells whether the path is a directory
+ * @param path - Path to the directory. If path is a relative,
+ * it will be checked relative to the current working directory.
+ *
+ * @returns `true` if the path exists and is a directory, `false` otherwise
+ */
+export const isDir = (path: string): boolean => {
+  return isPath(path, 'dir');
+};
+
+/**
  * Synchronously creates a directory recursively.
  * @param aliasOrPath - Alias or absolute directory path
  * @returns `true` if the directory was created, `false` otherwise
