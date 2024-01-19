@@ -216,7 +216,7 @@ export default class PluginsContainer extends BaseObject {
         if (name !== eventName) {
           continue;
         }
-        _handler = ('string' === typeof handler ? [instance, name] : handler) as EventHandler;
+        _handler = ('string' === typeof handler ? [instance, handler] : handler) as EventHandler;
       }
 
       if (_handler) {
