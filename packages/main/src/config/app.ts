@@ -9,24 +9,27 @@
 import {dirname} from '@jii/core/dist/helpers/path';
 
 // types
-import {ApplicationConfig} from '@jii/server/dist/typings/app-config';
+import {ApplicationConfig} from '@jii/web/dist/typings/app-config';
+import {CorsPluginDefinition} from '@jii/cors/dist/types';
 
 /**
  * Application configuration.
  */
-export default async (): Promise<ApplicationConfig> => ({
-  id: 'jii-app',
-  basePath: dirname(__dirname),
-  params: {
-    test: 'value',
-  },
-  aliases: {
-    classed: 'x',
-  },
-  bootstrap: ['@app/bootstrap/bootstrap'],
-  components: {
-    server: {
-      enableLogging: false,
+export default async (): Promise<ApplicationConfig> => {
+  return ({
+    id: 'jii-app',
+    basePath: dirname(__dirname),
+    params: require('./params')?.default,
+    bootstrap: ['@app/bootstrap/bootstrap'],
+    components: {
+      server: {
+        enableLogging: false,
+      },
     },
-  },
-});
+    plugins: {
+      cors: <CorsPluginDefinition>{
+        path: '@jii/cors',
+      },
+    },
+  });
+};
