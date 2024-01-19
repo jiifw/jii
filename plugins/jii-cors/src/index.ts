@@ -8,57 +8,96 @@
  */
 
 import merge from 'deepmerge';
+import {parse} from 'node:url';
 
 // classes
-import Plugin from '@jii/core/dist/classes/Plugin';
-
-// utils
-import Jii from '@jii/core/dist/Jii';
-import Server from '@jii/server/dist/classes/Server';
-import {getOrigin} from './utils';
+import WebPlugin from '@jii/web/dist/classes/WebPlugin';
+import ServerEvent from '@jii/web/dist/classes/ServerEvent';
 
 // types
-import {CorsOptions as NativeCorsOptions} from 'cors';
-
-export interface CorsOptions {
-  cors?: Partial<NativeCorsOptions>;
-  errors?: {
-    originBlocked?: string;
-  };
-}
+import {CorsPluginDefinition} from './types';
 
 /**
  * Friendly CORS Plugin
  */
-export default class extends Plugin {
-  id: Lowercase<string> = 'cors';
-  name: Lowercase<string> = 'plugin-cors';
+export default class extends WebPlugin {
+  /**
+   * Cors options
+   */
+  public cors: CorsPluginDefinition['cors'] = {};
 
   /**
-   * Plugin handler
+   * Errors label
    */
-  async handler(): Promise<void> {
-    const config = await this.getConfig<CorsOptions>({
-        cors: {
-          optionsSuccessStatus: 204,
-          preflightContinue: true,
-          methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-          credentials: true,
-        },
-        errors: {
-          originBlocked: 'Not allowed by CORS',
-        },
-      },
-    );
+  public errors: CorsPluginDefinition['errors'] = {};
 
-    const corsOptions = merge<NativeCorsOptions>(config.cors, {
-      origin(origin, callback) {
-        false !== getOrigin(origin)
+  /**
+   * List of allowed origins hostname names
+   *
+   * @example ['localhost', 'example.com']
+   */
+  public allowedOrigins: CorsPluginDefinition['allowedOrigins'] = [];
+
+  /**
+   * @inheritDoc
+   */
+  events() {
+    return {
+      [WebPlugin.EVENT_SERVER_INIT]: 'onServerInit',
+    };
+  }
+
+  /**
+   * An event handler for the server init event.
+   * @param event - The server event
+   */
+  public async onServerInit(event: ServerEvent): Promise<void> {
+    if (!this.getProperty<string[]>('allowedOrigins')?.length) {
+      this.getProperty<string[]>('allowedOrigins').push(event.owner.host);
+    }
+
+    const config = {
+      cors: merge({
+        optionsSuccessStatus: 204,
+        preflightContinue: true,
+        methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+        credentials: true,
+      }, this.cors),
+      errors: merge({
+        originBlocked: 'Not allowed by CORS',
+      }, this.errors),
+    };
+
+    const corsOptions = merge<CorsPluginDefinition['cors']>({
+      origin: (origin, callback) => {
+        false !== this.validateOrigin(origin)
           ? callback(null, true)
           : callback(new Error(config.errors.originBlocked));
       },
-    });
+    }, config.cors);
 
-    Jii.app().get<Server>('server')?.getServer()?.use(require('cors')(corsOptions));
+    event.server?.use(require('cors')(corsOptions));
+  }
+
+  /**
+   * Validates the origin from request
+   * @param origin - Request origin
+   * @returns True if request is from allowed origin or false if not
+   */
+  public validateOrigin(origin: string): boolean {
+    // Set true when non-browser request
+    if (!origin) {
+      return true;
+    }
+
+    const {hostname} = parse(origin, false);
+
+    for (const wlOrigin of this.allowedOrigins) {
+      if (wlOrigin.includes(hostname)) {
+        return true;
+      }
+    }
+
+    return false;
   }
 }
