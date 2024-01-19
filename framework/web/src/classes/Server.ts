@@ -19,12 +19,13 @@ import InvalidConfigError from '@jii/core/dist/classes/InvalidConfigError';
 import {ServerInstance, ServerHTTPOptions} from '../typings/server';
 import {
   MiddlewareAfter, MiddlewareCallback, MiddlewareDefinition,
-  MiddlewareMiddleware, MiddlewareRegister, MiddlewareType
+  MiddlewareMiddleware, MiddlewareRegister, MiddlewareType,
 } from '../typings/classes/Server';
 import WebPluginEvent from './WebPluginEvent';
 import Event from '@jii/core/dist/classes/Event';
 import Jii from '@jii/core/dist/Jii';
 import WebPlugin from './WebPlugin';
+import {SERVER_REPLY, SERVER_REQUEST} from '../utils/symbols';
 
 /**
  * Middleware supported types
@@ -174,6 +175,11 @@ export default class Server extends Component {
     pluginEvent = null;
     /////////////// ENDS: PLUGIN EVENT (BEFORE_APP_RUN) TRIGGER ////////////////
 
+    this.getServer().addHook('preValidation', async (request, reply) => {
+      Jii.container.memoSync(SERVER_REQUEST, request, {freeze: true});
+      Jii.container.memoSync(SERVER_REPLY, reply, {freeze: true});
+    });
+
     // register predefined middleware
     await this.applyMiddleware(this.getPredefinedMiddleware());
 
@@ -219,7 +225,7 @@ export default class Server extends Component {
    * @throws {InvalidCallError} If the server is already started.
    */
   public async start(): Promise<void> {
-    if ( this.isStarted ) {
+    if (this.isStarted) {
       throw new InvalidCallError('The server is already started.');
     }
 
@@ -286,7 +292,7 @@ export default class Server extends Component {
    * ]);
    */
   public async applyMiddleware<T>(definitions: MiddlewareDefinition[]): Promise<void> {
-    if (! definitions || !Array.isArray(definitions) || !definitions.length) {
+    if (!definitions || !Array.isArray(definitions) || !definitions.length) {
       return;
     }
 
