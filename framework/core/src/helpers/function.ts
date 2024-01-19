@@ -8,7 +8,7 @@
 
 // utils
 import {resolve} from './path';
-import {hasOwnMethod, hasOwnStaticMethod} from './reflection';
+import {hasOwnMethod, hasOwnStatic, hasOwnStaticMethod} from './reflection';
 
 // classes
 import InvalidArgumentError from '../classes/InvalidArgumentError';
@@ -150,13 +150,11 @@ export const invokeMethod = async (target: object, funcName: string, args: any[]
 
   let objFunc;
 
-  if (typeof target === 'function' && Reflect.ownKeys(target).includes(funcName)) {
+  if (typeof target === 'function' && hasOwnStatic(target, funcName, 'method')) {
     objFunc = target[funcName];
-  } else if (typeof target[funcName] === 'function') {
+  } else if ('object' === typeof target && hasOwnMethod(target, funcName)) {
     objFunc = target[funcName];
-  }
-
-  if (!objFunc) {
+  } else {
     throw new Error(`The target has no such function ${funcName}`);
   }
 
