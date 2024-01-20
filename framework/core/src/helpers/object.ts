@@ -43,6 +43,15 @@ export const combine = <V = any>(keys: string[], values: V[]): { [key: string]: 
 };
 
 /**
+ * Flip the object keys and values
+ * @param obj - The input object
+ * @returns Returns the new object with flipped keys and values
+ */
+export const flip = (obj: { [key: string]: any }): { [key: string]: any } | false => {
+  return combine(Object.values<string>(obj), Object.keys(obj));
+};
+
+/**
  * Check that the given object is a plain {key: value} pairs object
  * @param val - The input value to testify
  * @returns Returns true if the object is a plain object
