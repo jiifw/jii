@@ -50,7 +50,7 @@ const arrayTypes: Record<ArrayValueType, ((value: any) => boolean)> = {
  * @returns Whatever the list is of the type or not
  */
 export const isArrayOf = <T = any>(list: T[], type: ArrayValueType): boolean => {
-  if (!Array.isArray(list) || !list.length || !arrayTypes.hasOwnProperty(type)) {
+  if (!Array.isArray(list) || !list.length || !Object.hasOwn(arrayTypes, type)) {
     return false;
   }
 
