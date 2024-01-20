@@ -6,6 +6,63 @@
  * @since 0.0.1
  */
 
+import {isAsyncFunction, isFunction, isPromise, isSyncFunction} from './function';
+import {isPlainObject} from './object';
+
+export type ArrayValueType =
+  | 'string' | 'function' | 'async' | 'sync' | 'array-plain'
+  | 'object' | 'number' | 'int' | 'float' | 'array'
+  | 'array-empty' | 'null' | 'undefined' | 'promise';
+
+/**
+ * Convert any value to array
+ * @param value - Value to convert
+ * @returns Array of the value
+ */
+export const toArray = <T = any>(value: T): T[] =>
+  Array.isArray(value) ? value : [value];
+
+/**
+ * Validate the value against type function
+ * @private
+ */
+const arrayTypes: Record<ArrayValueType, ((value: any) => boolean)> = {
+  'string': value => 'string' === typeof value,
+  'function': value => isFunction(value),
+  'async': value => isAsyncFunction(value),
+  'sync': value => isSyncFunction(value),
+  'promise': value => isPromise(value),
+  'object': value => isPlainObject(value),
+  'number': value => Number(value) === value,
+  'int': value => Number.isInteger(value) === value,
+  'float': value => Number(value) === value && !Number.isInteger(value),
+  'array': value => Array.isArray(value),
+  'array-empty': value => Array.isArray(value) && value.length === 0,
+  'array-plain': value => Array.isArray(value) && value.length === 1,
+  null: value => value === null,
+  undefined: value => value === undefined,
+};
+
+/**
+ * Check if all the values of array has the given type or not
+ * @param list - The input array
+ * @param type - The type to check
+ * @returns Whatever the list is of the type or not
+ */
+export const isArrayOf = <T = any>(list: T[], type: ArrayValueType): boolean => {
+  if (!Array.isArray(list) || !list.length || !arrayTypes.hasOwnProperty(type)) {
+    return false;
+  }
+
+  const checker = arrayTypes[type];
+
+  for (const value of list) {
+    if (!checker(value)) return false;
+  }
+
+  return true;
+};
+
 /**
  * Wraps an array or any value into an array
  * @param [arg] - Value to wrap

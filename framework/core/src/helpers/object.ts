@@ -19,6 +19,28 @@ export const isObject = (val: any): boolean => {
   return type === 'function' || type === 'object' && !!val;
 };
 
+/**
+ * Create an object by using the elements from one "keys" array and one "values" array:
+ * @param keys - Array of keys
+ * @param values - Array of values
+ * @returns Returns the combined object. FALSE if number of elements does not match or arrays are not array
+ */
+export const combine = <V = any>(keys: string[], values: V[]): { [key: string]: V } | false => {
+  if (!Array.isArray(keys)
+    || !Array.isArray(values)
+    || keys.length !== values.length) {
+    return false;
+  }
+
+  const list: { [key: string]: V } = {};
+
+  for (let i: number = 0; i < keys.length; i++) {
+    const key: string = '' + keys[i];
+    list[key] = values[i];
+  }
+
+  return list;
+};
 
 /**
  * Check that the given object is a plain {key: value} pairs object
