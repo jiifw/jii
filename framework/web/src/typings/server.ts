@@ -7,8 +7,9 @@
  */
 
 // types
-import {FastifyInstance, FastifyRequest, FastifyReply, FastifyHttpOptions} from 'fastify';
+import {Accepts} from 'accepts';
 import {Handler} from '@fastify/middie';
+import {FastifyInstance, FastifyRequest, FastifyReply, FastifyHttpOptions} from 'fastify';
 
 export interface URIComponent {
   scheme?: string;
@@ -61,7 +62,7 @@ interface MiddlewareEngine {
 export interface ServerInstance extends server.ServerInstance {
 }
 
-export interface ServerRequest extends server.ServerRequest {
+export interface ServerRequest extends server.ServerRequest, Accepts {
   urlData?(): URIComponent;
 }
 
