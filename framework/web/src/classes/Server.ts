@@ -19,7 +19,7 @@ import InvalidConfigError from '@jii/core/dist/classes/InvalidConfigError';
 import {ServerInstance, ServerHTTPOptions} from '../typings/server';
 import {
   MiddlewareAfter, MiddlewareCallback, MiddlewareDefinition,
-  MiddlewareMiddleware, MiddlewareRegister, MiddlewareType,
+  MiddlewareMiddleware, MiddlewareRegister, MiddlewareType, ServerComponentDefinition,
 } from '../typings/classes/Server';
 import WebPluginEvent from './WebPluginEvent';
 import Event from '@jii/core/dist/classes/Event';
@@ -91,6 +91,31 @@ export default class Server extends Component {
    * @see https://fastify.dev/docs/latest/Reference/Server/#factory
    */
   public httpOptions: ServerHTTPOptions = {};
+
+  /**
+   * Cookies options,
+   * @see https://github.com/fastify/fastify-cookie#options
+   */
+  public cookieOptions: ServerComponentDefinition['cookieOptions'] = {};
+
+  /**
+   * Favicon options,
+   * @see https://github.com/smartiniOnGitHub/fastify-favicon#note
+   */
+  public faviconOptions: ServerComponentDefinition['faviconOptions'] = {};
+
+  /**
+   * Multipart content-type options,
+   * @see https://github.com/fastify/fastify-multipart?tab=readme-ov-file#usage
+   */
+  public multipartOptions: ServerComponentDefinition['multipartOptions'] = {};
+
+  /**
+   * Session options, <br>
+   * The session data is stored server-side using the configured session store.
+   * @see https://github.com/fastify/session?tab=readme-ov-file#options
+   */
+  public sessionOptions: ServerComponentDefinition['sessionOptions'] = {};
 
   /**
    * When true routes are registered as case-sensitive. That is, `/foo` is not equal to `/Foo`. When `false` then routes are case-insensitive.
@@ -252,14 +277,19 @@ export default class Server extends Component {
    */
   protected getPredefinedMiddleware(): MiddlewareDefinition[] {
     return [
-      {path: 'fastify-favicon', type: 'register'},
+      {path: 'fastify-favicon', type: 'register', config: this.faviconOptions || {}},
       {path: 'fastify-graceful-shutdown', type: 'register'},
       {path: 'x-xss-protection', type: 'middleware'},
       {path: '@fastify/accepts', type: 'register'},
       {path: '@fastify/url-data', type: 'register'},
-      {path: '@fastify/cookie', type: 'register'},
+      {path: '@fastify/cookie', type: 'register', config: this.cookieOptions || {}},
       {path: '@fastify/formbody', type: 'register'},
-      {path: '@fastify/multipart', type: 'register', config: {attachFieldsToBody: 'keyValues'}},
+      {
+        path: '@fastify/multipart', type: 'register', config: merge(
+          {attachFieldsToBody: 'keyValues'}, this.multipartOptions || {},
+        ),
+      },
+      {path: '@fastify/session', type: 'register', config: this.sessionOptions || {}},
       {
         async handler(error: any) {
           if (error) throw error;

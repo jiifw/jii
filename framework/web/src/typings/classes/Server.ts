@@ -7,9 +7,14 @@
  */
 
 // types
-import {Required} from 'utility-types';
+import {DeepPartial, Required} from 'utility-types';
+import {FastifyFaviconOptions} from 'fastify-favicon';
+import {FastifyCookieOptions} from '@fastify/cookie';
 import {ServerHTTPOptions, ServerInstance} from '../server';
 import {ComponentDefinition} from '@jii/core/dist/typings/components';
+import {FastifyMultipartOptions} from '@fastify/multipart';
+import {FastifySessionOptions} from '@fastify/session';
+
 
 /**
  * Server configuration.
@@ -38,6 +43,35 @@ export interface ServerComponentDefinition extends Omit<ComponentDefinition, 'cl
    * @default false
    */
   enableLogging?: boolean;
+
+  /**
+   * Cookies options,
+   * @see https://github.com/fastify/fastify-cookie#options
+   * @default {}
+   */
+  cookieOptions?: DeepPartial<FastifyCookieOptions>;
+
+  /**
+   * Favicon options,
+   * @see https://github.com/smartiniOnGitHub/fastify-favicon#note
+   * @default {}
+   */
+  faviconOptions?: DeepPartial<FastifyFaviconOptions>;
+
+  /**
+   * Multipart content-type options,
+   * @see https://github.com/fastify/fastify-multipart?tab=readme-ov-file#usage
+   * @default {}
+   */
+  multipartOptions?: DeepPartial<FastifyMultipartOptions>;
+
+  /**
+   * Session options, <br>
+   * The session data is stored server-side using the configured session store.
+   * @see https://github.com/fastify/session?tab=readme-ov-file#options
+   * @default {}
+   */
+  sessionOptions?: DeepPartial<FastifySessionOptions>;
 
   /**
    * The options to pass to the server.
@@ -126,7 +160,7 @@ export type MiddlewareDefinition = (
   | {
   type: 'after'
   description?: string
-  handler (error: any): Promise<void>;
+  handler(error: any): Promise<void>;
   [k: string]: unknown
 }
   | {
