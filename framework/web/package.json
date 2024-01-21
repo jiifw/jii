@@ -47,5 +47,8 @@
     "fastify-graceful-shutdown": "^3.5.1",
     "fastify-plugin": "^4.5.1",
     "x-xss-protection": "^2.0.0"
+  },
+  "devDependencies": {
+    "@types/accepts": "^1.3.7"
   }
 }
