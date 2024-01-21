@@ -17,6 +17,14 @@ export const PLUGIN_TYPES = ['server', 'config', 'request', 'response', 'cli', '
 export type PluginType = typeof PLUGIN_TYPES[number] | string;
 export type EventHandler = ComponentEventHandler;
 
+export interface Metadata {
+  appVersion?: string;
+  dependencies?: {
+    components?: (string | symbol)[];
+    plugins?: (string | symbol)[];
+  };
+}
+
 /**
  * A base plugin class to create application specific plugins
  */
@@ -52,6 +60,12 @@ export default abstract class Plugin extends Component {
    * You may seek {@link PluginAppConfigEvent#config PluginAppConfigEvent.config} to modify the application configuration after finalized
    */
   public static EVENT_AFTER_CONFIG_PROCESS: string = 'afterConfigProcess';
+
+  /**
+   * Use this module when creating new plugins, you can declare the dependencies
+   * and the expected Jii version that your plugin needs.
+   */
+  public static metadata: Metadata = {};
 
   /**
    * The unique plugin id, e.g., cors, body-parser, etc.
