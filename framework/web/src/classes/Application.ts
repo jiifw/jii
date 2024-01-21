@@ -55,6 +55,8 @@ export default class Application extends BaseApplication {
   public coreComponents(): ComponentsDefinition {
     return merge(super.coreComponents(), {
       server: {class: '@jiiWeb/classes/Server'},
+      request: {class: '@jiiWeb/classes/Request'},
+      response: {class: '@jiiWeb/classes/Response'},
     });
   }
 }
