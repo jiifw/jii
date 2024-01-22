@@ -57,6 +57,7 @@ export default class Application extends BaseApplication {
       server: {class: '@jiiWeb/classes/Server'},
       request: {class: '@jiiWeb/classes/Request'},
       response: {class: '@jiiWeb/classes/Response'},
+      accessToken: {class: '@jiiWeb/classes/AccessToken'},
     });
   }
 }
