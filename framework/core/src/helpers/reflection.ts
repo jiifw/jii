@@ -6,6 +6,13 @@
  * @since 0.0.1
  */
 
+import acorn from 'acorn';
+import merge from 'deepmerge';
+import objPath from 'object-path';
+
+// utils
+import {onlyKeys} from './object';
+
 /**
  * Checks if the value is a class
  * @param val - The value
@@ -336,4 +343,56 @@ export const isConstructor = (cons: any): boolean => {
   } catch (e) {
     return false;
   }
+};
+
+/**
+ * Inspects the given function and returns its information including name, generator, async, and parameters with their values.
+ * @param func - Function to inspect
+ * @param options - Options to pass to `acorn.parse`
+ *
+ * @example
+ * async function fetchUser(id, active = true) {}
+ *
+ * inspectFunction(fetchUser, {ecmaVersion: 'latest'});
+ * // expected: {name: 'fetchUser', generator: false, async: true, params: {id: undefined, active: true}}
+ */
+const inspectFunction = (
+  func: Function, options: Omit<acorn.Options, 'ecmaVersion'> = {}
+): null | {
+  name: string;
+  generator: boolean;
+  async: boolean;
+  params: { [name: string]: any };
+} => {
+  const source = func.toString();
+  const parsed = acorn.parse(source, merge({
+    ecmaVersion: 'latest',
+  }, options || {}) as any);
+
+  const node = objPath.get(parsed, 'body.0', null) as acorn.FunctionDeclaration;
+
+  if (!node || node.type !== 'FunctionDeclaration') return null;
+
+  const info = merge({name: node.id.name}, onlyKeys(node, ['generator', 'async'])) as any;
+  info.params = {} as { [name: string]: any };
+
+  if (!node.params.length) {
+    return info;
+  }
+
+  for (const param of node.params) {
+    const p = objPath(param);
+    if (p.get('type') === 'Identifier') {
+      const name = p.get('name');
+      info.params[name] = undefined;
+      continue;
+    }
+
+    if (param?.type === 'AssignmentPattern') {
+      const name = p.get('left.name');
+      info.params[name] = eval(source.substring(p.get('right.start'), p.get('right.end')));
+    }
+  }
+
+  return info;
 };
