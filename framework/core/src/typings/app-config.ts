@@ -9,7 +9,7 @@
 import {ComponentsDefinition} from './components';
 import {PluginsDefinition} from './plugin';
 
-export type CliDirectory = string | { path: string; recursive?: boolean } | (string | { path: string; recursive?: boolean })[];
+export type ConsoleDirectory = string | { path: string; recursive?: boolean } | (string | { path: string; recursive?: boolean })[];
 export {ComponentsDefinition};
 
 /**
@@ -69,11 +69,9 @@ export interface ApplicationConfig {
   /**
    * Command line (cli) related configuration
    */
-  cli?: {
+  console?: {
     /**
      * The absolute or alias directory path to the cli command files<br>
-     * **Note**: It will _only read_ files with the extension of
-     * *<span color="green">`<name>.cmd.ts`</span>* or *<span color="green">`<name>.cmd.js`</span> (after build)*.
      * @example Single directory
      * - 'drive:/path/to' // Absolute path (assuming 'drive:/path/to/commands' directory)
      * - '@app' // Alias path (assuming '@app/commands' directory)
@@ -86,7 +84,7 @@ export interface ApplicationConfig {
      * ]
      * @default '@app'
      */
-    dirs?: CliDirectory;
+    dirs?: ConsoleDirectory;
   };
 
   /**
