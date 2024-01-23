@@ -6,6 +6,8 @@
  * @since 0.0.1
  */
 
+import {extname} from 'node:path';
+
 // classes
 import Component from './Component';
 import {BehaviorArgs} from './Behavior';
@@ -21,6 +23,7 @@ import {EventHandler} from './Event';
 import {Constructor} from '../typings/utility';
 import {ComponentDefinition, ModuleDefinition} from '../typings/components';
 import BaseObject from './BaseObject';
+import Jii from '../Jii';
 
 export type ObjectType = (
   | string // alias path to class (e.g., '@app/components/User')
@@ -147,8 +150,14 @@ export default class Instance {
 
     let Class;
 
-    if (isPath(pathOrAlias, 'file')) {
-      Class = require(pathOrAlias);
+    if (!pathOrAlias.startsWith('@')) {
+      const _filePath = !extname(pathOrAlias)
+        ? require.resolve(pathOrAlias)
+        : pathOrAlias;
+
+      if (isPath(_filePath, 'file')) {
+        Class = require(_filePath);
+      }
     } else {
       if (!pathOrAlias.startsWith('@')) {
         throw new InvalidConfigError(`Object configuration 'class' should start with a @alias.`);
