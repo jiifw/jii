@@ -43,17 +43,16 @@ export default class Application<T extends ApplicationConfig = ApplicationConfig
    * @inheritDoc
    */
   init() {
+    Jii.setAlias('@consoleRoot', dirname(__dirname));
     super.init();
-    Jii.setAlias('@jiiConsole', dirname(__dirname));
   }
 
   /**
-   * Load command files
-   * @protected
+   * @inheritDoc
    */
   coreConfigValidators(): string[] {
     return merge(super.coreConfigValidators(), [
-      `@jiiConsole/config/validators/ConsoleConfigValidator`,
+      `@consoleRoot/config/validators/ConsoleConfigValidator`,
     ]);
   }
 
