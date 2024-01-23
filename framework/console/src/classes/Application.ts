@@ -7,13 +7,16 @@
  */
 
 import figlet from 'figlet';
+import merge from 'deepmerge';
 import {Command} from 'commander';
 
 // classes
 import BaseApplication, {Platform} from '@jii/core/dist/classes/Application';
 
 // utils
+import Jii from '@jii/core/dist/Jii';
 import {listCommands} from '../utils/commands';
+import {dirname} from '@jii/core/dist/helpers/path';
 
 // types
 import {ApplicationConfig} from '../typings/app-config';
@@ -37,6 +40,24 @@ export default class Application<T extends ApplicationConfig = ApplicationConfig
   protected console: Command = null;
 
   /**
+   * @inheritDoc
+   */
+  init() {
+    super.init();
+    Jii.setAlias('@jiiConsole', dirname(__dirname));
+  }
+
+  /**
+   * Load command files
+   * @protected
+   */
+  coreConfigValidators(): string[] {
+    return merge(super.coreConfigValidators(), [
+      `@jiiConsole/config/validators/ConsoleConfigValidator`,
+    ]);
+  }
+
+  /**
    * Creates a console app instance
    * @protected
    */
@@ -47,7 +68,13 @@ export default class Application<T extends ApplicationConfig = ApplicationConfig
     this.console
       .version(this.getVersion())
       .description('A Jii framework CLI for terminal operations');
+  }
 
+  /**
+   * Load command files
+   * @protected
+   */
+  protected async loadCommands() {
     const commands = await listCommands(this.console);
 
     commands.forEach(command => this.console.addCommand(command));
@@ -65,6 +92,7 @@ export default class Application<T extends ApplicationConfig = ApplicationConfig
   public async run(): Promise<void> {
     await this.createInstance();
     await super.run();
+    await this.loadCommands();
 
     console.log(figlet.textSync('Jii Framework'));
 
