@@ -7,22 +7,30 @@
  */
 
 import {sync} from 'glob';
+import {join} from 'node:path';
 import {Command} from 'commander';
 
 // utils
 import Jii from '@jii/core/dist/Jii';
-import {INTERNAL_CLI_DIRS, INTERNAL_METADATA} from '@jii/core/dist/utils/symbols';
+import {APP_CONFIG} from '@jii/core/dist/utils/symbols';
 import registerCommand from '../utils/register';
+
+// types
+import {ApplicationConfig} from '../typings/app-config';
 
 /**
  * Compile glob patterns for CLI commands.
  * @returns Array of glob patterns
  */
 export const compileGlobPatterns = (): { path: string; pattern: string }[] => {
-  //const patterns: string[];
-  const paths: Array<string> = Jii.container.getConfig(INTERNAL_METADATA)?.[INTERNAL_CLI_DIRS] ?? [];
+  const paths: string[] = Jii.container.retrieve<ApplicationConfig>(APP_CONFIG)?.console?.dirs as string[];
+  const pluginsList = Jii.plugins.pluginsMetadata(['commands', 'base-path']);
 
-  // @todo Implementation of plugins commands here
+  if (Object.keys(pluginsList).length) {
+    for (const meta of Object.values(pluginsList)) {
+      if (meta?.commands) paths.push(join(meta['base-path'], 'commands'));
+    }
+  }
 
   return paths.map(dir => ({
     path: dir,
@@ -37,10 +45,14 @@ export const compileGlobPatterns = (): { path: string; pattern: string }[] => {
 
 export const listCommands = async (instance: InstanceType<typeof Command>) => {
   const promises = compileGlobPatterns()
-    .map(item => sync(item.pattern, {cwd: item.path, absolute: true}))
+    .map(item => sync(item.pattern, {
+      cwd: item.path,
+      absolute: true,
+      ignore: ['*.d.ts'],
+    }))
     .flat()
     // promising the list
-    .map(file => registerCommand(require(file).default, file));
+    .map(file => registerCommand(file as any, file));
 
   return Promise.all(promises);
 };
