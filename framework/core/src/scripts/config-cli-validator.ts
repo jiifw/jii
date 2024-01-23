@@ -16,7 +16,7 @@ import {wrap} from '../helpers/array';
 import {INTERNAL_METADATA, INTERNAL_CLI_DIRS} from '../utils/symbols';
 
 // types
-import {ApplicationConfig, CliDirectory} from '../typings/app-config';
+import {ApplicationConfig, ConsoleDirectory} from '../typings/app-config';
 
 /**
  * Validates cli 'dirs' existence
@@ -44,8 +44,8 @@ type CliObj = { path: string; recursive: boolean };
  * Normalizes cli 'dirs' to array of paths
  * @param [definition] - Dirs definition to validate
  */
-export const normalizeDirs = (definition: CliDirectory): Array<string> => {
-  const list: CliDirectory[] = ['@app']; // predefined directories
+export const normalizeDirs = (definition: ConsoleDirectory): Array<string> => {
+  const list: ConsoleDirectory[] = ['@app']; // predefined directories
   list.push(...wrap(definition));
 
   const directories: Array<string> = [];
@@ -67,7 +67,7 @@ export const normalizeDirs = (definition: CliDirectory): Array<string> => {
 /**
  * Validates cli configuration
  */
-export default (config?: ApplicationConfig['cli']): void => {
+export default (config?: ApplicationConfig['console']): void => {
   // validates 'dirs' prop
   Jii.container.setConfig(INTERNAL_METADATA, {[INTERNAL_CLI_DIRS]: normalizeDirs(config?.dirs ?? [])});
 }
