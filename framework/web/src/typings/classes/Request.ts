@@ -9,4 +9,9 @@
 import {ComponentDefinition} from '@jii/core/dist/typings/components';
 
 export interface RequestComponentDefinition extends Omit<ComponentDefinition, 'class'> {
+  /**
+   * The request class.
+   * @default "@jiiServer/classes/Request"
+   */
+  class?: string;
 }

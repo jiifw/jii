@@ -29,6 +29,12 @@ export type TokenAllOption = TokenOption
 
 export interface AccessTokenComponentDefinition extends Omit<ComponentDefinition, 'class'> {
   /**
+   * The access token class.
+   * @default "@jiiServer/classes/AccessToken"
+   */
+  class?: string;
+
+  /**
    * Token field name to retrieve from
    * @default 'access_token'
    */
