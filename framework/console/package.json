@@ -20,10 +20,10 @@
     "directory": "dist"
   },
   "dependencies": {
+    "@inquirer/prompts": "^3.3.0",
     "@jii/core": "^0.0.1",
     "commander": "^11.1.0",
-    "figlet": "^1.7.0",
-    "inquirer": "^9.2.12"
+    "figlet": "^1.7.0"
   },
   "scripts": {
     "start": "node dist/cli.js",
