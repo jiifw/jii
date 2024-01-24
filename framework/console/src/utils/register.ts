@@ -69,7 +69,7 @@ export default async function registerCommand(Class: CommandStatic, filePath: st
       ? [null, ...args]
       : args;
 
-    instance.action.apply(undefined, <any>_args);
+    instance.action.apply(instance, <any>_args);
   });
 
   //<editor-fold desc="arguments processing">
