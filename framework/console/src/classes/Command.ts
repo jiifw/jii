@@ -25,10 +25,10 @@ export type {Argument, CommandOption} from '../typings/cli';
  * Base class for a creating command
  *
  * @example /path/to/commands/generate.ts
- * import {BaseCommand} from '@jii/cli/dist/classes/BaseCommand';
- * export default class extends BaseCommand {
- *  name = 'test';
- *  description = 'Express your command';
+ * import Command from '@jii/console/dist/classes/Command';
+ * export default class extends Command {
+ *  public name = 'test';
+ *  public description = 'Express your command';
  *
  *  async action(): Promise<void> {
  *    console.log(`Hello from 'test' command`);
