@@ -1,0 +1,62 @@
+{
+  "name": "@jii/{{ id }}",
+  "private": true,
+  "version": "{{ version }}",
+  "description": "{{ description }}",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "precommit": [
+    "lint",
+    "test"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jiifw/jii.git"
+  },
+  "licenses": [
+    {
+      "type": "Apache License 2.0",
+      "url": "https://github.com/jiifw/jii/blob/master/LICENSE.md"
+    }
+  ],
+  "keywords": [
+    "jii",
+    "plugin"
+  ],
+  "homepage": "https://github.com/jiifw/jii/tree/master/plugins/jii-{{ id }}",
+  "license": "ISC",
+  "directories": {
+    "dist": "dist"
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "clean": "rimraf coverage dist tmp && mkdir dist",
+    "prebuild": "npm run lint",
+    "build": "yarn run clean && yarn run build-code && yarn run build-types",
+    "build-code": "babel src --out-dir ./dist --copy-files --extensions .ts,.tsx,.js,.jsx",
+    "build-types": "tsc --emitDeclarationOnly",
+    "lint": "eslint . --ext .ts",
+    "prettier": "prettier --config .prettierrc --write .",
+    "test": "jest --coverage",
+    "test:watch": "jest --watch",
+    "tsc": "tsc"
+  },
+  "dependencies": {
+    "@jii/core": "^0.0.1",
+    {%- if target == "console" %}
+    "@jii/console": "^0.0.1"{{ "\n" }}
+    {%- elif target == "web" %}
+    "@jii/web": "^0.0.1"{{ "\n" }}
+    {%- endif -%}
+{{ "  }" }},
+  "devDependencies": {
+  },
+  "engines": {
+    "node": ">=18.18"
+  }
+}

@@ -1,0 +1,69 @@
+{
+  "name": "@jii/wizard",
+  "private": true,
+  "version": "0.0.1",
+  "description": "A plugin to generate Jii specific code",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "precommit": [
+    "lint",
+    "test"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jiifw/jii.git"
+  },
+  "licenses": [
+    {
+      "type": "Apache License 2.0",
+      "url": "https://github.com/jiifw/jii/blob/master/LICENSE.md"
+    }
+  ],
+  "keywords": [
+    "code-generator",
+    "scaffolding",
+    "console",
+    "jii",
+    "plugin"
+  ],
+  "author": {
+    "name": "Junaid Atari",
+    "email": "mj.atari@gmail.com",
+    "url": "https://github.com/blacksmoke26"
+  },
+  "homepage": "https://github.com/jiifw/jii/tree/master/plugins/jii-wizard",
+  "license": "ISC",
+  "directories": {
+    "dist": "dist"
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "clean": "rimraf coverage dist tmp && mkdir dist",
+    "prebuild": "npm run lint",
+    "build": "yarn run clean && yarn run build-code && yarn run build-types",
+    "build-code": "babel src --out-dir ./dist --copy-files --extensions .ts,.tsx,.js,.jsx",
+    "build-types": "tsc --emitDeclarationOnly",
+    "lint": "eslint . --ext .ts",
+    "prettier": "prettier --config .prettierrc --write .",
+    "test": "jest --coverage",
+    "test:watch": "jest --watch",
+    "tsc": "tsc"
+  },
+  "dependencies": {
+    "@jii/console": "^0.0.1",
+    "@jii/core": "^0.0.1",
+    "inquirer": "^9.2.12",
+    "semver": "^7.5.4"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17"
+  },
+  "engines": {
+    "node": ">=18.18"
+  }
+}

@@ -1,0 +1,18 @@
+/**
+ * @link https://www.github.com/jiifw
+ * @copyright Copyright (c) 2023-2024 Jii framework
+ * @license https://www.github.com/jiifw/jii/blob/main/LICENSE
+ * @since {{ version }}
+ */
+{{ "\n" }}
+{%- if target == "console" %}
+import ConsolePlugin from '@jii/console/dist/classes/ConsolePlugin';{{ "\n\n" }}
+{%- elif target == "web" %}
+import WebPlugin from '@jii/console/dist/classes/WebPlugin';{{ "\n\n" }}
+{%- endif -%}
+
+/**
+ * {{ description }}
+ */
+export default class {{ className }} extends {{ "Console" if target == "console" else "Web" }}Plugin {
+}
