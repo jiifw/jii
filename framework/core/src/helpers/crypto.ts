@@ -10,14 +10,39 @@ import crypto from 'node:crypto';
 import bcryptjs from 'bcryptjs';
 
 /**
+ * Generates md5 hash of value
+ * @param str - Value to verify
+ * @returns Generated hash string
+ */
+export const md5 = (str: string): string => {
+  return crypto.createHash('md5').update(str).digest('hex').toString();
+};
+
+/**
  * Generates a secure sha1 hash of value
  * @param str - Value to verify
  * @returns Generated hash string
  */
 export const sha1 = (str: string): string => {
-  const _sha1 = crypto.createHash('sha1');
-  _sha1.update(str);
-  return _sha1.digest('hex').toString();
+  return crypto.createHash('sha1').update(str).digest('hex').toString();
+};
+
+/**
+ * Generates a secure sha256 hash of value
+ * @param str - Value to verify
+ * @returns Generated hash string
+ */
+export const sha256 = (str: string): string => {
+  return crypto.createHash('sha256').update(str).digest('hex').toString();
+};
+
+/**
+ * Generates a secure sha512 hash of value
+ * @param str - Value to verify
+ * @returns Generated hash string
+ */
+export const sha512 = (str: string): string => {
+  return crypto.createHash('sha512').update(str).digest('hex').toString();
 };
 
 /**
