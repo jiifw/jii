@@ -6,17 +6,36 @@
  * @since 0.0.1
  */
 
-import merge from 'deepmerge';
-import {join} from 'node:path';
+import {join, resolve} from 'node:path';
 
 // classes
 import BaseObject from '@jii/core/dist/classes/BaseObject';
+import TemplateCodeFile from './TemplateCodeFile';
 
 // utils
-import {renderWriteFile} from '@jii/core/dist/helpers/nunjucks';
+import Jii from '@jii/core/dist/Jii';
+import {input} from '@inquirer/prompts';
+import {kebab} from '@jii/core/dist/helpers/inflector';
+import {toString} from '@jii/core/dist/helpers/string';
 
 /**
  * The base class for all prompt generators
+ *
+ * @example
+ *
+ * export default class MyPromptGenerator extends PromptGenerator {
+ *   public name: string = 'my-prompt';
+ *   public value: string = 'my-prompt';
+ *   public description: string = 'A quick intro regarding your command';
+ *
+ *   public async prepare(): Promise<void> {
+ *     // logic here
+ *   }
+ *
+ *   public async prepareFiles(): Promise<void> {
+ *     // logic here
+ *   }
+ * }
  */
 export default class PromptGenerator extends BaseObject {
   /**
@@ -30,18 +49,23 @@ export default class PromptGenerator extends BaseObject {
   public value: string = 'my-prompt';
 
   /**
+   * The package id
+   */
+  public packageId: string = null;
+
+  /**
    * The description of the generator
    */
   public description: string = 'To be described';
 
   /**
-   * Dynamic variables pass to template file(s)
+   * The base path
    */
-  protected _variables: Record<string, any> = {};
+  public basePath: string = null;
 
   /**
    * The inputs results map from the user
-   * @see {@link collectInputs collectInputs()}
+   * @see {@link prepare prepare()}
    */
   private _inputs: Record<string, any> = {};
 
@@ -50,6 +74,12 @@ export default class PromptGenerator extends BaseObject {
    * @private
    */
   private _templateDir: string = 'templates';
+
+  /**
+   * The template files register
+   * @private
+   */
+  protected codeFiles: Map<string, TemplateCodeFile> = new Map();
 
   /**
    * @returns The directory where templates are stored
@@ -69,12 +99,17 @@ export default class PromptGenerator extends BaseObject {
   /**
    * Collect inputs from the user
    *
-   * {@link collectInputs collectInputs()} is called by the {@link execute execute()} method.
+   * {@link prepare prepare()} is called by the {@link execute execute()} method.
    *
    * @example
    * // import {input} from '@inquirer/prompts';
    *
-   * protected async collectInputs(): Promise<void> {
+   * protected async prepare(): Promise<void> {
+   *   // set base path
+   *   this.basePath = __dirname;
+   *
+   *   await super.prepare();
+   *
    *   const id = await input({
    *     message: 'Unique ID (e.g., "authorization" or "access-token")',
    *     transformer: kebab,
@@ -89,77 +124,108 @@ export default class PromptGenerator extends BaseObject {
    *
    *   this.setInputs({id});
    * }
+   *
+   * **Note**: If you override this method, you must call the super method.
    */
-  public async collectInputs(): Promise<void> {
+  public async prepare(): Promise<void> {
+    //<editor-fold desc="package id">
+    this.packageId = await input({
+      message: 'Package name (e.g., "authorization" or "access-token")',
+      transformer: kebab,
+      validate(value) {
+        if (!toString(value, true)) {
+          return 'Package ID should be provided';
+        }
+        return true;
+      },
+    });
+    //</editor-fold>
   }
 
   /**
    * Gets prompt input results
    * @see {@link setInputs setInputs()}
-   * @see {@link collectInputs collectInputs()}
+   * @see {@link prepare prepare()}
    */
   public getInputs(): Record<string, any> {
     return this._inputs;
   }
 
   /**
+   * Gets prompt input by name
+   * @returns The input value or `null` if not found.
+   */
+  public getInput(name: string): string | null {
+    return this._inputs[name] || null;
+  }
+
+  /**
    * Sets prompt input results
    * @see {@link getInputs getInputs()}
-   * @see {@link collectInputs collectInputs()}
+   * @see {@link prepare prepare()}
    */
   public setInputs(variables: Record<string, any>): void {
     this._inputs = variables;
   }
 
   /**
-   * Get variables
-   * @see {@link setVariables setVariables()}
+   * Initialize the code files based on the output of {@link prepare prepare()}
+   *
+   * {@link process process()} is called by the {@link execute execute()} method.
+   *
+   * @see {@link getInputs getInputs()}
+   * @see {@link addFile addFile()}
+   * @see {@link execute execute()}
+   *
+   * @example
+   * public async prepareFiles(): Promise<void> {
+   *   const {id} = this.getInputs();
+   *   this.addFile('<template>', '<output-file>', {fileId: id});
+   * }
    */
-  public getVariables(): Record<string, any> {
-    return this._variables;
+  public async process(): Promise<void> {
   }
 
   /**
-   * Sets variables
-   * @see {@link getVariables getVariables()}
+   * Returns current template files instances
    */
-  public setVariables(variables: Record<string, any>): void {
-    this._variables = variables;
+  public getFiles(): TemplateCodeFile[] {
+    return [...this.codeFiles.values()];
   }
 
   /**
-   * Render a template file and write results to a file
-   * @param template - the template name (without extension)
+   * Resolves output file and returns absolute output file path
+   * @param file - The filename with extensions ('my-file.txt' or '/dir/file.js')
+   * @param [dir] - Base path to the directory (alias supported), Defaults to the current package path
+   * @returns The resolved output file path
+   */
+  public resolveOutFile(file: string, dir: string = null): string {
+    const basePath = Jii.getAlias((dir || this.basePath) + '/' + this.packageId, false);
+    return resolve(join(basePath, file));
+  }
+
+  /**
+   * Returns current template files instances
+   * @param template - The template name (without extension)
+   * @returns The template file instance or `null` if not found.
+   */
+  public getFile(template: string): TemplateCodeFile | null {
+    return this.codeFiles.get(template) || null;
+  }
+
+  /**
+   * Add a template file
+   * @param template - The template name (without extension)
    * @param outputFile - Absolute path to the output file
-   * @param options - Additional Options to pass to '`renderWriteFile`'.
-   * @returns `true` if the file was rendered successfully, `false` otherwise.
-   * @see {@link renderWriteFile renderWriteFile()}
+   * @param [variables] - Dynamic variables pass to template file
    *
    * **Note**: If you override this method, you must call the super method.
    */
-  protected writeFile(template: string, outputFile: string, options: Partial<{
-    variables: Record<string, any>;
-    overwrite: boolean;
-    print: boolean;
-    logger: Partial<{
-      msg: string;
-      func: (msg: string) => void;
-    }>;
-  }> = {}): boolean {
-    const filePath = join(this.getTemplatesDir(), template).replace(/\.njk$/, '') + '.njk';
-    return renderWriteFile(filePath, outputFile, merge({
-      overwrite: true,
-      variables: this.getVariables(),
-      print: true,
-    }, options));
-  }
-
-  /**
-   * Write files to disk
-   * @param inputs - The inputs to be passed to the generator, see {@link collectInputs collectInputs()}
-   * @param variables - The variables to be passed to the generator, see {@link getVariables variables()}
-   */
-  public async writeFiles(inputs: Record<string, any>, variables: Record<string, any>): Promise<void> {
+  public addFile(template: string, outputFile: string, variables: Record<string, any> = {}): TemplateCodeFile {
+    const templateFilePath = resolve(join(this.basePath, this.getTemplatesDir(), template)).replace(/\.njk$/, '') + '.njk';
+    const codeFile = new TemplateCodeFile(outputFile, templateFilePath);
+    codeFile.setVariables(variables);
+    return this.codeFiles.set(template, codeFile).get(template);
   }
 
   /**
@@ -168,6 +234,18 @@ export default class PromptGenerator extends BaseObject {
    * **Note**: If you override this method, you must call the super method.
    */
   public async execute(): Promise<void> {
-    return this.writeFiles(this.getInputs(), this.getVariables());
+    await this.prepare();
+    await this.process();
+
+    for (const codeFile of this.codeFiles.values()) {
+      const result = await codeFile.save();
+
+      if (result === true) {
+        console.log(`File saved at: '${codeFile.path}`);
+        continue;
+      }
+
+      console.log('Error while saving file:', result);
+    }
   }
 }
