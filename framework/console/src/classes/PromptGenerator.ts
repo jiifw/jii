@@ -139,6 +139,8 @@ export default class PromptGenerator extends BaseObject {
         return true;
       },
     });
+
+    this.packageId = kebab(this.packageId);
     //</editor-fold>
   }
 
