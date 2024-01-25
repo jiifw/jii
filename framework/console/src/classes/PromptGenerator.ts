@@ -11,7 +11,6 @@ import merge from 'deepmerge';
 
 // classes
 import BaseObject from '@jii/core/dist/classes/BaseObject';
-import NotImplementedError from '@jii/core/dist/classes/NotImplementedError';
 
 // utils
 import {renderWriteFile} from '@jii/core/dist/helpers/nunjucks';
