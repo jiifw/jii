@@ -6,22 +6,30 @@
  * @since 0.0.1
  */
 
-import {dirname, isPath, resolve} from './path';
 import {basename, join, normalize} from 'node:path';
 import {accessSync, readFileSync, unlinkSync, writeFileSync} from 'node:fs';
 
 // utils
 import Jii from '../Jii';
 import {getAlias} from '../base/aliases';
+import {dirname, isFile, resolve} from './path';
+
+/**
+ * Read a text file
+ * @param path - File path
+ * @returns File content
+ */
+export function readTextFile(path: string): string {
+  return readFileSync(getAlias(path, false), {encoding: 'utf8'});
+}
 
 /**
  * Read and parse a json file
  * @param path - File path
+ * @returns Json object
  */
 export function readJsonFile(path: string): any {
-  return JSON.parse(
-    readFileSync(path, {encoding: 'utf8'}).trim() || '{}',
-  );
+  return JSON.parse(readTextFile(path).trim() || '{}');
 }
 
 /**
@@ -56,13 +64,13 @@ export const importFile = async (alias: string): Promise<any> => {
 export const writeTextFile = (aliasOrPath: string, content: string, overwrite: boolean = false): boolean => {
   const filePath = getAlias(aliasOrPath, false);
 
-  if (isPath(filePath, 'file')) {
+  if (isFile(filePath)) {
     if (!overwrite) return false;
     unlinkSync(overwrite ? filePath : filePath);
   }
 
   writeFileSync(filePath, content, {encoding: 'utf8'});
-  return isPath(filePath, 'file');
+  return isFile(filePath);
 };
 
 /**
