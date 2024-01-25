@@ -62,14 +62,14 @@ export default async function registerCommand(Class: CommandStatic, filePath: st
   await processCommandOptions(command, instance.options());
 
   if (instance?.init) {
-    instance?.init.apply(undefined, [command]);
+    instance?.init.apply(instance, [command]);
   }
   command.action((...args) => {
     const _args = args.length < 3
       ? [null, ...args]
       : args;
 
-    instance.action.apply(instance, <any>_args);
+    instance.action.call(instance, ..._args);
   });
 
   //<editor-fold desc="arguments processing">
