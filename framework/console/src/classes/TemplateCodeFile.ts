@@ -14,8 +14,8 @@ import BaseObject, {Props} from '@jii/core/dist/classes/BaseObject';
 
 // utils
 import {isFile} from '@jii/core/dist/helpers/path';
-import {renderFile, renderText} from '@jii/core/dist/helpers/nunjucks';
 import {readTextFile} from '@jii/core/dist/helpers/file';
+import {renderText} from '@jii/core/dist/helpers/nunjucks';
 
 /**
  * CodeFile represents a code file to be generated.
@@ -25,11 +25,6 @@ export default class TemplateCodeFile extends BaseObject {
    * The file path that the new code should be saved to.
    */
   public path: string = null;
-
-  /**
-   * The template file path
-   */
-  protected templatePath: string = null;
 
   /**
    * The code file instance
@@ -42,6 +37,11 @@ export default class TemplateCodeFile extends BaseObject {
   private _variables: Record<string, any> = {};
 
   /**
+   * The variables pass to template file contents before rendering.
+   */
+  private _templateContent: string = '';
+
+  /**
    * Constructor.
    * @param path - The file path that the new code should be saved to.
    * @param templatePath - The template file path.
@@ -51,15 +51,42 @@ export default class TemplateCodeFile extends BaseObject {
     super(props);
     this.path = normalize(path);
 
-    // fix extension
-    templatePath = templatePath.replace(/\.njk$/, '') + '.njk';
-
-    if (!isFile(templatePath)) {
-      throw new Error(`The template file '${templatePath}' does not exist.`);
+    if (templatePath) {
+      this.loadTemplate(templatePath);
     }
 
-    this.templatePath = resolve(templatePath);
     this.codeFile = new CodeFile(path, '');
+  }
+
+  /**
+   * Loads template from the given path
+   * @param path - Template file path
+   */
+
+  public loadTemplate(path: string): void {
+    // fix extension
+    path = path.replace(/\.njk$/, '') + '.njk';
+
+    if (!isFile(path)) {
+      throw new Error(`The template file '${path}' does not exist.`);
+    }
+
+    this.setTemplateContent(readTextFile(resolve(path)));
+  }
+
+  /**
+   * Sets template content
+   * @param value - Template text
+   */
+  public setTemplateContent(value: string): void {
+    this._templateContent = value;
+  }
+
+  /**
+   * Get template content
+   */
+  public getTemplateContent(): string {
+    return this._templateContent;
   }
 
   /**
@@ -67,12 +94,6 @@ export default class TemplateCodeFile extends BaseObject {
    */
   public getVariables(): Record<string, any> {
     return this._variables;
-  }
-  /**
-   * @returns The template file path
-   */
-  public getTemplatePath(): string {
-    return this.templatePath;
   }
 
   /**
@@ -87,16 +108,13 @@ export default class TemplateCodeFile extends BaseObject {
    * @returns The error occurred while saving the code file, or true if no error.
    */
   public async save(): Promise<string | boolean> {
-    const templateContent = readTextFile(this.getTemplatePath())
-    this.codeFile.content = renderText(templateContent, this.getVariables());
+    this.codeFile.content = '';
+
+    if ( this.getTemplateContent().trim() ) {
+      this.codeFile.content = renderText(this.getTemplateContent(), this.getVariables());
+    }
+
     this.codeFile.trackFile();
     return this.codeFile.save();
-  }
-
-  /**
-   * The code file extension (e.g. js, txt)
-   */
-  public getType(): string {
-    return this.codeFile.getType();
   }
 }
