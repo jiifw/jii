@@ -201,33 +201,53 @@ export default class PromptGenerator extends BaseObject {
    * @param [dir] - Base path to the directory (alias supported), Defaults to the current package path
    * @returns The resolved output file path
    */
-  public resolveOutFile(file: string, dir: string = null): string {
+  public toOutFilePath(file: string, dir: string = null): string {
     const basePath = Jii.getAlias((dir || this.basePath) + '/' + this.packageId, false);
     return resolve(join(basePath, file));
   }
 
   /**
    * Returns current template files instances
-   * @param template - The template name (without extension)
-   * @returns The template file instance or `null` if not found.
+   * @param outputFile - The output file name or path
+   * @returns The template code file instance or `null` if not found.
    */
-  public getFile(template: string): TemplateCodeFile | null {
-    return this.codeFiles.get(template) || null;
+  public getFile(outputFile: string): TemplateCodeFile | null {
+    return this.codeFiles.get(outputFile) || null;
   }
 
   /**
    * Add a template file
-   * @param template - The template name (without extension)
+   * @param template - The template name (without extension) / Set 'null' to skip template
    * @param outputFile - Absolute path to the output file
    * @param [variables] - Dynamic variables pass to template file
    *
    * **Note**: If you override this method, you must call the super method.
    */
-  public addFile(template: string, outputFile: string, variables: Record<string, any> = {}): TemplateCodeFile {
-    const templateFilePath = resolve(join(this.basePath, this.getTemplatesDir(), template)).replace(/\.njk$/, '') + '.njk';
-    const codeFile = new TemplateCodeFile(outputFile, templateFilePath);
+  public addTemplateFile(template: string | null, outputFile: string, variables: Record<string, any> = {}): TemplateCodeFile {
+    const codeFile = new TemplateCodeFile(outputFile, null);
     codeFile.setVariables(variables);
-    return this.codeFiles.set(template, codeFile).get(template);
+
+    if ( template ) {
+      const templateFilePath = resolve(join(this.basePath, this.getTemplatesDir(), template));
+      codeFile.loadTemplate(templateFilePath)
+    }
+
+    return this.codeFiles.set(outputFile, codeFile).get(outputFile);
+  }
+
+  /**
+   * Add a template contents
+   * @param content - The template content
+   * @param outputFile - Absolute path to the output file
+   * @param [variables] - Dynamic variables pass to template file
+   *
+   * **Note**: If you override this method, you must call the super method.
+   */
+  public addTemplateContent(content: string, outputFile: string, variables: Record<string, any> = {}): TemplateCodeFile {
+    const codeFile = new TemplateCodeFile(outputFile, null);
+    codeFile.setVariables(variables);
+    codeFile.setTemplateContent(content);
+    return this.codeFiles.set(outputFile, codeFile).get(outputFile);
   }
 
   /**
