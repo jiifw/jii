@@ -47,14 +47,14 @@ export default class Plugin extends PromptGenerator {
    * Template files map {templateName: output-file}
    * @protected
    */
-  protected filesMap: Record<string, string | string[]> = {
-    'package': '/package.json',
-    'babelrc': '/.babelrc.json',
-    'gitignore': '/.gitignore',
-    'jest.config': '/jest.config.js',
-    'src/index': '/src/index.ts',
-    'src/types': '/src/types.ts',
-    'src/commands/gitkeep': '/src/commands/.gitkeep',
+  protected filesMap: Record<string, string | null> = {
+    '/package.json': 'package',
+    '/.babelrc.json': 'babelrc',
+    '/.gitignore': null,
+    '/jest.config.js': 'jest.config',
+    '/src/index.ts': 'src/index',
+    '/src/types.ts': 'src/types',
+    '/src/commands/.gitkeep': null,
   };
 
   /**
@@ -144,17 +144,10 @@ export default class Plugin extends PromptGenerator {
   async process(): Promise<void> {
     const variables = this.getInputs();
 
-    for (const [template, path] of Object.entries(this.filesMap)) {
-      let outFile = path;
-      if (Array.isArray(path)) {
-        outFile = path[0];
-
-        if (variables.target !== path[1]) continue;
-      }
-
-      this.addFile(
+    for (const [outFile, template] of Object.entries(this.filesMap)) {
+      this.addTemplateFile(
         template,
-        this.resolveOutFile(outFile as string, variables.basePath),
+        this.toOutFilePath(outFile, variables.basePath),
         variables,
       );
     }
