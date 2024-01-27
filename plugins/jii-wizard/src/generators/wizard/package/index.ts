@@ -61,9 +61,6 @@ export default class Plugin extends PromptGenerator {
    * @inheritDoc
    */
   public async prepare(): Promise<void> {
-    // set base path
-    this.basePath = __dirname;
-
     await super.prepare();
 
     this.packageId = this.packageId.replace(/^jii-/i, '');
@@ -151,5 +148,12 @@ export default class Plugin extends PromptGenerator {
         variables,
       );
     }
+  }
+
+  /**
+   * @inheritDoc
+   */
+  async finalize(): Promise<void> {
+    console.log('Code generation completed');
   }
 }
