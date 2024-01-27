@@ -189,6 +189,21 @@ export default class PromptGenerator extends BaseObject {
   }
 
   /**
+   * Implement some logic once all the operations are done
+   *
+   * {@link finalize finalize()} is called by the {@link execute execute()} method.
+   *
+   * @see execute
+   *
+   * @example
+   * public async finalize(): Promise<void> {
+   *   console.log('Plugin code ready to use');
+   * }
+   */
+  public async finalize(): Promise<void> {
+  }
+
+  /**
    * Returns current template files instances
    */
   public getFiles(): TemplateCodeFile[] {
@@ -269,5 +284,7 @@ export default class PromptGenerator extends BaseObject {
 
       console.log('Error while saving file:', result);
     }
+
+    await this.finalize();
   }
 }
