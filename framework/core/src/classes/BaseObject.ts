@@ -36,9 +36,21 @@ export default class BaseObject extends Object {
   private _props: Map<PropertyName, PropertyMeta> = new Map();
 
   /**
-   * Configures an object with the initial property values.
+   * Constructor.
+   *
+   * The default implementation does two things:
+   *
+   * - Initializes the object with the given configuration `props`.
+   * - Call {@link init init()}
+   *
+   * If this method is overridden in a child class, it is recommended that
+   *
+   * - the last parameter of the constructor is a configuration array, like `props` here.
+   * - call the parent implementation at the end of the constructor.
+   *
+   * @param [props] - Name-value pairs that will be used to initialize the object properties
    */
-  constructor(props: Props = {}) {
+  public constructor(props: Props = {}) {
     super();
 
     if (!isPlainObject(props)) {
