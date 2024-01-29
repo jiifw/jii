@@ -22,6 +22,16 @@ export const isClass = (val: any): boolean => {
 };
 
 /**
+ * Returns true if class is a defined class, false otherwise.
+ * @param className - The class name
+ * @returns true if the class is defined, false otherwise.
+ * @see https://github.com/node-yii/php-class-exists/blob/master/index.js
+ */
+export const classExists = (className: string): boolean => {
+  return eval('typeof ' + className) === 'function';
+};
+
+/**
  * Get the class hierarchy including the class itself, its parent classes, and implemented interfaces.
  * @param className - The class name.
  * @returns Array of class names in the hierarchy.
@@ -336,7 +346,11 @@ export const hasOwnStaticMethod = (theClass: Function, method: string | symbol):
  * @see https://stackoverflow.com/a/48036194
  */
 export const isConstructor = (cons: any): boolean => {
-  const handler={construct(){return handler}} //Must return ANY object, so reuse one
+  const handler = {
+    construct() {
+      return handler;
+    },
+  }; //Must return ANY object, so reuse one
 
   try {
     return !!(new (new Proxy(cons, handler))());
@@ -357,7 +371,7 @@ export const isConstructor = (cons: any): boolean => {
  * // expected: {name: 'fetchUser', generator: false, async: true, params: {id: undefined, active: true}}
  */
 const inspectFunction = (
-  func: Function, options: Omit<acorn.Options, 'ecmaVersion'> = {}
+  func: Function, options: Omit<acorn.Options, 'ecmaVersion'> = {},
 ): null | {
   name: string;
   generator: boolean;

@@ -191,6 +191,18 @@ export const rtrim = (str: string, characters: string = ' \\\\s\u00A0'): string 
 };
 
 /**
+ * Strip whitespace (or other characters) from the beginning or end of a string
+ * @param str - The input string.
+ * @param [characters] - You can also specify the characters you want to strip, by means
+ * of the characters' parameter. Simply list all characters that you want to be stripped.
+ * With .. you can specify a range of characters.
+ * @return This function returns a string with whitespace stripped from the end of string.
+ */
+export const trim = (str: string, characters: string = ' \\\\s\u00A0'): string => {
+  return _lr_trim(str, 'both', characters);
+};
+
+/**
  * Uppercase the first character of each word in a string
  * @param str - The input string.
  * @returns Returns the modified string.
@@ -276,4 +288,33 @@ export const strncmp = (string1: string, string2: string, length: number): numbe
   const s1 = (string1 + '').substring(0, length);
   const s2 = (string2 + '').substring(0, length);
   return (s1 === s2 ? 0 : (s1 > s2 ? 1 : -1));
+};
+
+/**
+ * Find the position of the last occurrence of a substring in a string
+ * @see https://github.com/locutusjs/locutus/blob/master/src/php/strings/strrpos.js
+ * @param haystack The string to search in.
+ * @param needle If <b>needle</b> is not a string, it is converted to an integer and applied as the ordinal value of a character.
+ * @param [offset] If specified, search will start this number of characters counted from the beginning of the string.
+ * If the value is negative, search will instead start from that many characters from the end of the string, searching backwards.
+ * @returns <p>
+ * Returns the position where the needle exists relative to the beginning of
+ * the <b>haystack</b> string (independent of search direction
+ * or offset).
+ * Also note that string positions start at 0, and not 1.
+ * </p>
+ * <p>
+ * Returns <b>FALSE</b> if the needle was not found.
+ * </p>
+ */
+export const strrpos = (haystack: string, needle: string, offset: number = 0): number | false => {
+  let i: number = -1;
+  if (offset) {
+    i = toString(haystack).slice(offset).lastIndexOf(needle);
+    if (i !== -1) i += offset;
+  } else {
+    i = toString(haystack).lastIndexOf(needle);
+  }
+
+  return i >= 0 ? i : false;
 };

@@ -70,6 +70,17 @@ export const lcFirst = (str: string): string => {
 export const pascal = (str: string): string => Case.pascal(str);
 
 /**
+ * Returns given id as action name.
+ *
+ * Converts a word like "send-email" to "actionSendEmail".
+ * @param id - The action id
+ */
+export const actionName = (id: string): string => {
+  const _id = toString(id).replace('-', ' ');
+  return 'action' + classname(_id);
+}
+
+/**
  Returns given string as variable name (JS).
  *
  * Converts a word like "send_email" to "sendEmail". It
