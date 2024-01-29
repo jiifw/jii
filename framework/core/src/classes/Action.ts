@@ -7,8 +7,14 @@
  */
 
 // classes
-import Component, {Props} from './Component';
 import Controller from './Controller';
+import Component, {Props} from './Component';
+import InvalidConfigError from './InvalidConfigError';
+
+// utils
+import Jii from '../Jii';
+import {invokeMethod} from '../helpers/function';
+import {hasOwnMethod} from '../helpers/reflection';
 
 /**
  * Action is the base class for all controller action classes.
@@ -18,6 +24,7 @@ import Controller from './Controller';
  *
  * Derived classes must implement a method named `run()`. This method
  * will be invoked by the controller when the action is requested.
+ *
  * The `run()` method can have parameters which will be filled up
  * with user input values automatically according to their names.
  * For example, if the `run()` method is declared as follows:
@@ -26,7 +33,7 @@ import Controller from './Controller';
  * public run(id: string, type: string = 'book') { ... }
  * ```
  *
- * And the parameters provided for the action are: `{id: 1}`.
+ * And the parameters provided for the action are: `{id: 1}`.<br>
  * Then the `run()` method will be invoked as `run(1)` automatically.
  */
 export default class Action<C extends Controller = Controller> extends Component {
@@ -55,11 +62,38 @@ export default class Action<C extends Controller = Controller> extends Component
 
   /**
    * Returns the unique ID of this action among the whole application.
-   *
-   * @returns The unique ID of this action among the whole application.
    */
   public getUniqueId(): string {
     return this.controller.getUniqueId() + '/' + this.id;
+  }
+
+  /**
+   * Runs this action with the specified parameters.<br>
+   * This method is mainly invoked by the controller.
+   *
+   * @param params - The parameters to be bound to the action's run() method.
+   * @returns The result of the action
+   * @throws {InvalidConfigError} - If the action class does not have a run() method
+   */
+  public async runWithParams<T = any>(params: any[]): Promise<T> {
+    if (!hasOwnMethod(this, 'run')) {
+      throw new InvalidConfigError(this.constructor.name + ' must define a "run()" method.');
+    }
+
+    const args = this.controller.bindActionParams(this, params);
+
+    if (Jii.app().requestedParams === null) {
+      Jii.app().requestedParams = args;
+    }
+
+    if (await this.beforeRun()) {
+      const result = await invokeMethod(this, 'run', args);
+      await this.afterRun();
+
+      return result;
+    }
+
+    return null;
   }
 
   /**
