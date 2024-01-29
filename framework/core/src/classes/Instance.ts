@@ -10,20 +10,20 @@ import {extname} from 'node:path';
 
 // classes
 import Component from './Component';
+import BaseObject from './BaseObject';
 import {BehaviorArgs} from './Behavior';
 import InvalidConfigError from './InvalidConfigError';
 
 // utils
+import {isFunction} from '../helpers/function';
+import {Constructor} from '../typings/utility';
 import {isPath, resolve} from '../helpers/path';
 import {isObject, isPlainObject} from '../helpers/object';
 import {isClass, hasOwnMethod, isConstructor} from '../helpers/reflection';
 
 // types
 import {EventHandler} from './Event';
-import {Constructor} from '../typings/utility';
 import {ComponentDefinition, ModuleDefinition} from '../typings/components';
-import BaseObject from './BaseObject';
-import Jii from '../Jii';
 
 export type ObjectType = (
   | string // alias path to class (e.g., '@app/components/User')
@@ -44,7 +44,6 @@ interface InstanceMetadata {
 /**
  * Instance represents a reference to a named object in a dependency injection
  */
-
 export default class Instance {
   /**
    * Get class object from component configuration
@@ -125,7 +124,7 @@ export default class Instance {
     }, {}) as T;
   }
 
-  public static classFromDefinition<T>(definition: ComponentDefinition): T {
+  public static classFromDefinition<T = any>(definition: ComponentDefinition): T {
     if (!isPlainObject(definition)) {
       throw new InvalidConfigError('Component configuration must be an object');
     }
@@ -143,7 +142,7 @@ export default class Instance {
     return this.classFromPath<T>(conf.class as string);
   }
 
-  public static classFromPath<T>(pathOrAlias: string): T {
+  public static classFromPath<T = any>(pathOrAlias: string): T {
     if (!pathOrAlias || 'string' !== typeof pathOrAlias || !pathOrAlias.trim()) {
       throw new InvalidConfigError(`Object configuration 'class' should be a string property`);
     }
@@ -266,10 +265,64 @@ export default class Instance {
 
   /**
    * Checks that the component is a valid component
-   * @param comp - The class object
+   * @param component - The class object
    * @returns True if the component is a valid component
    */
-  public static isComponent(comp: any): boolean {
-    return comp instanceof Component;
+  public static isComponent(component: any): boolean {
+    return component instanceof Component;
+  }
+
+  /**
+   * Check if the class is a subclass of another class or an instance of a class
+   * @param theClass - The object or class to check
+   * @param classOrPath - The class or aliased-path to compare with
+   * @returns True if the object is a subclass of the class
+   *
+   * @example As a class object
+   * import Component from './classes/Component';
+   *
+   * class MyComponent extends Component {}
+   *
+   * console.log('isSubclassOf:', Instance.isSubclassOf(MyComponent, Component));
+   * // expected: true
+   *
+   * @example As an aliased-path
+   * console.log('isSubclassOf:', Instance.isSubclassOf(MyComponent, '@jiiRoot/classes/Component'));
+   * // expected: true
+   *
+   * @example As a class path and aliased-path
+   * console.log('isSubclassOf:', Instance.isSubclassOf(
+   *   '@app/components/MyComponent',
+   *   '@jiiRoot/classes/Component',
+   * ));
+   * // expected: true
+   */
+  public static isSubclassOf(theClass: Function | string, classOrPath: string | Function): boolean {
+    if (!isClass(theClass)
+      && !isFunction(theClass)
+      && 'string' !== typeof classOrPath) {
+      return false;
+    }
+
+    if (!isClass(classOrPath)
+      && !isFunction(classOrPath)
+      && 'string' !== typeof classOrPath) {
+      return false;
+    }
+
+    let _classA = classOrPath;
+
+    if ('string' === typeof classOrPath) {
+      _classA = Instance.classFromPath(classOrPath);
+    }
+
+    let _classB = theClass;
+
+    if ('string' === typeof classOrPath) {
+      _classB = Instance.classFromPath(classOrPath);
+    }
+
+    return (<Function>_classB).prototype instanceof (<Function>_classA)
+      || _classB === _classA;
   }
 }
