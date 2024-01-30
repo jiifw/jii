@@ -6,20 +6,23 @@
  * @since 0.0.1
  */
 
-import objPath from 'object-path';
 import merge from 'deepmerge';
+import objPath from 'object-path';
 
 // classes
+import Application from '../../classes/Application';
 import ConfigValidator from '../../classes/ConfigValidator';
 import ConfigurationEvent from '../../classes/ConfigurationEvent';
-import Application from '../../classes/Application';
 
 // utils
 import {isPlainObject} from '../../helpers/object';
 
+// schemas
+import componentsSchema from '../../schemas/components.schema';
+
 // types
-import {Schema, PropertyPath} from '../../classes/ConfigValidator';
 import {ComponentDefinition} from '../../typings/components';
+import {Schema, PropertyPath} from '../../classes/ConfigValidator';
 
 /**
  * Validate and process application components
@@ -36,30 +39,7 @@ export default class ComponentsConfigValidator extends ConfigValidator {
    * @inheritDoc
    */
   async getSchema(): Promise<Schema | null> {
-    return {
-      'type': 'object',
-      'additionalProperties': {
-        'type': 'object',
-        'properties': {
-          'class': {
-            'type': 'string',
-            'description': 'Class object or a path',
-            'minLength': 3,
-          },
-        },
-        'additionalProperties': true,
-        'patternProperties': {
-          '^(on|as) [a-z]+([A-Z][a-z]+)*$': {},
-          '^[a-z]+([A-Z][a-z]+)*$': {},
-        },
-        'required': [
-          'class',
-        ],
-      },
-      'propertyNames': {
-        'pattern': '^[a-z]+([A-Z0-9][a-z0-9]+)*$',
-      },
-    };
+    return componentsSchema;
   }
 
   /**
