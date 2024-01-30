@@ -6,14 +6,16 @@
  * @since 0.0.1
  */
 
-import {ComponentsDefinition} from './components';
 import {PluginsDefinition} from './plugin';
+import {ModulesDefinition} from './modules';
+import {ComponentsDefinition} from './components';
 
+// public types
 export type ConsoleDirectory = string | { path: string; recursive?: boolean } | (string | { path: string; recursive?: boolean })[];
 export {ComponentsDefinition};
 
 /**
- * Application configuration typing interface
+ * Application configuration
  */
 export interface ApplicationConfig {
   /**
@@ -155,9 +157,19 @@ export interface ApplicationConfig {
    */
   components?: ComponentsDefinition;
 
-  /*modules?: {
-    [name: string]: {
-      [property: string]: any;
-    };
-  };*/
+  /**
+   * This property specifies the modules that the application contains.<br>
+   *
+   * @example
+   * modules: {
+   *   forum: {
+   *     class: '@app/modules/forum/Module',
+   *     ... // props, methods, events, behaviors,...
+   *   },
+   *   ... // others
+   * }
+   *
+   * @default {}
+   */
+  modules?: ModulesDefinition;
 }
