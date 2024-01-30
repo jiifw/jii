@@ -10,6 +10,8 @@
 import Event from './Event';
 import Plugin from './Plugin';
 import Module from './Module';
+import Action from './Action';
+import Controller from './Controller';
 import PluginAppEvent from './PluginAppEvent';
 import InvalidConfigError from './InvalidConfigError';
 
@@ -23,6 +25,11 @@ import {APP_CONFIG, CONTAINER_APP_KEY} from '../utils/symbols';
 // types
 import {Props} from './BaseObject';
 import {ApplicationConfig, ComponentsDefinition} from '../typings/app-config';
+import Response from './Response';
+import Request from './Request';
+import {getValue} from '../env';
+import {isTimezone} from '../helpers/datetime';
+import InvalidArgumentError from './InvalidArgumentError';
 
 // public types
 export type Platform = 'web' | 'cli' | string;
@@ -76,12 +83,44 @@ export default abstract class Application<
    */
 
   public language: string = 'en-US';
+
   /**
-   * The language that the application is written in. This mainly refers to
+   * The language that the application is written in. This mainly refers to<br>
    * the language that the messages and view files are written in.
    * @see language
    */
   public sourceLanguage: string = 'en-US';
+
+  /**
+   * The currently active controller instance
+   */
+  public controller: Controller;
+
+  /**
+   * The layout that should be applied for views in this application. Defaults to 'main'.
+   * If this is false, layout will be disabled.
+   */
+  public layout: string | false = 'main';
+
+  /**
+   * The requested route
+   */
+  public requestedRoute: string = null;
+
+  /**
+   * The requested Action. If null, it means the request cannot be resolved into an action.
+   */
+  public requestedAction: Action | null = null;
+
+  /**
+   * The parameters supplied to the requested action.
+   */
+  public requestedParams: any[] = [];
+
+  /**
+   * List of loaded modules indexed by their class names.
+   */
+  public loadedModules: Map<string, Module> = new Map();
 
   /**
    * Application type
@@ -112,6 +151,7 @@ export default abstract class Application<
     this._appConfig = config;
     Jii.container.memoSync(CONTAINER_APP_KEY, this, {freeze: true});
     this.state = Application.STATE_BEGIN;
+    this.init();
   }
 
   /**
@@ -123,7 +163,26 @@ export default abstract class Application<
    * If you override this method, please make sure you call the parent implementation.
    */
   init() {
+    super.init();
     this.state = Application.STATE_INIT;
+  }
+
+  /**
+   * @inheritDoc
+   */
+  getUniqueId(): string {
+    return '';
+  }
+
+  /**
+   * Sets the root directory of the application and the `@app` alias.<br>
+   * This method can only be invoked at the beginning of the constructor.
+   * @param path the root directory of the application.
+   * @throws {InvalidArgumentError} If the directory does not exist.
+   */
+  public setBasePath(path: string) {
+    super.setBasePath(path);
+    Jii.setAlias('@app', this.getBasePath());
   }
 
   /**
@@ -149,7 +208,7 @@ export default abstract class Application<
       throw new InvalidConfigError('You must specify the application type');
     }
 
-    const _config = await applyAppCoreConfiguration(this, config)
+    const _config = await applyAppCoreConfiguration(this, config);
 
     // memorize the configuration for future reference and usage
     Jii.container.memoSync(APP_CONFIG, _config, {freeze: true});
@@ -202,5 +261,42 @@ export default abstract class Application<
     }
     pluginEvent = null;
     /////////////// ENDS: PLUGIN EVENT (BEFORE_APP_RUN) TRIGGER ////////////////
+  }
+
+  /**
+   * Handles the specified request.
+   *
+   * This method should return an instance of {@link Response} or its child class<br>
+   * which represents the handling result of the request.
+   *
+   * @param request - The request to be handled
+   * @return The resulting response
+   */
+  public abstract handleRequest<T, R>(request: T): Promise<T>;
+
+  /**
+   * Returns the time zone used by this application.<br>
+   * it will be set to UTC by default.
+   * @returns The time zone used by this application.
+   */
+  public getTimeZone(): string {
+    const _val = getValue<string | null>('TZ', null);
+
+    if (!_val) {
+      this.setTimeZone('UTC');
+    }
+
+    return _val;
+  }
+
+  /**
+   * Sets the time zone used by this application.<br>
+   * @param value the time zone used by this application.
+   */
+  public setTimeZone(value: string) {
+    if (!isTimezone(value)) {
+      throw new InvalidArgumentError(`Invalid time zone: ${value}`);
+    }
+    process.env.TZ = value;
   }
 }
