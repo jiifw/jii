@@ -27,6 +27,7 @@ export default async (instance: Application, config: ApplicationConfig): Promise
     '@jiiRoot/config/validators/SettingsConfigValidator',
     '@jiiRoot/config/validators/AppEventsConfigValidator',
     '@jiiRoot/config/validators/ComponentsConfigValidator',
+    '@jiiRoot/config/validators/ModulesConfigValidator',
     ...instance.coreConfigValidators(),
   ];
 
