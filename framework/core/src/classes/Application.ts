@@ -273,17 +273,6 @@ export default abstract class Application<
   }
 
   /**
-   * Handles the specified request.
-   *
-   * This method should return an instance of {@link Response} or its child class<br>
-   * which represents the handling result of the request.
-   *
-   * @param request - The request to be handled
-   * @return The resulting response
-   */
-  public abstract handleRequest<T, R>(request: T): Promise<R>;
-
-  /**
    * Returns the time zone used by this application.<br>
    * it will be set to UTC by default.
    * @returns The time zone used by this application.
