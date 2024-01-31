@@ -610,7 +610,7 @@ export default class Module extends ServiceLocator {
    * This exception is only thrown when in debug mode.
    */
   public createControllerByID(id: string): Controller | null {
-    let pos = strrpos(id, '/');
+    const pos = strrpos(id, '/');
     let prefix: string | false = '';
     let className: string | false = '';
     if (pos === false) {

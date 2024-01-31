@@ -236,7 +236,7 @@ export default class Controller extends Component implements ViewContextInterfac
     }
 
     const actionMap = this.actions();
-    if (actionMap.hasOwnProperty(id)) {
+    if (id in actionMap) {
       return Jii.createObject(actionMap[id], [id, this]);
     }
 
