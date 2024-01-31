@@ -155,6 +155,13 @@ export default abstract class Application<
   }
 
   /**
+   * Initializes extensions and executes bootstrap components.<br>
+   * This method is called by {@link preInit preInit()} after the application has been fully configured.<br>
+   * If you override this method, make sure you also call the parent implementation.
+   */
+  protected async bootstrap (): Promise<void> {}
+
+  /**
    * Initializes the application.
    *
    * This method is called after the module is created and initialized with property values
@@ -207,6 +214,8 @@ export default abstract class Application<
     if (!this._platform) {
       throw new InvalidConfigError('You must specify the application type');
     }
+
+    await this.bootstrap();
 
     const _config = await applyAppCoreConfiguration(this, config);
 
@@ -272,7 +281,7 @@ export default abstract class Application<
    * @param request - The request to be handled
    * @return The resulting response
    */
-  public abstract handleRequest<T, R>(request: T): Promise<T>;
+  public abstract handleRequest<T, R>(request: T): Promise<R>;
 
   /**
    * Returns the time zone used by this application.<br>
