@@ -570,7 +570,7 @@ export default class Module extends ServiceLocator {
     }
 
     // module and controller map take precedence
-    if (this.controllerMap.hasOwnProperty(id)) {
+    if (id in this.controllerMap) {
       const controller = Jii.createObject(this.controllerMap[id], [id, this]);
       return [controller, route];
     }
@@ -637,7 +637,7 @@ export default class Module extends ServiceLocator {
     }
 
     if (Instance.isSubclassOf(className, '@jiiRoot/classes/Controller')) {
-      let controller = Jii.createObject(className, [id, this]) as Controller;
+      const controller = Jii.createObject(className, [id, this]) as Controller;
       return controller.constructor.name === className ? controller : null;
     }
 
@@ -659,7 +659,7 @@ export default class Module extends ServiceLocator {
       return true;
     }
 
-    return prefix !== '' && /^[a-z0-9_\/]+$/i.test(prefix);
+    return prefix !== '' && /^[a-z0-9_/]+$/i.test(prefix);
   }
 
   /**
