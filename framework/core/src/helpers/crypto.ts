@@ -46,6 +46,16 @@ export const sha512 = (str: string): string => {
 };
 
 /**
+ * Generates a secure shake256 hash of value
+ * @param str - Value to verify
+ * @param [length] - Maximum length of hash string
+ * @returns Generated hash string
+ */
+export const shake256 = (str: string, length: number = 11): string => {
+  return crypto.createHash('shake256', {outputLength: length}).update(str).digest('hex').toString();
+};
+
+/**
  * Generates a secure hash from a value and a random salt.
  * @param str - The value
  * @param [cost] - Cost length, more length more computation power
