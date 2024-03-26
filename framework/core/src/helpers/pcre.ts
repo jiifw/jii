@@ -6,6 +6,8 @@
  * @since 0.0.1
  */
 
+import {toString} from './string';
+
 /**
  * Quote a string for use in a regular expression.
  * @param str - The input string.
@@ -35,8 +37,8 @@ const normalizePcre = (regex: string, delimiter: string = null): RegExp => {
 
   const _delimiter = pregQuote(delimiter, delimiter);
   const [, pattern, flags = null] = regex
-    ?.match(new RegExp(`^${_delimiter}([^${_delimiter}]+)${_delimiter}(.+)?$`))
-    ?.flat();
+    .match(new RegExp(`^${_delimiter}([^${_delimiter}]+)${_delimiter}(.+)?$`))
+    .flat();
   return flags ? new RegExp(pattern, flags) : new RegExp(pattern);
 };
 
