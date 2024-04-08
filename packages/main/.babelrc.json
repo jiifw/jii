@@ -4,11 +4,9 @@
     [
       "module-resolver",
       {
-        "root": [
-          "./src"
-        ],
         "alias": {
-          "~/": "./"
+          "~root": "./",
+          "~": "./src"
         }
       }
     ]
