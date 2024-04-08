@@ -42,6 +42,7 @@
     "@jii/console": "^0.0.1",
     "@jii/core": "^0.0.1",
     "@jii/cors": "^0.0.1",
-    "@jii/web": "^0.0.1"
+    "@jii/web": "^0.0.1",
+    "@jii/wizard": "^0.0.1"
   }
 }

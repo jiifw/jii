@@ -11,6 +11,7 @@ import {dirname} from '@jii/core/dist/helpers/path';
 // types
 import {ApplicationConfig} from '@jii/web/dist/typings/app-config';
 import {CorsPluginDefinition} from '@jii/cors/dist/types';
+import {WizardPluginDefinition} from '@jii/wizard/dist/types';
 
 /**
  * Application configuration.
@@ -29,6 +30,9 @@ export default async (): Promise<ApplicationConfig> => {
     plugins: {
       cors: <CorsPluginDefinition>{
         path: '@jii/cors',
+      },
+      wizard: <WizardPluginDefinition>{
+        path: '@jii/wizard',
       },
     },
   });
