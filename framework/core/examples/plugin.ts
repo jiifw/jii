@@ -17,6 +17,27 @@ class MyApplication extends Application {
    * @inheritDoc
    */
   protected _platform = 'web';
+
+  appendArguments(args: any[]): string[] {
+    const collectedArgs = [];
+    for (const argument of args) {
+      if (typeof argument ==='string') {
+        collectedArgs.push(argument);
+      }
+    }
+
+    return args;
+  }
+
+  getUniqueId(): string {
+    if (this._platform) {
+      return `my-app-${this._platform}`;
+    }
+
+    const t = this.appendArguments([])
+
+    return super.getUniqueId()
+  }
 }
 
 const config: ApplicationConfig = {
