@@ -6,17 +6,15 @@
  * @since 0.0.1
  */
 
-import {valid} from 'semver';
-import {input, select} from '@inquirer/prompts';
+import {input} from '@inquirer/prompts';
 
 // classes
 import PromptGenerator from '@jii/console/dist/classes/PromptGenerator';
 
-// utils
-import {noDistDir, isDir} from '@jii/core/dist/helpers/path';
+// helpers
 import {toString} from '@jii/core/dist/helpers/string';
 import {classname} from '@jii/core/dist/helpers/inflector';
-import {template} from '@babel/core';
+import {noDistDir, isDir} from '@jii/core/dist/helpers/path';
 
 /**
  * Generate for 'command' schematic
