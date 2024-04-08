@@ -23,7 +23,7 @@ import {ApplicationConfig} from '../typings/app-config';
  * @returns Array of glob patterns
  */
 export const compileGlobPatterns = (): { path: string; pattern: string }[] => {
-  const paths: string[] = Jii.container.retrieve<ApplicationConfig>(APP_CONFIG)?.console?.dirs as string[];
+  const paths: string[] = Jii.container.retrieve<ApplicationConfig>(APP_CONFIG)?.console?.dirs as string[] ?? [];
   const pluginsList = Jii.plugins.pluginsMetadata(['commands', 'base-path']);
 
   if (Object.keys(pluginsList).length) {
