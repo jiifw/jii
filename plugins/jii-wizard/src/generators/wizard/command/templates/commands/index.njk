@@ -1,0 +1,46 @@
+/**
+ * @link https://www.github.com/jiifw
+ * @copyright Copyright (c) 2023-2024 Jii framework
+ * @license https://www.github.com/jiifw/jii/blob/main/LICENSE
+ * @since {{ version }}
+ */
+{{ "\n" }}
+// classes
+import BaseCommand from '@jii/core/dist/classes/Plugin';
+
+// types
+import {CommandOption} from '@jii/console/dist/typings/cli';
+
+/**
+ * {{ description }}
+ */
+export default class {{ className }} extends BaseCommand {
+  /**
+   * @inheritdoc
+   */
+  public name = '{{ id }}';
+
+  /**
+   * @inheritdoc
+   */
+  public aliases = ['{{ alias }}'];
+
+  /**
+   * @inheritDoc
+   */
+  public basePath = __dirname;
+
+  /**
+   * @inheritDoc
+   */
+  public options(): CommandOption[] {
+    return [];
+  }
+
+  /**
+   * @inheritDoc
+   */
+  async action(arg: string, options: { [name: string]: string }, command): Promise<void> {
+    // Implement command logic here
+  }
+}
