@@ -20,8 +20,13 @@ export default async (): Promise<ApplicationConfig> => {
   return ({
     id: 'jii-app',
     basePath: dirname(__dirname),
-    params: require('./params')?.default,
+    params: require('./params')?.default ?? {},
     bootstrap: ['@app/bootstrap/bootstrap'],
+    console: {
+      dirs: [
+        '@app/commands',
+      ],
+    },
     components: {
       server: {
         enableLogging: false,
