@@ -20,7 +20,7 @@ import {classname} from '@jii/core/dist/helpers/inflector';
 /**
  * Generate for 'package' schematic
  */
-export default class Plugin extends PromptGenerator {
+export default class Package extends PromptGenerator {
   /**
    * @inheritDoc
    */
