@@ -45,6 +45,23 @@ export const dirname = (path: string, levels: number = 1): string => {
 };
 
 /**
+ * Omit `dist` directory from the given (aliased) path.
+ * @param path - The path
+ * @param [throwException] - Throw error when alias not found or alias is not registered.
+ * @returns The resolved path
+ *
+ * @example Default
+ * // expected: '/project/path'
+ * console.log(noDistDir('/project/dist/path'));
+ */
+export const noDistDir = (path: string, throwException: boolean = false): string => {
+  const resolvedPath = npath.normalize(getAlias(path, throwException));
+  return resolvedPath.includes('dist')
+    ? resolvedPath.replace(/dist([\\/])/, '')
+    : resolvedPath;
+};
+
+/**
  * Get root directory path
  * @param [joins] - Paths to join (optional)
  *
