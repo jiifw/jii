@@ -15,7 +15,7 @@ import ConfigValidator from '@jii/core/dist/classes/ConfigValidator';
 // utils
 import Jii from '@jii/core/dist/Jii';
 import {wrap} from '@jii/core/dist/helpers/array';
-import {isPath, trimSlashes} from '@jii/core/dist/helpers/path';
+import {isPath, trimSlashes, createDir, noDistDir} from '@jii/core/dist/helpers/path';
 
 // types
 import {ConsoleDirectory} from '@jii/core/dist/typings/app-config';
@@ -42,7 +42,11 @@ export default class ConsoleConfigValidator extends ConfigValidator {
   protected resolvePath(dir: string, recursive: boolean = false): Array<string> {
     const path = trimSlashes(normalize(Jii.getAlias(dir, false)));
 
-    if (!isPath(path, 'dir')) {
+    const newDirPath = isPath(path, 'dir');
+
+    if ( !newDirPath ) createDir(path);
+
+    if (!newDirPath) {
       throw new Error(`${path} must be a valid directory`);
     }
 
