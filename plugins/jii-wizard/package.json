@@ -1,6 +1,5 @@
 {
   "name": "@jii/wizard",
-  "private": true,
   "version": "0.0.1",
   "description": "A plugin to generate Jii specific code",
   "main": "dist/index.js",
@@ -60,10 +59,10 @@
     "inquirer": "^9.2.12",
     "semver": "^7.5.4"
   },
-  "devDependencies": {
-    "@types/cors": "^2.8.17"
-  },
   "engines": {
     "node": ">=18.18"
+  },
+  "devDependencies": {
+    "lerna": "^8.0.2"
   }
 }
