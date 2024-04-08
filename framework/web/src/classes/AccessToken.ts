@@ -84,13 +84,13 @@ export default class AccessToken extends Component {
    */
   public authBearer(options?: TokenBearerOption): string | null {
     options = merge({scheme: this.scheme}, options || {});
-    if (!this.getRequest().headers.hasOwnProperty('authorization')) {
+    if (!('authorization' in this.getRequest().headers)) {
       return null;
     }
 
     const [
       scheme = null, token = null,
-    ] = this.getRequest().headers?.authorization?.trim().split(' ');
+    ] = this.getRequest().headers.authorization.trim().split(' ');
 
     return !scheme || scheme.toLowerCase() !== options?.scheme?.toLowerCase()
       ? null
