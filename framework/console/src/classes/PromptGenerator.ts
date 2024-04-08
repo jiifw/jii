@@ -54,6 +54,11 @@ export default class PromptGenerator extends BaseObject {
   public packageId: string = null;
 
   /**
+   * The package label for input command
+   */
+  public packageLabel: string = 'Package name';
+
+  /**
    * The description of the generator
    */
   public description: string = 'To be described';
@@ -130,11 +135,11 @@ export default class PromptGenerator extends BaseObject {
   public async prepare(): Promise<void> {
     //<editor-fold desc="package id">
     this.packageId = await input({
-      message: 'Package name (e.g., "authorization" or "access-token")',
+      message: `${this.packageLabel} (e.g., "authorization" or "access-token")`,
       transformer: kebab,
       validate(value) {
         if (!toString(value, true)) {
-          return 'Package ID should be provided';
+          return `${this.packageLabel} should be provided`;
         }
         return true;
       },
@@ -214,10 +219,12 @@ export default class PromptGenerator extends BaseObject {
    * Resolves output file and returns absolute output file path
    * @param file - The filename with extensions ('my-file.txt' or '/dir/file.js')
    * @param [dir] - Base path to the directory (alias supported), Defaults to the current package path
+   * @param [stripPackageDir=false] - Do not include package name in directory path.
    * @returns The resolved output file path
    */
-  public toOutFilePath(file: string, dir: string = null): string {
-    const basePath = Jii.getAlias((dir || this.basePath) + '/' + this.packageId, false);
+  public toOutFilePath(file: string, dir: string = null, stripPackageDir: boolean = false): string {
+    const packageDir = stripPackageDir ? '' : '/' + this.packageId;
+    const basePath = Jii.getAlias((dir || this.basePath) + packageDir, false);
     return resolve(join(basePath, file));
   }
 
