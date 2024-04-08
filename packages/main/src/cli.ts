@@ -9,7 +9,7 @@
  */
 
 // classes
-import Application from '@jii/cli/dist/classes/Application';
+import Application from '@jii/console/dist/classes/Application';
 
 // utils
 import {loadFile} from '@jii/core/dist/env';
