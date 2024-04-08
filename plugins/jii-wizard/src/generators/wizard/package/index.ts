@@ -7,20 +7,18 @@
  */
 
 import {valid} from 'semver';
-import {normalize} from 'node:path';
 import {input, select} from '@inquirer/prompts';
 
 // classes
 import PromptGenerator from '@jii/console/dist/classes/PromptGenerator';
 
 // utils
-import Jii from '@jii/core/dist/Jii';
-import {isDir} from '@jii/core/dist/helpers/path';
+import {noDistDir, isDir} from '@jii/core/dist/helpers/path';
 import {toString} from '@jii/core/dist/helpers/string';
 import {classname} from '@jii/core/dist/helpers/inflector';
 
 /**
- * Generate for 'plugin' schematic
+ * Generate for 'package' schematic
  */
 export default class Plugin extends PromptGenerator {
   /**
@@ -84,7 +82,7 @@ export default class Plugin extends PromptGenerator {
           }
         }
 
-        const dir = normalize(Jii.getAlias(value));
+        const dir = noDistDir(value);
 
         if (!isDir(dir)) {
           return `Path to the directory should exist: ${dir}`;
@@ -93,6 +91,7 @@ export default class Plugin extends PromptGenerator {
         return true;
       },
     });
+    inputs.basePath = noDistDir(inputs.basePath);
     //</editor-fold>
 
     //<editor-fold desc="package version">
