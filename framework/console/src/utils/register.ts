@@ -10,9 +10,11 @@ import {basename} from 'path';
 import {Command} from 'commander';
 
 // utils
-import {toString} from '@jii/core/dist/helpers/string';
 import {validateCommand} from './validators';
 import processCommandOptions from './command-options';
+
+// helpers
+import {toString} from '@jii/core/dist/helpers/string';
 
 // types
 import Jii from '@jii/core/dist/Jii';
@@ -73,9 +75,8 @@ export default async function registerCommand(Class: CommandStatic, filePath: st
   });
 
   //<editor-fold desc="arguments processing">
-  const argument = instance?.argument();
-
-  if (argument) {
+  let argument: any = null;
+  if ( 'argument' in instance && (argument = instance?.argument()) ) {
     const args: [string, string] | [string, string, unknown] = [
       argument.name,
       argument.description,

@@ -9,6 +9,7 @@
 // utils
 import {isObject} from '@jii/core/dist/helpers/object';
 import {toString} from '@jii/core/dist/helpers/string';
+import {hasOwnMethod} from '@jii/core/dist/helpers/reflection';
 
 // types
 import {CommandOption, Argument} from '../typings/cli';
@@ -37,7 +38,7 @@ export const validateCommandOption = async (option: CommandOption): Promise<void
 };
 
 const validateAliases = (aliases: string[]): void => {
-  if ( !aliases ) {
+  if (!aliases) {
     return;
   }
 
@@ -53,7 +54,7 @@ const validateAliases = (aliases: string[]): void => {
       throw new Error(`Alias must follow the proper format. (e.g., 'g' or 'generator')`);
     }
   }
-}
+};
 
 /**
  * Validate command params
@@ -69,7 +70,9 @@ export const validateCommand = async (instance: CommandInstance) => {
   }
 
   validateAliases(instance.aliases);
-  validateArguments(instance?.argument());
+  if (hasOwnMethod(instance, 'argument')) {
+    validateArguments(instance?.argument());
+  }
 };
 
 /**
