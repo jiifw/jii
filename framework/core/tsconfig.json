@@ -1,7 +1,10 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "rootDir": "./src",
+    "paths": {
+      "~root/*": ["./*"],
+      "~/*": ["./src/*"]
+    },
     // Generate d.ts files
     "declaration": true,
     // This compiler run should
