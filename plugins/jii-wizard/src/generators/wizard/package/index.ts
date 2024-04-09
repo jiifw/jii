@@ -48,6 +48,7 @@ export default class Package extends PromptGenerator {
   protected filesMap: Record<string, string | null> = {
     '/package.json': 'package',
     '/.babelrc.json': 'babelrc',
+    '/tsconfig.json': 'tsconfig',
     '/.gitignore': null,
     '/jest.config.js': 'jest.config',
     '/src/index.ts': 'src/index',
