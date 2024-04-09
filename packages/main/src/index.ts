@@ -6,9 +6,14 @@
  * @since 0.0.1
  */
 
-import {loadFile} from '@jii/core/dist/env';
+// classes
 import Application from '@jii/web/dist/classes/Application';
-import appConfig from './config/app';
+
+// utils
+import {loadFile} from '@jii/core/dist/env';
+
+// config files
+import appConfig from '~/config/app';
 
 loadFile('../.env');
 
