@@ -10,6 +10,8 @@ import {dirname} from '@jii/core/dist/helpers/path';
 
 // types
 import {ApplicationConfig} from '@jii/web/dist/typings/app-config';
+
+// plugin types
 import {CorsPluginDefinition} from '@jii/cors/dist/types';
 import {WizardPluginDefinition} from '@jii/wizard/dist/types';
 
@@ -30,6 +32,9 @@ export default async (): Promise<ApplicationConfig> => {
     components: {
       server: {
         enableLogging: false,
+        sessionOptions: {
+          secret: 'c45445d8-f4ad-4687-890c-bb1eedce9a00'
+        }
       },
     },
     plugins: {
@@ -38,6 +43,7 @@ export default async (): Promise<ApplicationConfig> => {
       },
       wizard: <WizardPluginDefinition>{
         path: '@jii/wizard',
+
       },
     },
   });
