@@ -15,15 +15,15 @@ import {BehaviorArgs} from './Behavior';
 import InvalidConfigError from './InvalidConfigError';
 
 // utils
-import {isFunction} from '../helpers/function';
-import {Constructor} from '../typings/utility';
-import {isPath, resolve} from '../helpers/path';
-import {isObject, isPlainObject} from '../helpers/object';
-import {isClass, hasOwnMethod, isConstructor} from '../helpers/reflection';
+import {isFunction} from '~/helpers/function';
+import {Constructor} from '~/typings/utility';
+import {isPath, resolve} from '~/helpers/path';
+import {isObject, isPlainObject} from '~/helpers/object';
+import {isClass, hasOwnMethod, isConstructor} from '~/helpers/reflection';
 
 // types
 import {EventHandler} from './Event';
-import {ComponentDefinition, ModuleDefinition} from '../typings/components';
+import {ComponentDefinition, ModuleDefinition} from '~/typings/components';
 
 export type ObjectType = (
   | string // alias path to class (e.g., '@app/components/User')

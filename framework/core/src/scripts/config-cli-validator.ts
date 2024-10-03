@@ -10,13 +10,13 @@ import {normalize, sep} from 'path';
 import {sync} from 'glob';
 
 // utils
-import Jii from '../Jii';
-import {isPath, trimSlashes} from '../helpers/path';
-import {wrap} from '../helpers/array';
-import {INTERNAL_METADATA, INTERNAL_CLI_DIRS} from '../utils/symbols';
+import Jii from '~/Jii';
+import {wrap} from '~/helpers/array';
+import {isPath, trimSlashes} from '~/helpers/path';
+import {INTERNAL_METADATA, INTERNAL_CLI_DIRS} from '~/utils/symbols';
 
 // types
-import {ApplicationConfig, ConsoleDirectory} from '../typings/app-config';
+import {ApplicationConfig, ConsoleDirectory} from '~/typings/app-config';
 
 /**
  * Validates cli 'dirs' existence

@@ -7,8 +7,8 @@
  */
 
 // classes
-import {EventHandler} from '../classes/Event';
-import {BehaviorArgs} from '../classes/Behavior';
+import {EventHandler} from '~/classes/Event';
+import {BehaviorArgs} from '~/classes/Behavior';
 import {ComponentsDefinition} from './components';
 
 export type PluginDefinition = {

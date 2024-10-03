@@ -11,7 +11,7 @@ import {accessSync, readFileSync, unlinkSync, writeFileSync} from 'node:fs';
 
 // utils
 import Jii from '../Jii';
-import {getAlias} from '../base/aliases';
+import {getAlias} from '~/base/aliases';
 import {dirname, isFile, resolve} from './path';
 
 /**

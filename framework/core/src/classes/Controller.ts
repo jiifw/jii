@@ -19,11 +19,11 @@ import InlineAction from './InlineAction';
 import Component, {Props} from './Component';
 
 // utils
-import Jii from '../Jii';
-import {isFile} from '../helpers/path';
-import {actionName} from '../helpers/inflector';
-import {hasOwnMethod} from '../helpers/reflection';
-import {ltrim, strncmp, substr} from '../helpers/string';
+import Jii from '~/Jii';
+import {isFile} from '~/helpers/path';
+import {actionName} from '~/helpers/inflector';
+import {hasOwnMethod} from '~/helpers/reflection';
+import {ltrim, strncmp, substr} from '~/helpers/string';
 
 // types
 import {Class} from 'utility-types';

@@ -7,9 +7,9 @@
  */
 
 // utils
-import Jii from '../Jii';
-import {invokeModuleMethod} from '../helpers/file';
-import {checkEventHandler, invoke, invokeMethod} from '../helpers/function';
+import Jii from '~/Jii';
+import {invokeModuleMethod} from '~/helpers/file';
+import {checkEventHandler, invoke, invokeMethod} from '~/helpers/function';
 
 // classes
 import Event, {EventData, EventHandler, Events} from './Event';

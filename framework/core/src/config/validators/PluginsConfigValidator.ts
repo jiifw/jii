@@ -9,17 +9,17 @@
 import merge from 'deepmerge';
 
 // classes
-import ConfigValidator from '../../classes/ConfigValidator';
-import InvalidConfigError from '../../classes/InvalidConfigError';
-import {Schema, PropertyPath} from '../../classes/ConfigValidator';
+import ConfigValidator from '~/classes/ConfigValidator';
+import InvalidConfigError from '~/classes/InvalidConfigError';
+import {Schema, PropertyPath} from '~/classes/ConfigValidator';
 
 // utils
-import Jii from '../../Jii';
-import {isPath} from '../../helpers/path';
-import {readSchemaFile, resolveMainFile} from '../../helpers/file';
+import Jii from '~/Jii';
+import {isPath} from '~/helpers/path';
+import {readSchemaFile, resolveMainFile} from '~/helpers/file';
 
 // types
-import {PluginsDefinition} from '../../typings/plugin';
+import {PluginsDefinition} from '~/typings/plugin';
 
 /**
  * Validate and register plugins into to the application

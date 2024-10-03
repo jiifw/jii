@@ -15,7 +15,7 @@ import Application from './Application';
 
 // types
 import {JSONSchema7} from 'json-schema';
-import {ApplicationConfig} from '../typings/app-config';
+import {ApplicationConfig} from '~/typings/app-config';
 
 // public types
 export type Schema = JSONSchema7;

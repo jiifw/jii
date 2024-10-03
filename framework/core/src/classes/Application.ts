@@ -7,6 +7,7 @@
  */
 
 // classes
+import Jii from '../Jii';
 import Event from './Event';
 import Plugin from './Plugin';
 import Module from './Module';
@@ -14,22 +15,19 @@ import Action from './Action';
 import Controller from './Controller';
 import PluginAppEvent from './PluginAppEvent';
 import InvalidConfigError from './InvalidConfigError';
+import InvalidArgumentError from './InvalidArgumentError';
 
 // scripts
-import applyAppCoreConfiguration from '../scripts/app-core-configuration';
+import applyAppCoreConfiguration from '~/scripts/app-core-configuration';
 
 // utils
-import Jii from '../Jii';
-import {APP_CONFIG, CONTAINER_APP_KEY} from '../utils/symbols';
+import {getValue} from '~/env';
+import {isTimezone} from '~/helpers/datetime';
+import {APP_CONFIG, CONTAINER_APP_KEY} from '~/utils/symbols';
 
 // types
 import {Props} from './BaseObject';
-import {ApplicationConfig, ComponentsDefinition} from '../typings/app-config';
-import Response from './Response';
-import Request from './Request';
-import {getValue} from '../env';
-import {isTimezone} from '../helpers/datetime';
-import InvalidArgumentError from './InvalidArgumentError';
+import {ApplicationConfig, ComponentsDefinition} from '~/typings/app-config';
 
 // public types
 export type Platform = 'web' | 'cli' | string;

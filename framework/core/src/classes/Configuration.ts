@@ -9,9 +9,9 @@
 import merge from 'deepmerge';
 
 // utils
-import {newInstance, parseError} from '../helpers/ajv';
-import {bindClass} from '../helpers/auto-bind';
-import {invokeModuleMethod} from '../helpers/file';
+import {bindClass} from '~/helpers/auto-bind';
+import {invokeModuleMethod} from '~/helpers/file';
+import {newInstance, parseError} from '~/helpers/ajv';
 
 // types
 import {ValidateFunction} from 'ajv';

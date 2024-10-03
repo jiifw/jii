@@ -13,11 +13,11 @@ import InvalidConfigError from './InvalidConfigError';
 
 // utils
 import Jii from '../Jii';
-import {isPlainObject} from '../helpers/object';
+import {isPlainObject} from '~/helpers/object';
 
 // types
 import {ObjectType} from './Instance';
-import {ComponentsDefinition} from '../typings/components';
+import {ComponentsDefinition} from '~/typings/components';
 
 /**
  * To use ServiceLocator, you first need to register component IDs with the corresponding component

@@ -9,7 +9,7 @@
 import merge from 'deepmerge';
 
 // utils
-import {isObject} from '../helpers/object';
+import {isObject} from '~/helpers/object';
 
 export interface ComponentConfig {
   [name: string | symbol]: any;

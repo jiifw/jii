@@ -10,7 +10,7 @@
 import Event from './Event';
 
 // types
-import {ApplicationConfig} from '../typings/app-config';
+import {ApplicationConfig} from '~/typings/app-config';
 
 /**
  * ConfigurationEvent represents the event parameter used for finalizing configuration event.

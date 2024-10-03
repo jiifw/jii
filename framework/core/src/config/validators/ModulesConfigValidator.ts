@@ -7,15 +7,15 @@
  */
 
 // classes
-import ConfigValidator from '../../classes/ConfigValidator';
+import ConfigValidator from '~/classes/ConfigValidator';
 
 // utils
-import componentsSchema from '../../schemas/components.schema';
+import componentsSchema from '~/schemas/components.schema';
 
 // types
-import {ModulesDefinition} from '../../typings/modules';
-import {PropertyPath, Schema} from '../../classes/ConfigValidator';
-import {ApplicationConfig} from '../../typings/app-config';
+import {ModulesDefinition} from '~/typings/modules';
+import {PropertyPath, Schema} from '~/classes/ConfigValidator';
+import {ApplicationConfig} from '~/typings/app-config';
 
 /**
  * Validate and process application modules

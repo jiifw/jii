@@ -11,20 +11,20 @@ import merge from 'deepmerge';
 import objPath from 'object-path';
 
 // classes
-import Instance from '../classes/Instance';
-import Application from '../classes/Application';
-import Configuration from '../classes/Configuration';
-import ConfigValidator from '../classes/ConfigValidator';
-import InvalidArgumentError from '../classes/InvalidArgumentError';
+import Instance from '~/classes/Instance';
+import Application from '~/classes/Application';
+import Configuration from '~/classes/Configuration';
+import ConfigValidator from '~/classes/ConfigValidator';
+import InvalidArgumentError from '~/classes/InvalidArgumentError';
 
 // utils
-import {isConstructor} from '../helpers/reflection';
+import {isConstructor} from '~/helpers/reflection';
 
 // types
 import {JSONSchema7} from 'json-schema';
 import {Class, DeepPartial} from 'utility-types';
-import {PropertyPath} from '../classes/ConfigValidator';
-import {ApplicationConfig} from '../typings/app-config';
+import {PropertyPath} from '~/classes/ConfigValidator';
+import {ApplicationConfig} from '~/typings/app-config';
 
 export type Args = {
   app: Application;

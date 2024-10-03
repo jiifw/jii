@@ -7,17 +7,17 @@
  */
 
 // classes
-import ConfigValidator from '../../classes/ConfigValidator';
-import InvalidConfigError from '../../classes/InvalidConfigError';
-import Application from '../../classes/Application';
+import ConfigValidator from '~/classes/ConfigValidator';
+import InvalidConfigError from '~/classes/InvalidConfigError';
+import Application from '~/classes/Application';
 
 // utils
-import {isPath, resolve} from '../../helpers/path';
-import {isPlainObject} from '../../helpers/object';
-import {invokeModuleMethod} from '../../helpers/file';
+import {isPath, resolve} from '~/helpers/path';
+import {isPlainObject} from '~/helpers/object';
+import {invokeModuleMethod} from '~/helpers/file';
 
 // types
-import {Schema, PropertyPath} from '../../classes/ConfigValidator';
+import {Schema, PropertyPath} from '~/classes/ConfigValidator';
 
 /**
  * Validate and apply the aliases, params and bootstrapper configuration to the application

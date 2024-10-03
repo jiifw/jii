@@ -11,8 +11,8 @@ import Action from './Action';
 import Controller from './Controller';
 
 // utils
-import Jii from '../Jii';
-import {invokeMethod} from '../helpers/function';
+import Jii from '~/Jii';
+import {invokeMethod} from '~/helpers/function';
 
 // types
 import {Props} from './BaseObject';

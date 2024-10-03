@@ -12,8 +12,8 @@ import {hasOwnMethod, hasOwnStatic, hasOwnStaticMethod} from './reflection';
 
 // classes
 import InvalidArgumentError from '../classes/InvalidArgumentError';
-import InvalidCallError from '../classes/InvalidCallError';
-import {EventHandler} from '../classes/Event';
+import InvalidCallError from '~/classes/InvalidCallError';
+import {EventHandler} from '~/classes/Event';
 
 /**
  * Check if a function is an async function that returns a promise or nor

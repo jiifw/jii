@@ -7,10 +7,10 @@
  */
 
 // utils
-import {dirname} from '../helpers/path';
+import {dirname} from '~/helpers/path';
 
 // classes
-import BaseJii from '../BaseJii';
+import BaseJii from '~/BaseJii';
 
 /**
  * Initializes the core aliases

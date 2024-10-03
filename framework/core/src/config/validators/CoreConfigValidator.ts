@@ -9,18 +9,18 @@
 import {normalize} from 'node:path';
 
 // classes
-import ConfigValidator from '../../classes/ConfigValidator';
-import InvalidConfigError from '../../classes/InvalidConfigError';
+import ConfigValidator from '~/classes/ConfigValidator';
+import InvalidConfigError from '~/classes/InvalidConfigError';
 
 // utils
-import Jii from '../../Jii';
-import {isPath} from '../../helpers/path';
-import {toString} from '../../helpers/string';
-import {isLanguage} from '../../helpers/locale';
-import {isTimezone} from '../../helpers/datetime';
+import Jii from '~/Jii';
+import {isPath} from '~/helpers/path';
+import {toString} from '~/helpers/string';
+import {isLanguage} from '~/helpers/locale';
+import {isTimezone} from '~/helpers/datetime';
 
 // types
-import {Schema, PropertyPath} from '../../classes/ConfigValidator';
+import {Schema, PropertyPath} from '~/classes/ConfigValidator';
 
 /**
  * Validate and apply the core configuration properties to the application

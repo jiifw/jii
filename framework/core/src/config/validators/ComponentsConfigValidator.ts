@@ -10,19 +10,19 @@ import merge from 'deepmerge';
 import objPath from 'object-path';
 
 // classes
-import Application from '../../classes/Application';
-import ConfigValidator from '../../classes/ConfigValidator';
-import ConfigurationEvent from '../../classes/ConfigurationEvent';
+import Application from '~/classes/Application';
+import ConfigValidator from '~/classes/ConfigValidator';
+import ConfigurationEvent from '~/classes/ConfigurationEvent';
 
 // utils
-import {isPlainObject} from '../../helpers/object';
+import {isPlainObject} from '~/helpers/object';
 
 // schemas
-import componentsSchema from '../../schemas/components.schema';
+import componentsSchema from '~/schemas/components.schema';
 
 // types
-import {ComponentDefinition} from '../../typings/components';
-import {Schema, PropertyPath} from '../../classes/ConfigValidator';
+import {ComponentDefinition} from '~/typings/components';
+import {Schema, PropertyPath} from '~/classes/ConfigValidator';
 
 /**
  * Validate and process application components

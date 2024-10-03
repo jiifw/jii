@@ -11,7 +11,7 @@ import merge from 'deepmerge';
 import { compile, Environment, render, renderString, Template } from 'nunjucks';
 
 // utils
-import { getAlias } from '../base/aliases';
+import { getAlias } from '~/base/aliases';
 import { writeTextFile } from './file';
 
 /**

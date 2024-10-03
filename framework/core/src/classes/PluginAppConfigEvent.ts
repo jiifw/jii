@@ -10,7 +10,7 @@
 import Event from './Event';
 
 // types
-import {ApplicationConfig} from '../typings/app-config';
+import {ApplicationConfig} from '~/typings/app-config';
 
 /**
  * The event class for the plugin.

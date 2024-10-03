@@ -6,8 +6,6 @@
  * @since 0.0.1
  */
 
-import {toString} from './string';
-
 /**
  * Quote a string for use in a regular expression.
  * @param str - The input string.

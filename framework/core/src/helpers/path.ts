@@ -10,7 +10,7 @@ import npath from 'node:path';
 import nfs, {mkdirSync} from 'node:fs';
 
 // utils
-import {getAlias, hasAlias} from '../base/aliases';
+import {getAlias, hasAlias} from '~/base/aliases';
 
 /**
  * Given a string containing the path of a file or directory, this function

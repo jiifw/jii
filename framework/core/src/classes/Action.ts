@@ -12,9 +12,9 @@ import Component, {Props} from './Component';
 import InvalidConfigError from './InvalidConfigError';
 
 // utils
-import Jii from '../Jii';
-import {invokeMethod} from '../helpers/function';
-import {hasOwnMethod} from '../helpers/reflection';
+import Jii from '~/Jii';
+import {invokeMethod} from '~/helpers/function';
+import {hasOwnMethod} from '~/helpers/reflection';
 
 /**
  * Action is the base class for all controller action classes.

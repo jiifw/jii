@@ -19,15 +19,15 @@ import InvalidConfigError from './InvalidConfigError';
 import InvalidArgumentError from './InvalidArgumentError';
 
 // utils
-import Jii from '../Jii';
-import {isEnvironment} from '../env';
-import {classname} from '../helpers/inflector';
-import {dirname, isDir} from '../helpers/path';
-import {ltrim, strpos, strrpos, substr, trim} from '../helpers/string';
+import Jii from '~/Jii';
+import {isEnvironment} from '~/env';
+import {classname} from '~/helpers/inflector';
+import {dirname, isDir} from '~/helpers/path';
+import {ltrim, strpos, strrpos, substr, trim} from '~/helpers/string';
 
 // types
 import {Props} from './BaseObject';
-import {ModuleDefinition, ModulesDefinition} from '../typings/modules';
+import {ModuleDefinition, ModulesDefinition} from '~/typings/modules';
 
 /**
  * Module is the base class for module and application classes.

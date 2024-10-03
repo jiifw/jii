@@ -19,7 +19,7 @@ import PluginAppConfigEvent from '../classes/PluginAppConfigEvent';
 import configurationProcessor from './configuration-processor';
 
 // types
-import {ApplicationConfig} from '../typings/app-config';
+import {ApplicationConfig} from '~/typings/app-config';
 
 export default async (instance: Application, config: ApplicationConfig): Promise<ApplicationConfig> => {
   let validators: string[] = [

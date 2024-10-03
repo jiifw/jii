@@ -8,8 +8,8 @@
 
 // types
 import {Class} from 'utility-types';
-import {EventHandler} from '../classes/Event';
-import {BehaviorArgs} from '../classes/Behavior';
+import {EventHandler} from '~/classes/Event';
+import {BehaviorArgs} from '~/classes/Behavior';
 import {ComponentsDefinition} from './components';
 
 export interface ModuleDefinition {

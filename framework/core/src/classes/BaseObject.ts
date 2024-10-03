@@ -7,10 +7,10 @@
  */
 
 // utils
-import {isPlainObject} from '../helpers/object';
-import {invoke, isFunction} from '../helpers/function';
-import {hasOwn} from '../helpers/reflection';
-import {bindClass} from '../helpers/auto-bind';
+import {isPlainObject} from '~/helpers/object';
+import {invoke, isFunction} from '~/helpers/function';
+import {hasOwn} from '~/helpers/reflection';
+import {bindClass} from '~/helpers/auto-bind';
 import UnknownMethodError from './UnknownMethodError';
 import InvalidScopeError from './InvalidScopeError';
 import InvalidCallError from './InvalidCallError';

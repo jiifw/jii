@@ -7,10 +7,10 @@
  */
 
 // classes
-import ConfigValidator from '../../classes/ConfigValidator';
+import ConfigValidator from '~/classes/ConfigValidator';
 
 // types
-import {Schema, PropertyPath} from '../../classes/ConfigValidator';
+import {Schema, PropertyPath} from '~/classes/ConfigValidator';
 
 /**
  * Validate and apply the events/behaviors to the application

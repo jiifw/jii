@@ -13,8 +13,8 @@ import Component from './Component';
 import InvalidConfigError from './InvalidConfigError';
 
 // utils
-import Jii from '../Jii';
-import {isFile} from '../helpers/path';
+import Jii from '~/Jii';
+import {isFile} from '~/helpers/path';
 
 /**
  * Request represents a request that is handled by an {@link Application}.

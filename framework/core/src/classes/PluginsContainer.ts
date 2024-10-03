@@ -10,24 +10,24 @@ import merge from 'deepmerge';
 import {join, normalize} from 'node:path';
 
 // classes
-import Plugin, {EventHandler} from './Plugin';
+import Jii from '~/Jii';
 import Instance from './Instance';
 import Component from './Component';
 import BaseObject from './BaseObject';
 import Configuration from './Configuration';
+import Plugin, {EventHandler} from './Plugin';
 import InvalidCallError from './InvalidCallError';
 import InvalidConfigError from './InvalidConfigError';
+import InvalidArgumentError from './InvalidArgumentError';
 
 // utils
-import Jii from '../Jii';
-import {readSchemaFile, resolveMainFile} from '../helpers/file';
-import {isPlainObject} from '../helpers/object';
+import {isSyncFunction} from '~/helpers/function';
+import {readSchemaFile, resolveMainFile} from '~/helpers/file';
+import {isPlainObject} from '~/helpers/object';
 
 // types
 import {Class} from 'utility-types';
-import {PluginDefinition, PluginsDefinition} from '../typings/plugin';
-import {isSyncFunction} from '../helpers/function';
-import InvalidArgumentError from './InvalidArgumentError';
+import {PluginDefinition, PluginsDefinition} from '~/typings/plugin';
 
 export type PluginAttributes = {
   [name: string | symbol]: any;
