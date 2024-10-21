@@ -16,7 +16,8 @@ import {SERVER_REQUEST} from '../utils/symbols';
 
 // types
 import {IncomingMessage} from 'http';
-import {ServerRequest} from '../typings/server';
+import {ServerRequest, ServerReply} from '../typings/server';
+import Response from './Response';
 
 /**
  * The web Request class represents an HTTP request.
@@ -42,6 +43,17 @@ export default class Request extends BaseRequest {
    */
   public getRaw(): IncomingMessage {
     return this.getRequest().raw as unknown as IncomingMessage;
+  }
+
+  /**
+   * Resolves the current request into a route and the associated parameters.
+   * @return array the first element is the route, and the second is the associated parameters.
+   * @throws NotFoundHttpException if the request cannot be resolved.
+   */
+  public async resolve(reply: ServerReply): Promise<[string, any]> {
+    reply.send('SUCCESS');
+    console.log('ROUTE', this.getRequest());
+    return ['some/route', {param: 'value'}];
   }
 
   /**

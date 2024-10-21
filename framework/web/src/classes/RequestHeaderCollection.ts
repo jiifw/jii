@@ -8,7 +8,7 @@
 
 import BaseObject, {Props} from '@jii/core/dist/classes/BaseObject';
 import {HttpHeader} from 'fastify/types/utils';
-import {ServerRequest} from '../typings/server';
+import {ServerRequest} from '~/typings/server';
 
 type HeaderName = HttpHeader | string;
 type HeaderValue = number | string | undefined;

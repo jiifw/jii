@@ -16,16 +16,17 @@ import InvalidCallError from '@jii/core/dist/classes/InvalidCallError';
 import InvalidConfigError from '@jii/core/dist/classes/InvalidConfigError';
 
 // types
-import {ServerInstance, ServerHTTPOptions} from '../typings/server';
+import {ServerInstance, ServerHTTPOptions} from '~/typings/server';
 import {
   MiddlewareAfter, MiddlewareCallback, MiddlewareDefinition,
   MiddlewareMiddleware, MiddlewareRegister, MiddlewareType, ServerComponentDefinition,
-} from '../typings/classes/Server';
+} from '~/typings/classes/Server';
 import WebPluginEvent from './WebPluginEvent';
 import Event from '@jii/core/dist/classes/Event';
 import Jii from '@jii/core/dist/Jii';
 import WebPlugin from './WebPlugin';
-import {SERVER_REPLY, SERVER_REQUEST} from '../utils/symbols';
+import {SERVER_REPLY, SERVER_REQUEST} from '~/utils/symbols';
+import Request from './Request';
 
 /**
  * Middleware supported types
@@ -187,12 +188,13 @@ export default class Server extends Component {
    */
   public async createServer(): Promise<void> {
     this.state = Server.STATE_INIT;
+    const server = this.getServer();
     // register middleware engine
-    await this.getServer().register(require('@fastify/middie'));
+    await server.register(require('@fastify/middie'));
 
     /////////////// STARTS: PLUGIN EVENT (BEFORE_APP_RUN) TRIGGER //////////////
     let pluginEvent = new WebPluginEvent();
-    pluginEvent.server = this.getServer();
+    pluginEvent.server = server;
     pluginEvent.owner = this;
     for (const handler of Object.values(Jii.plugins.getPluginsEvent(WebPlugin.EVENT_SERVER_INIT))) {
       await Event.triggerHandler(WebPlugin.EVENT_SERVER_INIT, handler, {}, pluginEvent);
@@ -200,10 +202,13 @@ export default class Server extends Component {
     pluginEvent = null;
     /////////////// ENDS: PLUGIN EVENT (BEFORE_APP_RUN) TRIGGER ////////////////
 
-    this.getServer().addHook('preValidation', async (request, reply) => {
+    server.addHook('onRequest', async (request, reply) => {
       Jii.container.memoSync(SERVER_REQUEST, request, {freeze: true});
       Jii.container.memoSync(SERVER_REPLY, reply, {freeze: true});
     });
+
+    // Server handling request event
+    await this.handleRequest(server);
 
     // register predefined middleware
     await this.applyMiddleware(this.getPredefinedMiddleware());
@@ -212,6 +217,14 @@ export default class Server extends Component {
     await this.applyMiddleware(this.middleware);
 
     await this.onInitialize();
+  }
+
+  public async handleRequest(server: ServerInstance) {
+    server.route({url: '/test/:task', method: 'GET', handler () {}});
+    server.addHook('preHandler', async (req, reply) => {
+      await Jii.app().get<Request>('request').resolve(reply);
+      return reply;
+    });
   }
 
   /**

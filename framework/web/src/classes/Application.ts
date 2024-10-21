@@ -9,6 +9,7 @@ import merge from 'deepmerge';
 
 // classes
 import Server from './Server';
+import UrlManager from './UrlManager';
 import BaseApplication from '@jii/core/dist/classes/Application';
 
 // utils
@@ -16,6 +17,8 @@ import {dirname} from '@jii/core/dist/helpers/path';
 
 // types
 import {ComponentsDefinition} from '@jii/core/dist/typings/components';
+import {Props} from '@jii/core/dist/classes/BaseObject';
+import {ApplicationConfig} from '~/typings/app-config';
 
 /**
  * Application is the base class for all web application classes.
@@ -36,6 +39,19 @@ export default class Application extends BaseApplication {
    */
   //public static readonly EVENT_AFTER_REQUEST = 'afterRequest';
 
+  /**
+   * Application constructor
+   * @param config - Application configuration
+   * @param [props] - Component properties
+   */
+  public constructor(config: ApplicationConfig, props: Props = {}) {
+    super(config as any, props);
+    this.init();
+  }
+
+  /**
+   * @inheritDoc
+   */
   init() {
     this.setAliases({'@jiiWeb': dirname(__dirname)});
     super.init();
@@ -50,6 +66,14 @@ export default class Application extends BaseApplication {
   }
 
   /**
+   * Returns the URL manager for this application.
+   * @returns The URL manager for this application.
+   */
+  public getUrlManager<T extends UrlManager = UrlManager>(): T {
+    return this.get<T>('urlManager');
+  }
+
+  /**
    * @inheritDoc
    */
   public coreComponents(): ComponentsDefinition {
@@ -58,6 +82,7 @@ export default class Application extends BaseApplication {
       request: {class: '@jiiWeb/classes/Request'},
       response: {class: '@jiiWeb/classes/Response'},
       accessToken: {class: '@jiiWeb/classes/AccessToken'},
+      urlManager: {class: '@jiiWeb/classes/UrlManager'},
     });
   }
 }

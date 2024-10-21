@@ -14,11 +14,11 @@ import InvalidArgumentError from '@jii/core/dist/classes/InvalidArgumentError';
 
 // utils
 import Jii from '@jii/core/dist/Jii';
-import {SERVER_REPLY} from '../utils/symbols';
+import {SERVER_REPLY} from '~/utils/symbols';
 
 // types
 import {IncomingMessage} from 'http';
-import {ServerReply} from '../typings/server';
+import {ServerReply} from '~/typings/server';
 import HeaderCollection from './HeaderCollection';
 
 // public types

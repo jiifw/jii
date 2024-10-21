@@ -11,7 +11,7 @@ import Event from '@jii/core/dist/classes/Event';
 import Server from './Server';
 
 // types
-import {ServerInstance} from '../typings/server';
+import {ServerInstance} from '~/typings/server';
 
 /**
  * An event that is fired when a server is started or crashed.
