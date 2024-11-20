@@ -9,7 +9,7 @@
 import obp, {Path} from 'object-path';
 
 // utils
-import {getAlias} from '../base/aliases';
+import {getAlias} from '~/base/aliases';
 
 export type Environment = 'development' | 'staging' | 'production' | string;
 

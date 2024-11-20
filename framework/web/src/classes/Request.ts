@@ -12,12 +12,11 @@ import RequestHeaderCollection from './RequestHeaderCollection';
 
 // utils
 import Jii from '@jii/core/dist/Jii';
-import {SERVER_REQUEST} from '../utils/symbols';
+import {SERVER_REQUEST} from '~/utils/symbols';
 
 // types
 import {IncomingMessage} from 'http';
-import {ServerRequest, ServerReply} from '../typings/server';
-import Response from './Response';
+import {ServerRequest, ServerReply} from '~/typings/server';
 
 /**
  * The web Request class represents an HTTP request.
